@@ -31,6 +31,11 @@ export default {
     salutation: 'Title',
     phone: 'Phone',
     phonePlaceholder: '(xxx)xxx-xxxx',
+    zelleRefundQ: 'In case of duplicate payment, how should we Zelle you a refund?',
+    zelleByPhone: 'Use my phone number',
+    zelleByEmail: 'Use my email',
+    zelleOther: 'Other',
+    zelleOtherPlaceholder: 'Enter Zelle info',
   },
   cart: {
     title: 'My Cart',

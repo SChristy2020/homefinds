@@ -50,7 +50,7 @@ const ordersStore = useOrdersStore()
 const onOrderSuccess = inject('onOrderSuccess')
 const i18n = useI18nStore()
 
-const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '' })
+const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', zelleRefund: 'phone', zelleRefundOther: '' })
 
 const isValid = computed(() =>
   form.value.firstName && form.value.lastName &&
@@ -64,7 +64,7 @@ function handleConfirm() {
   cart.clear()
   emit('update:modelValue', false)
   onOrderSuccess(order)
-  form.value = { firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '' }
+  form.value = { firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', zelleRefund: 'phone', zelleRefundOther: '' }
 }
 </script>
 

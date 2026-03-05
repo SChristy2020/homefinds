@@ -40,7 +40,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'confirmed'])
 
 const i18n = useI18nStore()
-const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '' })
+const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', zelleRefund: 'phone', zelleRefundOther: '' })
 
 const isValid = computed(() =>
   form.value.firstName && form.value.lastName &&
@@ -55,7 +55,7 @@ function fmt(d) {
 function handleConfirm() {
   if (!isValid.value) return
   emit('confirmed', { ...form.value })
-  form.value = { firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '' }
+  form.value = { firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', zelleRefund: 'phone', zelleRefundOther: '' }
 }
 </script>
 

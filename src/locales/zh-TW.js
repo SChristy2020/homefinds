@@ -31,6 +31,11 @@ export default {
     salutation: '稱呼',
     phone: '電話',
     phonePlaceholder: '(xxx)xxx-xxxx',
+    zelleRefundQ: '若遇到重複付款，該如何透過 Zelle 退費給您？',
+    zelleByPhone: '透過我的電話',
+    zelleByEmail: '透過我的 Email',
+    zelleOther: '其他',
+    zelleOtherPlaceholder: '輸入匯款資訊',
   },
   cart: {
     title: '購物車',
