@@ -1,0 +1,16 @@
+// stores/toast.js
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+
+export const useToastStore = defineStore('toast', () => {
+  const message = ref('')
+  let timer = null
+
+  function show(msg, duration = 2600) {
+    message.value = msg
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => { message.value = '' }, duration)
+  }
+
+  return { message, show }
+})

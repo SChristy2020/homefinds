@@ -1,0 +1,147 @@
+/* ─── Global Design Tokens ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream:        #FAF7F2;
+  --warm-white:   #FFFDF9;
+  --charcoal:     #1C1C1C;
+  --dark:         #2A2A2A;
+  --mid:          #6B6B6B;
+  --light:        #B8B0A4;
+  --border:       #E2DDD7;
+  --accent:       #C4956A;
+  --accent-light: #EDD9C2;
+  --green:        #5A7A5A;
+  --red:          #8B3A3A;
+  --shadow:       0 2px 20px rgba(0,0,0,0.08);
+  --shadow-lg:    0 8px 40px rgba(0,0,0,0.14);
+  --radius:       4px;
+  --font-display: 'Playfair Display', serif;
+  --font-body:    'DM Sans', sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--charcoal);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ─── Utilities ─────────────────────────────────────────────────────── */
+.mt-8  { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.text-sm   { font-size: 0.82rem; }
+.text-muted { color: var(--mid); }
+.font-bold  { font-weight: 700; }
+.strikethrough { text-decoration: line-through; color: var(--light); }
+.text-center { text-align: center; }
+
+/* ─── Section Divider ───────────────────────────────────────────────── */
+.section-divider {
+  height: 1.5px;
+  background: var(--border);
+  margin: 24px 0;
+}
+
+/* ─── Shared Button Styles ──────────────────────────────────────────── */
+.btn-primary {
+  padding: 10px 28px;
+  background: var(--charcoal);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+  letter-spacing: 0.04em;
+}
+.btn-primary:hover   { background: var(--accent); }
+.btn-primary:disabled { background: var(--light); cursor: not-allowed; }
+
+.btn-outline {
+  padding: 7px 16px;
+  background: transparent;
+  color: var(--charcoal);
+  border: 1.5px solid var(--charcoal);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-outline:hover { background: var(--charcoal); color: #fff; }
+
+.btn-danger {
+  padding: 4px 10px;
+  background: var(--charcoal);
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+  font-size: 0.72rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-danger:hover { background: var(--red); }
+
+/* ─── Form Elements ─────────────────────────────────────────────────── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.form-group label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--mid);
+}
+.form-group input,
+.form-group select {
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  background: var(--cream);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-group input:focus,
+.form-group select:focus { border-color: var(--charcoal); }
+
+.form-row {
+  display: flex;
+  gap: 14px;
+}
+.form-row .form-group { flex: 1; }
+
+.radio-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding-top: 4px;
+}
+.radio-group label {
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  color: var(--charcoal);
+}
+
+/* ─── Empty State ───────────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--light);
+}
+.empty-state-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.empty-state p    { font-size: 0.88rem; }
