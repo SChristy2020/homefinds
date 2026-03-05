@@ -1,17 +1,15 @@
 <template>
-  <div class="cart-bubble" @click="openCartModal()">
+  <div class="cart-bubble" @click="cart.showModal = true">
     <ShoppingCart :size="22" />
     <span v-if="cart.count > 0" class="cart-count">{{ cart.count }}</span>
   </div>
 </template>
 
 <script setup>
-import { inject } from 'vue'
 import { ShoppingCart } from 'lucide-vue-next'
 import { useCartStore } from '@/stores/cart'
 
 const cart = useCartStore()
-const openCartModal = inject('openCartModal')
 </script>
 
 <style scoped>

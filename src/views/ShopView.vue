@@ -36,24 +36,24 @@
       v-model="showDetailModal"
       :product="selectedProduct"
     />
-    <CartModal v-model="showCartModal" />
+    <CartModal v-model="cart.showModal" />
     <OrderSuccessModal v-model="showSuccessModal" :order="lastOrder" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, provide } from 'vue'
 import { Search, ArrowUpDown } from 'lucide-vue-next'
 import { useProductsStore } from '@/stores/products'
+import { useCartStore } from '@/stores/cart'
 import { useI18nStore } from '@/stores/i18n'
 import ProductGrid from '@/components/shop/ProductGrid.vue'
 import ProductDetailModal from '@/components/shop/ProductDetailModal.vue'
 import CartModal from '@/components/shop/CartModal.vue'
 import OrderSuccessModal from '@/components/shop/OrderSuccessModal.vue'
 
-import { provide } from 'vue'
-
 const productsStore = useProductsStore()
+const cart = useCartStore()
 const i18n = useI18nStore()
 
 const selectedCategory = ref('Bedroom')
@@ -63,11 +63,9 @@ const sortAsc = ref(true)
 
 const selectedProduct = ref(null)
 const showDetailModal = ref(false)
-const showCartModal = ref(false)
 const showSuccessModal = ref(false)
 const lastOrder = ref(null)
 
-provide('openCartModal', () => { showCartModal.value = true })
 provide('onOrderSuccess', (order) => {
   lastOrder.value = order
   showSuccessModal.value = true

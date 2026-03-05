@@ -4,6 +4,7 @@ import { ref, computed } from 'vue'
 
 export const useCartStore = defineStore('cart', () => {
   const items = ref([])
+  const showModal = ref(false)
 
   const total = computed(() => items.value.reduce((s, i) => s + i.price, 0))
   const count = computed(() => items.value.length)
@@ -23,5 +24,5 @@ export const useCartStore = defineStore('cart', () => {
     return items.value.some(i => i.id === productId)
   }
 
-  return { items, total, count, add, remove, clear, has }
+  return { items, total, count, add, remove, clear, has, showModal }
 })
