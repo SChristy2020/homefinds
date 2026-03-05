@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="list-label">這些是你的 orders:</div>
+    <div class="list-label">{{ i18n.t('orders.orderLabel') }}</div>
     <div v-if="order.items.length === 0" class="empty-state">
       <div class="empty-state-icon">📦</div>
-      <p>目前沒有訂單</p>
+      <p>{{ i18n.t('orders.noOrders') }}</p>
     </div>
     <div v-else class="items-grid">
       <div v-for="item in order.items" :key="item.id" class="item-card">
@@ -12,15 +12,17 @@
           <span v-if="item.originalPrice" class="strikethrough" style="font-size:0.7rem;">${{ item.originalPrice }}</span>
           ${{ item.price }}
         </div>
-        <button class="btn-danger" @click="$emit('cancel', item.id)">Cancel</button>
+        <button class="btn-danger" @click="$emit('cancel', item.id)">{{ i18n.t('orders.cancelItem') }}</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18nStore } from '@/stores/i18n'
 defineProps({ order: Object })
 defineEmits(['cancel'])
+const i18n = useI18nStore()
 </script>
 
 <style scoped>

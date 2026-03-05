@@ -10,7 +10,7 @@
           :class="{ active: selectedCategory === cat }"
           @click="selectedCategory = cat"
         >
-          {{ cat }}
+          {{ i18n.t('shop.categories.' + cat) }}
         </button>
       </div>
       <div class="shop-actions">
@@ -23,7 +23,7 @@
     <Transition name="slide-down">
       <div v-if="searchOpen" class="search-bar">
         <span>🔍</span>
-        <input v-model="searchQuery" placeholder="搜尋商品..." autofocus />
+        <input v-model="searchQuery" :placeholder="i18n.t('shop.searchPlaceholder')" autofocus />
       </div>
     </Transition>
 
@@ -44,17 +44,16 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useProductsStore } from '@/stores/products'
-import { useCartStore } from '@/stores/cart'
+import { useI18nStore } from '@/stores/i18n'
 import ProductGrid from '@/components/shop/ProductGrid.vue'
 import ProductDetailModal from '@/components/shop/ProductDetailModal.vue'
 import CartModal from '@/components/shop/CartModal.vue'
 import OrderSuccessModal from '@/components/shop/OrderSuccessModal.vue'
 
-// Provide cart modal open state globally via provide/inject
 import { provide } from 'vue'
 
 const productsStore = useProductsStore()
-const cartStore = useCartStore()
+const i18n = useI18nStore()
 
 const selectedCategory = ref('Bedroom')
 const searchOpen = ref(false)
@@ -67,7 +66,6 @@ const showCartModal = ref(false)
 const showSuccessModal = ref(false)
 const lastOrder = ref(null)
 
-// Expose cart/success modal toggle for child components
 provide('openCartModal', () => { showCartModal.value = true })
 provide('onOrderSuccess', (order) => {
   lastOrder.value = order

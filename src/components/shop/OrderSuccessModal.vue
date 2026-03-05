@@ -1,11 +1,11 @@
 <template>
   <BaseModal :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)">
-    <div class="success-title">預定成功!</div>
+    <div class="success-title">{{ i18n.t('orderSuccess.title') }}</div>
     <div class="success-icon">🎁</div>
 
     <div v-if="order" class="success-info">
       <p><strong>{{ order.firstName }} {{ order.lastName }}</strong></p>
-      <p>稱呼: {{ order.salutation }}</p>
+      <p>{{ i18n.t('orderSuccess.salutation') }}: {{ order.salutation }}</p>
       <p>Email: {{ order.email }}</p>
       <p>Phone: {{ order.phone }}</p>
     </div>
@@ -13,17 +13,19 @@
     <div class="section-divider"></div>
 
     <ol class="success-notes">
-      <li>你的資訊將匿名呈現在該物品的 waiting list 裡!</li>
-      <li>若你不是第一順位，我們將通知你如果你變成第一順位!</li>
-      <li>如果你先zelle付款，該物品將會先被標記"已出售"並禁止其他人再預定!</li>
+      <li>{{ i18n.t('orderSuccess.note1') }}</li>
+      <li>{{ i18n.t('orderSuccess.note2') }}</li>
+      <li>{{ i18n.t('orderSuccess.note3') }}</li>
     </ol>
   </BaseModal>
 </template>
 
 <script setup>
 import BaseModal from '@/components/shared/BaseModal.vue'
+import { useI18nStore } from '@/stores/i18n'
 defineProps({ modelValue: Boolean, order: Object })
 defineEmits(['update:modelValue'])
+const i18n = useI18nStore()
 </script>
 
 <style scoped>

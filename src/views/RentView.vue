@@ -5,7 +5,7 @@
 
     <!-- Booking panel -->
     <div class="booking-panel">
-      <p class="avail-note">📅 Available: Apr 25 – Jun 29, 2026</p>
+      <p class="avail-note">📅 {{ i18n.t('rent.available') }}</p>
       <RentCalendar v-model:selection="selection" />
 
       <!-- Price summary -->
@@ -14,13 +14,13 @@
         <div class="date-range">
           {{ formatDate(selection.start) }} –
           {{ selection.end ? formatDate(selection.end) : '...' }}
-          <span v-if="nights > 0"> &nbsp; total {{ nights }} night{{ nights > 1 ? 's' : '' }}</span>
+          <span v-if="nights > 0"> &nbsp; {{ i18n.t('rent.total') }} {{ nights }} {{ nights === 1 ? i18n.t('rent.night') : i18n.t('rent.nights') }}</span>
         </div>
         <button class="btn-primary" :disabled="!selection.end" @click="showConfirm = true">
-          Confirm
+          {{ i18n.t('rent.confirm') }}
         </button>
       </div>
-      <p v-else class="mt-16 text-sm text-muted">請選擇入住與退房日期</p>
+      <p v-else class="mt-16 text-sm text-muted">{{ i18n.t('rent.selectDates') }}</p>
     </div>
   </div>
 
@@ -43,11 +43,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18nStore } from '@/stores/i18n'
 import RoomGallery from '@/components/rent/RoomGallery.vue'
 import RentCalendar from '@/components/rent/RentCalendar.vue'
 import RentConfirmModal from '@/components/rent/RentConfirmModal.vue'
 import RentSuccessModal from '@/components/rent/RentSuccessModal.vue'
 
+const i18n = useI18nStore()
 const RATE_PER_NIGHT = 222
 const selection = ref({ start: null, end: null })
 const showConfirm = ref(false)

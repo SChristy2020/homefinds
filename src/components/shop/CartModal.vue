@@ -1,10 +1,10 @@
 <template>
   <BaseModal :modelValue="modelValue" size="lg" @update:modelValue="$emit('update:modelValue', $event)">
-    <h2 class="modal-title">My Cart</h2>
+    <h2 class="modal-title">{{ i18n.t('cart.title') }}</h2>
 
     <div v-if="cart.items.length === 0" class="empty-state">
       <div class="empty-state-icon">🛒</div>
-      <p>購物車是空的</p>
+      <p>{{ i18n.t('cart.empty') }}</p>
     </div>
 
     <template v-else>
@@ -16,7 +16,7 @@
             <div v-if="item.originalPrice" class="strikethrough" style="font-size:0.7rem;">${{ item.originalPrice }}</div>
             ${{ item.price }}
           </div>
-          <button class="btn-outline" style="font-size:0.72rem;padding:3px 10px;" @click="cart.remove(item.id)">Cancel</button>
+          <button class="btn-outline" style="font-size:0.72rem;padding:3px 10px;" @click="cart.remove(item.id)">{{ i18n.t('cart.cancel') }}</button>
         </div>
       </div>
 
@@ -25,16 +25,16 @@
       <!-- Checkout Form -->
       <div class="form-row">
         <div class="form-group">
-          <label>First Name</label>
-          <input v-model="form.firstName" placeholder="First Name" />
+          <label>{{ i18n.t('cart.firstName') }}</label>
+          <input v-model="form.firstName" :placeholder="i18n.t('cart.firstName')" />
         </div>
         <div class="form-group">
-          <label>Last Name</label>
-          <input v-model="form.lastName" placeholder="Last Name" />
+          <label>{{ i18n.t('cart.lastName') }}</label>
+          <input v-model="form.lastName" :placeholder="i18n.t('cart.lastName')" />
         </div>
       </div>
       <div class="form-group">
-        <label>稱呼</label>
+        <label>{{ i18n.t('cart.salutation') }}</label>
         <div class="radio-group">
           <label><input type="radio" v-model="form.salutation" value="Mr." /> Mr.</label>
           <label><input type="radio" v-model="form.salutation" value="Miss" /> Miss</label>
@@ -50,8 +50,8 @@
       </div>
 
       <div class="total-row">
-        <span class="total-label">Total: ${{ cart.total }}</span>
-        <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">Confirm</button>
+        <span class="total-label">{{ i18n.t('cart.total') }}: ${{ cart.total }}</span>
+        <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('cart.confirm') }}</button>
       </div>
     </template>
   </BaseModal>
@@ -62,6 +62,7 @@ import { ref, computed, inject } from 'vue'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import { useCartStore } from '@/stores/cart'
 import { useOrdersStore } from '@/stores/orders'
+import { useI18nStore } from '@/stores/i18n'
 
 defineProps({ modelValue: Boolean })
 const emit = defineEmits(['update:modelValue'])
@@ -69,6 +70,7 @@ const emit = defineEmits(['update:modelValue'])
 const cart = useCartStore()
 const ordersStore = useOrdersStore()
 const onOrderSuccess = inject('onOrderSuccess')
+const i18n = useI18nStore()
 
 const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '' })
 

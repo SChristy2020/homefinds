@@ -6,7 +6,7 @@
       <button class="cal-nav" @click="nextMonth">›</button>
     </div>
     <div class="cal-grid">
-      <div class="cal-weekday" v-for="d in WEEKDAYS" :key="d">{{ d }}</div>
+      <div class="cal-weekday" v-for="d in weekdays" :key="d">{{ d }}</div>
       <div
         v-for="(day, i) in days"
         :key="i"
@@ -22,19 +22,26 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18nStore } from '@/stores/i18n'
 
 const props = defineProps({ selection: Object })
 const emit = defineEmits(['update:selection'])
 
+const i18n = useI18nStore()
+
 const RENT_START = new Date(2026, 3, 25)
 const RENT_END   = new Date(2026, 5, 29)
-const WEEKDAYS   = ['一','二','三','四','五','六','日']
-const MONTHS     = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+
+const weekdays = computed(() => i18n.t('calendar.weekdays'))
+const months   = computed(() => i18n.t('calendar.months'))
 
 const year  = ref(2026)
 const month = ref(3) // April (0-indexed)
 
-const title = computed(() => `${year.value}年 ${MONTHS[month.value]}`)
+const title = computed(() => {
+  const fmt = i18n.t('calendar.titleFormat')
+  return fmt.replace('{year}', year.value).replace('{month}', months.value[month.value])
+})
 
 function prevMonth() {
   if (month.value === 0) { month.value = 11; year.value-- }

@@ -2,17 +2,19 @@
   <div class="pickup-banner">
     <div class="pickup-row">
       <span class="pickup-time">
-        預計取貨時間: <strong>{{ order.pickupTime }}</strong>
+        {{ i18n.t('orders.pickupTime') }}<strong>{{ order.pickupTime }}</strong>
       </span>
-      <button class="btn-notify" @click="$emit('notify')">Notify Christy</button>
+      <button class="btn-notify" @click="$emit('notify')">{{ i18n.t('orders.notifyChristy') }}</button>
     </div>
-    <p class="pickup-note">Christy將會在你到達前把東西準備好! 謝謝!</p>
+    <p class="pickup-note">{{ i18n.t('orders.pickupNote') }}</p>
   </div>
 </template>
 
 <script setup>
+import { useI18nStore } from '@/stores/i18n'
 defineProps({ order: Object })
 defineEmits(['notify'])
+const i18n = useI18nStore()
 </script>
 
 <style scoped>

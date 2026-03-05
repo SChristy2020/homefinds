@@ -10,13 +10,15 @@
         <span class="price-current">${{ product.price }}</span>
       </div>
       <div class="product-date">{{ product.date }}</div>
-      <span v-if="product.soldOut" class="sold-badge">已售出</span>
+      <span v-if="product.soldOut" class="sold-badge">{{ i18n.t('shop.soldOut') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18nStore } from '@/stores/i18n'
 defineProps({ product: Object })
+const i18n = useI18nStore()
 </script>
 
 <style scoped>

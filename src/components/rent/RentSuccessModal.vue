@@ -1,24 +1,26 @@
 <template>
   <BaseModal :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)">
-    <div class="success-title">Reservation</div>
+    <div class="success-title">{{ i18n.t('rentSuccess.title') }}</div>
     <div class="success-icon">📅✅</div>
     <p class="text-sm text-muted text-center">
       {{ fmt(selection.start) }} – {{ fmt(selection.end) }}
-      &nbsp; total {{ nights }} nights
+      &nbsp; {{ i18n.t('rentSuccess.total') }} {{ nights }} {{ i18n.t('rentSuccess.nights') }}
     </p>
     <div class="price-line">${{ totalPrice }} USD</div>
     <div v-if="reservation" class="info">
-      <p>Name: {{ reservation.firstName }} {{ reservation.lastName }}</p>
-      <p>Email: {{ reservation.email }}</p>
-      <p>Phone: {{ reservation.phone }}</p>
+      <p>{{ i18n.t('rentSuccess.name') }}: {{ reservation.firstName }} {{ reservation.lastName }}</p>
+      <p>{{ i18n.t('rentSuccess.email') }}: {{ reservation.email }}</p>
+      <p>{{ i18n.t('rentSuccess.phone') }}: {{ reservation.phone }}</p>
     </div>
   </BaseModal>
 </template>
 
 <script setup>
 import BaseModal from '@/components/shared/BaseModal.vue'
+import { useI18nStore } from '@/stores/i18n'
 defineProps({ modelValue: Boolean, reservation: Object, nights: Number, totalPrice: Number, selection: Object })
 defineEmits(['update:modelValue'])
+const i18n = useI18nStore()
 
 function fmt(d) {
   if (!d) return ''

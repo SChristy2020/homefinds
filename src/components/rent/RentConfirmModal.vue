@@ -1,24 +1,24 @@
 <template>
   <BaseModal :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)">
-    <h2 class="modal-title">Reservation</h2>
+    <h2 class="modal-title">{{ i18n.t('rentConfirm.title') }}</h2>
     <p class="text-sm text-muted">
       {{ fmt(selection.start) }} – {{ fmt(selection.end) }}
-      &nbsp; total {{ nights }} night{{ nights > 1 ? 's' : '' }}
+      &nbsp; {{ i18n.t('rentConfirm.total') }} {{ nights }} {{ nights === 1 ? i18n.t('rentConfirm.night') : i18n.t('rentConfirm.nights') }}
     </p>
     <div class="price-line">${{ totalPrice }} USD</div>
 
     <div class="form-row mt-16">
       <div class="form-group">
-        <label>First Name</label>
-        <input v-model="form.firstName" placeholder="First Name" />
+        <label>{{ i18n.t('rentConfirm.firstName') }}</label>
+        <input v-model="form.firstName" :placeholder="i18n.t('rentConfirm.firstName')" />
       </div>
       <div class="form-group">
-        <label>Last Name</label>
-        <input v-model="form.lastName" placeholder="Last Name" />
+        <label>{{ i18n.t('rentConfirm.lastName') }}</label>
+        <input v-model="form.lastName" :placeholder="i18n.t('rentConfirm.lastName')" />
       </div>
     </div>
     <div class="form-group">
-      <label>稱呼</label>
+      <label>{{ i18n.t('rentConfirm.salutation') }}</label>
       <div class="radio-group">
         <label><input type="radio" v-model="form.salutation" value="Mr." /> Mr.</label>
         <label><input type="radio" v-model="form.salutation" value="Miss" /> Miss</label>
@@ -34,17 +34,17 @@
     </div>
 
     <div class="policy">
-      <p>請支付 <strong>30%</strong> 租金以完成預定！並在 note 填上你的名字。</p>
-      <p>若1日內未付款，預定將取消。</p>
-      <p class="mt-8"><strong>取消預定的訂金退款政策</strong></p>
-      <div class="policy-row"><span class="days">14+ days:</span><span>80% refund</span></div>
-      <div class="policy-row"><span class="days">7–13 days:</span><span>50% refund</span></div>
-      <div class="policy-row"><span class="days">&lt;7 days / no-show:</span><span>non-refundable</span></div>
-      <p class="mt-8">請於入住時繳交剩餘 70% 訂金。</p>
+      <p v-html="i18n.t('rentConfirm.depositNote')"></p>
+      <p>{{ i18n.t('rentConfirm.cancelNote') }}</p>
+      <p class="mt-8"><strong>{{ i18n.t('rentConfirm.refundPolicy') }}</strong></p>
+      <div class="policy-row"><span class="days">14+ days:</span><span>{{ i18n.t('rentConfirm.refund14') }}</span></div>
+      <div class="policy-row"><span class="days">7–13 days:</span><span>{{ i18n.t('rentConfirm.refund7') }}</span></div>
+      <div class="policy-row"><span class="days">&lt;7 days / no-show:</span><span>{{ i18n.t('rentConfirm.refundLess') }}</span></div>
+      <p class="mt-8">{{ i18n.t('rentConfirm.remainingNote') }}</p>
     </div>
 
     <div style="text-align:right; margin-top:16px;">
-      <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">Confirm</button>
+      <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('rentConfirm.confirm') }}</button>
     </div>
   </BaseModal>
 </template>
@@ -52,6 +52,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import BaseModal from '@/components/shared/BaseModal.vue'
+import { useI18nStore } from '@/stores/i18n'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -61,6 +62,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue', 'confirmed'])
 
+const i18n = useI18nStore()
 const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '' })
 
 const isValid = computed(() =>
