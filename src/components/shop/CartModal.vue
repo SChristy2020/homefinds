@@ -23,31 +23,7 @@
       <div class="section-divider"></div>
 
       <!-- Checkout Form -->
-      <div class="form-row">
-        <div class="form-group">
-          <label>{{ i18n.t('cart.firstName') }}</label>
-          <input v-model="form.firstName" :placeholder="i18n.t('cart.firstName')" />
-        </div>
-        <div class="form-group">
-          <label>{{ i18n.t('cart.lastName') }}</label>
-          <input v-model="form.lastName" :placeholder="i18n.t('cart.lastName')" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label>{{ i18n.t('cart.salutation') }}</label>
-        <div class="radio-group">
-          <label><input type="radio" v-model="form.salutation" value="Mr." /> Mr.</label>
-          <label><input type="radio" v-model="form.salutation" value="Miss" /> Miss</label>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input v-model="form.email" type="email" placeholder="your@email.com" />
-      </div>
-      <div class="form-group">
-        <label>Phone</label>
-        <input v-model="form.phone" placeholder="(xxx)xxx-xxxx" />
-      </div>
+      <UserInfoForm v-model="form" />
 
       <div class="total-row">
         <span class="total-label">{{ i18n.t('cart.total') }}: ${{ cart.total }}</span>
@@ -61,6 +37,7 @@
 import { ref, computed, inject } from 'vue'
 import { ShoppingCart } from 'lucide-vue-next'
 import BaseModal from '@/components/shared/BaseModal.vue'
+import UserInfoForm from '@/components/shared/UserInfoForm.vue'
 import { useCartStore } from '@/stores/cart'
 import { useOrdersStore } from '@/stores/orders'
 import { useI18nStore } from '@/stores/i18n'

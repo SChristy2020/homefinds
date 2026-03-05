@@ -7,31 +7,7 @@
     </p>
     <div class="price-line">${{ totalPrice }} USD</div>
 
-    <div class="form-row mt-16">
-      <div class="form-group">
-        <label>{{ i18n.t('rentConfirm.firstName') }}</label>
-        <input v-model="form.firstName" :placeholder="i18n.t('rentConfirm.firstName')" />
-      </div>
-      <div class="form-group">
-        <label>{{ i18n.t('rentConfirm.lastName') }}</label>
-        <input v-model="form.lastName" :placeholder="i18n.t('rentConfirm.lastName')" />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>{{ i18n.t('rentConfirm.salutation') }}</label>
-      <div class="radio-group">
-        <label><input type="radio" v-model="form.salutation" value="Mr." /> Mr.</label>
-        <label><input type="radio" v-model="form.salutation" value="Miss" /> Miss</label>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Email</label>
-      <input v-model="form.email" type="email" placeholder="your@email.com" />
-    </div>
-    <div class="form-group">
-      <label>Phone</label>
-      <input v-model="form.phone" placeholder="(xxx)xxx-xxxx" />
-    </div>
+    <UserInfoForm v-model="form" class="mt-16" />
 
     <div class="policy">
       <p v-html="i18n.t('rentConfirm.depositNote')"></p>
@@ -52,6 +28,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import BaseModal from '@/components/shared/BaseModal.vue'
+import UserInfoForm from '@/components/shared/UserInfoForm.vue'
 import { useI18nStore } from '@/stores/i18n'
 
 const props = defineProps({
