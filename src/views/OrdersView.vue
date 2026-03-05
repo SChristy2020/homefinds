@@ -23,13 +23,14 @@
     <div v-else>
       <OrderPickupBanner :order="foundOrder" @notify="handleNotify" />
       <OrderItemList :order="foundOrder" @cancel="handleCancel" />
-      <button class="btn-outline mt-16" @click="reset">{{ i18n.t('orders.back') }}</button>
+      <button class="btn-outline mt-16 back-btn" @click="reset"><ArrowLeft :size="14" />{{ i18n.t('orders.back') }}</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { ArrowLeft } from 'lucide-vue-next'
 import { useOrdersStore } from '@/stores/orders'
 import { useToastStore } from '@/stores/toast'
 import { useI18nStore } from '@/stores/i18n'
@@ -84,4 +85,5 @@ function reset() {
 .error-msg {
   margin-top: 10px; font-size: 0.8rem; color: var(--red);
 }
+.back-btn { display: inline-flex; align-items: center; gap: 5px; }
 </style>

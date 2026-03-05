@@ -1,11 +1,11 @@
 <template>
   <div class="room-gallery">
     <div class="gallery-placeholder">
-      <div>🏠</div>
+      <Home :size="40" />
       <div class="gallery-label">Room Photos</div>
     </div>
-    <button class="gallery-nav left" @click="prev">‹</button>
-    <button class="gallery-nav right" @click="next">›</button>
+    <button class="gallery-nav left" @click="prev"><ChevronLeft :size="18" /></button>
+    <button class="gallery-nav right" @click="next"><ChevronRight :size="18" /></button>
     <div class="gallery-dots">
       <span
         v-for="i in totalSlides"
@@ -20,6 +20,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { Home, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 const totalSlides = 4
 const current = ref(0)
 function prev() { current.value = (current.value - 1 + totalSlides) % totalSlides }
@@ -36,13 +37,14 @@ function next() { current.value = (current.value + 1) % totalSlides }
 }
 .gallery-placeholder {
   color: rgba(255,255,255,0.2);
-  font-size: 2.5rem; text-align: center;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center;
 }
 .gallery-label { font-size: 0.9rem; font-family: var(--font-body); margin-top: 8px; }
 .gallery-nav {
   position: absolute; top: 50%; transform: translateY(-50%);
   background: rgba(255,255,255,0.15); border: none;
-  color: #fff; font-size: 1.2rem; width: 36px; height: 36px;
+  color: #fff; width: 36px; height: 36px;
   border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.18s;

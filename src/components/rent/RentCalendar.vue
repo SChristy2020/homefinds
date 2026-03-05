@@ -1,9 +1,9 @@
 <template>
   <div class="calendar">
     <div class="cal-header">
-      <button class="cal-nav" @click="prevMonth">‹</button>
+      <button class="cal-nav" @click="prevMonth"><ChevronLeft :size="16" /></button>
       <span class="cal-month">{{ title }}</span>
-      <button class="cal-nav" @click="nextMonth">›</button>
+      <button class="cal-nav" @click="nextMonth"><ChevronRight :size="16" /></button>
     </div>
     <div class="cal-grid">
       <div class="cal-weekday" v-for="d in weekdays" :key="d">{{ d }}</div>
@@ -22,6 +22,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { useI18nStore } from '@/stores/i18n'
 
 const props = defineProps({ selection: Object })
@@ -98,8 +99,9 @@ function selectDay(day) {
 }
 .cal-nav {
   background: none; border: none; cursor: pointer;
-  font-size: 1rem; color: var(--mid); padding: 2px 6px;
+  color: var(--mid); padding: 2px 4px;
   border-radius: 2px; transition: color 0.15s;
+  display: flex; align-items: center;
 }
 .cal-nav:hover { color: var(--charcoal); }
 .cal-month { font-weight: 600; font-size: 0.88rem; }

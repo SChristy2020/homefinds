@@ -3,7 +3,7 @@
     <h2 class="modal-title">{{ i18n.t('cart.title') }}</h2>
 
     <div v-if="cart.items.length === 0" class="empty-state">
-      <div class="empty-state-icon">🛒</div>
+      <div class="empty-state-icon"><ShoppingCart :size="40" /></div>
       <p>{{ i18n.t('cart.empty') }}</p>
     </div>
 
@@ -59,6 +59,7 @@
 
 <script setup>
 import { ref, computed, inject } from 'vue'
+import { ShoppingCart } from 'lucide-vue-next'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import { useCartStore } from '@/stores/cart'
 import { useOrdersStore } from '@/stores/orders'

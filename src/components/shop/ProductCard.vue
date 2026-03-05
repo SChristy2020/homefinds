@@ -1,7 +1,7 @@
 <template>
   <div class="product-card" :class="{ 'sold-out': product.soldOut }">
     <div class="product-img">
-      <div class="product-img-placeholder"><span>🏠</span></div>
+      <div class="product-img-placeholder"><Home :size="28" /></div>
     </div>
     <div class="product-info">
       <div class="product-name">{{ product.name }}</div>
@@ -16,6 +16,7 @@
 </template>
 
 <script setup>
+import { Home } from 'lucide-vue-next'
 import { useI18nStore } from '@/stores/i18n'
 defineProps({ product: Object })
 const i18n = useI18nStore()
@@ -40,7 +41,7 @@ const i18n = useI18nStore()
   width: 100%; height: 100%;
   background: linear-gradient(135deg, #2a2a2a 0%, #4a4040 100%);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem; opacity: 0.4;
+  color: rgba(255,255,255,0.4);
   aspect-ratio: 1;
 }
 .product-info  { padding: 10px 10px 12px; }

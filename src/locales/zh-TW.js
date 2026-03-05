@@ -47,7 +47,7 @@ export default {
     namePlaceholder: '姓氏',
     sent: '查詢',
     error: '找不到相關訂單，請確認資訊是否正確',
-    back: '\u2190 返回',
+    back: '返回',
     pickupTime: '預計取貨時間: ',
     notifyChristy: '通知 Christy',
     pickupNote: 'Christy 將會在你到達前把東西準備好！謝謝！',

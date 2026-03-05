@@ -1,12 +1,13 @@
 <template>
   <div class="cart-bubble" @click="openCartModal()">
-    <span class="cart-icon">🛒</span>
+    <ShoppingCart :size="22" />
     <span v-if="cart.count > 0" class="cart-count">{{ cart.count }}</span>
   </div>
 </template>
 
 <script setup>
 import { inject } from 'vue'
+import { ShoppingCart } from 'lucide-vue-next'
 import { useCartStore } from '@/stores/cart'
 
 const cart = useCartStore()
@@ -32,5 +33,5 @@ const openCartModal = inject('openCartModal')
   display: flex; align-items: center; justify-content: center;
   border: 2px solid var(--cream);
 }
-.cart-icon { font-size: 1.3rem; }
+.cart-bubble svg { display: block; }
 </style>

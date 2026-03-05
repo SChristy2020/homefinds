@@ -5,7 +5,7 @@
 
     <!-- Booking panel -->
     <div class="booking-panel">
-      <p class="avail-note">📅 {{ i18n.t('rent.available') }}</p>
+      <p class="avail-note"><CalendarDays :size="14" /> {{ i18n.t('rent.available') }}</p>
       <RentCalendar v-model:selection="selection" />
 
       <!-- Price summary -->
@@ -43,6 +43,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { CalendarDays } from 'lucide-vue-next'
 import { useI18nStore } from '@/stores/i18n'
 import RoomGallery from '@/components/rent/RoomGallery.vue'
 import RentCalendar from '@/components/rent/RentCalendar.vue'
@@ -77,7 +78,7 @@ function onConfirmed(formData) {
 <style scoped>
 .room-layout { display: flex; gap: 28px; flex-wrap: wrap; }
 .booking-panel { flex: 1; min-width: 280px; }
-.avail-note { font-size: 0.82rem; color: var(--mid); margin-bottom: 12px; }
+.avail-note { font-size: 0.82rem; color: var(--mid); margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
 .price-summary { margin-top: 16px; padding-top: 14px; border-top: 1.5px solid var(--border); }
 .price-big { font-size: 1.4rem; font-weight: 700; color: var(--charcoal); }
 .date-range { font-size: 0.8rem; color: var(--mid); margin: 4px 0 12px; }

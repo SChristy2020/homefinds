@@ -47,7 +47,7 @@ export default {
     namePlaceholder: '姓氏',
     sent: '查询',
     error: '找不到相关订单，请确认信息是否正确',
-    back: '\u2190 返回',
+    back: '返回',
     pickupTime: '预计取货时间: ',
     notifyChristy: '通知 Christy',
     pickupNote: 'Christy 将会在你到达前把东西准备好！谢谢！',

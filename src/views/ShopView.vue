@@ -14,15 +14,15 @@
         </button>
       </div>
       <div class="shop-actions">
-        <button class="icon-btn" @click="searchOpen = !searchOpen">🔍</button>
-        <button class="icon-btn" @click="toggleSort">↕</button>
+        <button class="icon-btn" @click="searchOpen = !searchOpen"><Search :size="17" /></button>
+        <button class="icon-btn" @click="toggleSort"><ArrowUpDown :size="17" /></button>
       </div>
     </div>
 
     <!-- Search -->
     <Transition name="slide-down">
       <div v-if="searchOpen" class="search-bar">
-        <span>🔍</span>
+        <Search :size="15" class="search-icon" />
         <input v-model="searchQuery" :placeholder="i18n.t('shop.searchPlaceholder')" autofocus />
       </div>
     </Transition>
@@ -43,6 +43,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { Search, ArrowUpDown } from 'lucide-vue-next'
 import { useProductsStore } from '@/stores/products'
 import { useI18nStore } from '@/stores/i18n'
 import ProductGrid from '@/components/shop/ProductGrid.vue'
@@ -108,7 +109,8 @@ function toggleSort() {
 .shop-actions { display: flex; gap: 12px; align-items: center; }
 .icon-btn {
   background: none; border: none; cursor: pointer;
-  font-size: 1.1rem; color: var(--charcoal); padding: 4px;
+  color: var(--charcoal); padding: 4px;
+  display: flex; align-items: center;
   transition: color 0.15s;
 }
 .icon-btn:hover { color: var(--accent); }
@@ -123,6 +125,7 @@ function toggleSort() {
   outline: none; flex: 1; color: var(--charcoal);
 }
 .search-bar input::placeholder { color: var(--light); }
+.search-icon { color: var(--mid); flex-shrink: 0; }
 .slide-down-enter-active, .slide-down-leave-active { transition: all 0.2s ease; }
 .slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-8px); }
 </style>

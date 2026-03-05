@@ -1,7 +1,7 @@
 <template>
   <BaseModal :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)">
     <div class="success-title">{{ i18n.t('orderSuccess.title') }}</div>
-    <div class="success-icon">🎁</div>
+    <div class="success-icon"><Gift :size="48" /></div>
 
     <div v-if="order" class="success-info">
       <p><strong>{{ order.firstName }} {{ order.lastName }}</strong></p>
@@ -21,6 +21,7 @@
 </template>
 
 <script setup>
+import { Gift } from 'lucide-vue-next'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import { useI18nStore } from '@/stores/i18n'
 defineProps({ modelValue: Boolean, order: Object })
@@ -34,7 +35,7 @@ const i18n = useI18nStore()
   font-size: 1.4rem; font-weight: 700;
   text-align: center; margin-bottom: 10px;
 }
-.success-icon { text-align: center; font-size: 3rem; margin-bottom: 20px; }
+.success-icon { display: flex; justify-content: center; color: var(--accent); margin-bottom: 20px; }
 .success-info { font-size: 0.83rem; color: var(--mid); margin-bottom: 4px; }
 .success-info p { margin-bottom: 3px; }
 .success-notes { font-size: 0.8rem; color: var(--mid); padding-left: 16px; }

@@ -2,7 +2,7 @@
   <div>
     <div class="list-label">{{ i18n.t('orders.orderLabel') }}</div>
     <div v-if="order.items.length === 0" class="empty-state">
-      <div class="empty-state-icon">📦</div>
+      <div class="empty-state-icon"><Package :size="40" /></div>
       <p>{{ i18n.t('orders.noOrders') }}</p>
     </div>
     <div v-else class="items-grid">
@@ -19,6 +19,7 @@
 </template>
 
 <script setup>
+import { Package } from 'lucide-vue-next'
 import { useI18nStore } from '@/stores/i18n'
 defineProps({ order: Object })
 defineEmits(['cancel'])
