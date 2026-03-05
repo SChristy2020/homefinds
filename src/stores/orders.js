@@ -39,10 +39,11 @@ export const useOrdersStore = defineStore('orders', () => {
   }
 
   function findOrder(lastName, email, phone) {
+    if (!lastName || !email || !phone) return null
     return orders.value.find(o =>
-      (lastName && o.lastName.toLowerCase() === lastName.toLowerCase()) ||
-      (email    && o.email.toLowerCase()    === email.toLowerCase())    ||
-      (phone    && o.phone                  === phone)
+      o.lastName.toLowerCase() === lastName.toLowerCase() &&
+      o.email.toLowerCase() === email.toLowerCase() &&
+      o.phone === phone
     ) || null
   }
 
