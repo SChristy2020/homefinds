@@ -1,3 +1,11 @@
+/*
+ * @Author: Christy qsa8647332@gmail.com
+ * @Date: 2026-03-05 21:21:42
+ * @LastEditors: Christy qsa8647332@gmail.com
+ * @LastEditTime: 2026-03-05 21:33:10
+ * @FilePath: \homefinds\src\router\index.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import { createRouter, createWebHistory } from 'vue-router'
 import ShopView from '@/views/ShopView.vue'
 import RentView from '@/views/RentView.vue'
@@ -10,6 +18,6 @@ const routes = [
 ]
 
 export default createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL), //正確引導到 homefinds/
   routes,
 })
