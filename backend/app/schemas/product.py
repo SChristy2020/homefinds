@@ -1,0 +1,66 @@
+from pydantic import BaseModel
+from typing import Optional, Any
+from datetime import date, datetime
+from enum import Enum
+
+class ProductStatus(str, Enum):
+    available = "available"
+    reserved  = "reserved"
+    sold      = "sold"
+
+class ProductCategory(str, Enum):
+    bedroom   = "Bedroom"
+    kitchen   = "Kitchen"
+    bathroom  = "Bathroom"
+    misc      = "Home & Misc"
+
+class TranslationCreate(BaseModel):
+    locale:      str
+    name:        str
+    description: Optional[str] = None
+
+class TranslationOut(TranslationCreate):
+    id: int
+    class Config:
+        from_attributes = True
+
+class ImageOut(BaseModel):
+    id:         int
+    url:        str
+    sort_order: int
+    class Config:
+        from_attributes = True
+
+class ProductCreate(BaseModel):
+    code:                  str
+    category:              ProductCategory
+    price:                 float
+    original_price:        Optional[float] = None
+    status:                ProductStatus = ProductStatus.available
+    pickup_available_time: Optional[datetime] = None
+    listed_date:           date
+    translations:          list[TranslationCreate] = []
+
+class ProductUpdate(BaseModel):
+    price:                 Optional[float] = None
+    original_price:        Optional[float] = None
+    status:                Optional[ProductStatus] = None
+    pickup_available_time: Optional[datetime] = None
+
+class ProductOut(BaseModel):
+    id:                    int
+    code:                  str
+    category:              str
+    price:                 float
+    original_price:        Optional[float]
+    status:                str
+    pickup_available_time: Optional[datetime]
+    listed_date:           date
+    waiting_list_summary:  Optional[Any]
+    created_at:            datetime
+    updated_at:            datetime
+    translations:          list[TranslationOut] = []
+    images:                list[ImageOut] = []
+
+    class Config:
+        from_attributes = True
