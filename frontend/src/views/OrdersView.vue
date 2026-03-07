@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Lookup form -->
-    <div v-if="!foundOrder" class="orders-lookup">
+    <div v-if="!userStore.currentUser" class="orders-lookup">
       <div class="lookup-title">{{ i18n.t('orders.lookupTitle') }}</div>
       <div class="form-group">
         <label>{{ i18n.t('orders.namePlaceholder') }}</label>
@@ -15,15 +15,28 @@
         <label>Phone</label>
         <input v-model="form.phone" placeholder="(xxx)xxx-xxxx" />
       </div>
-      <button class="btn-primary" @click="handleLookup">{{ i18n.t('orders.sent') }}</button>
-      <p v-if="hasError" class="error-msg">{{ i18n.t('orders.error') }}</p>
+      <button class="btn-primary" :disabled="userStore.loading" @click="handleLookup">
+        {{ userStore.loading ? '...' : i18n.t('orders.sent') }}
+      </button>
+      <p v-if="userStore.error" class="error-msg">{{ i18n.t('orders.error') }}</p>
     </div>
 
-    <!-- Order result -->
+    <!-- Logged in -->
     <div v-else>
-      <OrderPickupBanner :order="foundOrder" @notify="handleNotify" />
-      <OrderItemList :order="foundOrder" @cancel="handleCancel" />
-      <button class="btn-outline mt-16 back-btn" @click="reset"><ArrowLeft :size="14" />{{ i18n.t('orders.back') }}</button>
+      <template v-if="foundOrder && !foundOrder._noOrders">
+        <OrderPickupBanner :order="foundOrder" @notify="handleNotify" />
+        <OrderItemList :order="foundOrder" @cancel="handleCancel" />
+      </template>
+
+      <div v-else class="no-orders-state">
+        <p class="greeting">
+          {{ userStore.currentUser.salutation }} {{ userStore.currentUser.last_name }}，{{ i18n.t('orders.noOrders') }}
+        </p>
+      </div>
+
+      <button class="btn-outline mt-16 back-btn" @click="reset">
+        <ArrowLeft :size="14" />{{ i18n.t('orders.back') }}
+      </button>
     </div>
   </div>
 </template>
@@ -32,33 +45,31 @@
 import { ref } from 'vue'
 import { ArrowLeft } from 'lucide-vue-next'
 import { useOrdersStore } from '@/stores/orders'
+import { useUserStore } from '@/stores/user'
 import { useToastStore } from '@/stores/toast'
 import { useI18nStore } from '@/stores/i18n'
 import OrderPickupBanner from '@/components/orders/OrderPickupBanner.vue'
 import OrderItemList from '@/components/orders/OrderItemList.vue'
 
 const ordersStore = useOrdersStore()
+const userStore = useUserStore()
 const toast = useToastStore()
 const i18n = useI18nStore()
 
 const form = ref({ name: '', email: '', phone: '' })
 const foundOrder = ref(null)
-const hasError = ref(false)
 
-function handleLookup() {
-  hasError.value = false
-  const result = ordersStore.findOrder(form.value.name, form.value.email, form.value.phone)
-  if (result) {
-    foundOrder.value = result
-  } else {
-    hasError.value = true
+async function handleLookup() {
+  const user = await userStore.lookup(form.value.name, form.value.email, form.value.phone)
+  if (user) {
+    const result = ordersStore.findOrder(form.value.name, form.value.email, form.value.phone)
+    foundOrder.value = result || { _noOrders: true }
   }
 }
 
 function handleCancel(productId) {
   ordersStore.cancelItem(foundOrder.value.id, productId)
   toast.show(i18n.t('orders.cancelToast'))
-  // Refresh reference
   foundOrder.value = ordersStore.orders.find(o => o.id === foundOrder.value.id) || null
 }
 
@@ -68,7 +79,7 @@ function handleNotify() {
 
 function reset() {
   foundOrder.value = null
-  hasError.value = false
+  userStore.logout()
   form.value = { name: '', email: '', phone: '' }
 }
 </script>
@@ -86,4 +97,8 @@ function reset() {
   margin-top: 10px; font-size: 0.8rem; color: var(--red);
 }
 .back-btn { display: inline-flex; align-items: center; gap: 5px; }
+.no-orders-state {
+  text-align: center; padding: 60px 20px; color: var(--mid);
+}
+.greeting { font-size: 1rem; }
 </style>
