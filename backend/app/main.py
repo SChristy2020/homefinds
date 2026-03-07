@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import users, products, orders, waiting_list, reservations, room
+from app.routers import users, products, orders, waiting_list, reservations, room, categories
 
 app = FastAPI(title="HomeFinds API", version="1.0.0")
 
@@ -18,6 +18,7 @@ app.include_router(orders.router,      prefix="/api/orders",       tags=["Orders
 app.include_router(waiting_list.router,prefix="/api/waiting-list", tags=["Waiting List"])
 app.include_router(reservations.router,prefix="/api/reservations", tags=["Reservations"])
 app.include_router(room.router,        prefix="/api/room",         tags=["Room"])
+app.include_router(categories.router,  prefix="/api/categories",   tags=["Categories"])
 
 @app.get("/")
 def root():

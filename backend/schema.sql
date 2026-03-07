@@ -27,7 +27,30 @@ CREATE TABLE users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 2. products ─────────────────────────────
+-- ─── 2. categories ───────────────────────────
+CREATE TABLE categories (
+  id            INT         NOT NULL AUTO_INCREMENT,
+  code_prefix   VARCHAR(10) NOT NULL,
+  product_count INT         NOT NULL DEFAULT 0,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_categories_code_prefix (code_prefix)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ─── 3. category_translations ────────────────
+CREATE TABLE category_translations (
+  id          INT          NOT NULL AUTO_INCREMENT,
+  category_id INT          NOT NULL,
+  locale      ENUM('en','zh-TW','zh-CN') NOT NULL,
+  name        VARCHAR(100) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_category_locale (category_id, locale),
+  CONSTRAINT fk_ct_category FOREIGN KEY (category_id)
+    REFERENCES categories(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ─── 4. products ─────────────────────────────
 CREATE TABLE products (
   id                    INT            NOT NULL AUTO_INCREMENT,
   code                  VARCHAR(50)    NOT NULL,
@@ -45,7 +68,7 @@ CREATE TABLE products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 3. product_translations ─────────────────
+-- ─── 5. product_translations ─────────────────
 CREATE TABLE product_translations (
   id          INT          NOT NULL AUTO_INCREMENT,
   product_id  INT          NOT NULL,
@@ -59,7 +82,7 @@ CREATE TABLE product_translations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 4. product_images ───────────────────────
+-- ─── 6. product_images ───────────────────────
 CREATE TABLE product_images (
   id          INT          NOT NULL AUTO_INCREMENT,
   product_id  INT          NOT NULL,
@@ -71,7 +94,7 @@ CREATE TABLE product_images (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 5. orders ───────────────────────────────
+-- ─── 7. orders ───────────────────────────────
 CREATE TABLE orders (
   id          INT       NOT NULL AUTO_INCREMENT,
   user_id     INT       NOT NULL,
@@ -86,7 +109,7 @@ CREATE TABLE orders (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 6. order_items ──────────────────────────
+-- ─── 8. order_items ──────────────────────────
 CREATE TABLE order_items (
   id           INT           NOT NULL AUTO_INCREMENT,
   order_id     INT           NOT NULL,
@@ -101,7 +124,7 @@ CREATE TABLE order_items (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 7. waiting_list ─────────────────────────
+-- ─── 9. waiting_list ─────────────────────────
 CREATE TABLE waiting_list (
   id           INT       NOT NULL AUTO_INCREMENT,
   product_id   INT       NOT NULL,
@@ -115,7 +138,7 @@ CREATE TABLE waiting_list (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 8. reservations ─────────────────────────
+-- ─── 10. reservations ────────────────────────
 CREATE TABLE reservations (
   id             INT           NOT NULL AUTO_INCREMENT,
   user_id        INT           NOT NULL,
@@ -133,7 +156,7 @@ CREATE TABLE reservations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 9. room ─────────────────────────────────
+-- ─── 11. room ────────────────────────────────
 CREATE TABLE room (
   id                INT           NOT NULL AUTO_INCREMENT,
   available_from    DATE          NOT NULL,
@@ -147,7 +170,7 @@ CREATE TABLE room (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 10. room_images ─────────────────────────
+-- ─── 12. room_images ─────────────────────────
 CREATE TABLE room_images (
   id         INT          NOT NULL AUTO_INCREMENT,
   room_id    INT          NOT NULL,
