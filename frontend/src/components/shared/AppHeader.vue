@@ -2,17 +2,6 @@
   <header class="site-header">
     <div class="header-top">
       <h1 class="site-title">Christy's Home Finds</h1>
-      <div class="lang-switcher">
-        <button
-          v-for="lang in langs"
-          :key="lang.code"
-          class="lang-btn"
-          :class="{ active: i18n.locale === lang.code }"
-          @click="i18n.setLocale(lang.code)"
-        >
-          {{ lang.label }}
-        </button>
-      </div>
     </div>
     <nav class="nav-tabs">
       <RouterLink class="nav-tab" :class="{ active: route.name === 'shop' }" to="/">
@@ -34,12 +23,6 @@ import { useI18nStore } from '@/stores/i18n'
 
 const route = useRoute()
 const i18n = useI18nStore()
-
-const langs = [
-  { code: 'en', label: 'EN' },
-  { code: 'zh-TW', label: '繁中' },
-  { code: 'zh-CN', label: '简中' },
-]
 </script>
 
 <style scoped>
@@ -61,28 +44,6 @@ const langs = [
   text-align: center;
   color: var(--charcoal);
 }
-.lang-switcher {
-  position: absolute; right: 0;
-  display: flex; gap: 4px;
-}
-.lang-btn {
-  font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 500;
-  padding: 3px 8px;
-  border: 1.5px solid var(--charcoal);
-  background: transparent;
-  color: var(--charcoal);
-  cursor: pointer;
-  border-radius: 2px;
-  transition: all 0.18s;
-  letter-spacing: 0.03em;
-}
-.lang-btn.active {
-  background: var(--charcoal);
-  color: #fff;
-}
-.lang-btn:hover:not(.active) { background: var(--border); }
 .nav-tabs {
   display: flex; gap: 4px; justify-content: center;
 }
