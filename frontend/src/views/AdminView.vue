@@ -26,12 +26,13 @@
               <th>en名稱</th>
               <th>代號</th>
               <th>商品總數</th>
+              <th>排序</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="filteredCategories.length === 0">
-              <td colspan="7" class="empty-row">無資料</td>
+              <td colspan="8" class="empty-row">無資料</td>
             </tr>
             <tr v-for="cat in filteredCategories" :key="cat.id">
               <td>{{ cat.id }}</td>
@@ -40,6 +41,7 @@
               <td>{{ getCatName(cat, 'en') }}</td>
               <td>{{ cat.code_prefix }}</td>
               <td>{{ cat.product_count }}</td>
+              <td>{{ cat.sort_order }}</td>
               <td class="row-actions">
                 <button class="action-btn edit" @click="openEditCat(cat)" title="編輯"><Pencil :size="14"/></button>
                 <button class="action-btn delete" @click="deleteCategory(cat.id)" title="刪除"><Trash2 :size="14"/></button>
@@ -192,6 +194,10 @@
         <label class="form-label">代號</label>
         <input v-model="catForm.code_prefix" class="form-input" placeholder="e.g. BED" />
       </div>
+      <div class="form-group">
+        <label class="form-label">排序</label>
+        <input type="number" v-model.number="catForm.sort_order" class="form-input" style="width:100px" />
+      </div>
       <div v-if="editingCatId" class="form-group">
         <label class="form-label">商品總數 <span class="hint">（僅顯示，不可編輯）</span></label>
         <input :value="catForm.product_count" disabled class="form-input" />
@@ -343,7 +349,7 @@ const catSortAsc = ref(true)
 const showCatModal = ref(false)
 const editingCatId = ref(null)
 const catSaving = ref(false)
-const catForm = reactive({ code_prefix: '', product_count: 0, name_zh: '', name_cn: '', name_en: '' })
+const catForm = reactive({ code_prefix: '', product_count: 0, sort_order: 0, name_zh: '', name_cn: '', name_en: '' })
 
 async function loadCategories() {
   categories.value = await api.get('/api/categories')
@@ -367,6 +373,7 @@ function openAddCat() {
   editingCatId.value = null
   catForm.code_prefix = ''
   catForm.product_count = 0
+  catForm.sort_order = 0
   catForm.name_zh = ''
   catForm.name_cn = ''
   catForm.name_en = ''
@@ -377,6 +384,7 @@ function openEditCat(cat) {
   editingCatId.value = cat.id
   catForm.code_prefix = cat.code_prefix
   catForm.product_count = cat.product_count
+  catForm.sort_order = cat.sort_order ?? 0
   catForm.name_zh = getCatName(cat, 'zh-TW')
   catForm.name_cn = getCatName(cat, 'zh-CN')
   catForm.name_en = getCatName(cat, 'en')
@@ -387,13 +395,14 @@ async function saveCatModal() {
   catSaving.value = true
   try {
     if (editingCatId.value) {
-      await api.put(`/api/categories/${editingCatId.value}`, { code_prefix: catForm.code_prefix })
+      await api.put(`/api/categories/${editingCatId.value}`, { code_prefix: catForm.code_prefix, sort_order: catForm.sort_order })
       await api.put(`/api/categories/${editingCatId.value}/translations/zh-TW`, { locale: 'zh-TW', name: catForm.name_zh })
       await api.put(`/api/categories/${editingCatId.value}/translations/zh-CN`, { locale: 'zh-CN', name: catForm.name_cn })
       await api.put(`/api/categories/${editingCatId.value}/translations/en`,    { locale: 'en',    name: catForm.name_en })
     } else {
       await api.post('/api/categories', {
         code_prefix: catForm.code_prefix,
+        sort_order: catForm.sort_order,
         translations: [
           { locale: 'zh-TW', name: catForm.name_zh },
           { locale: 'zh-CN', name: catForm.name_cn },

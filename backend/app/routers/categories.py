@@ -16,7 +16,7 @@ def _build_out(category, db):
 
 @router.get("", response_model=list[CategoryOut])
 def list_categories(db: Session = Depends(get_db)):
-    categories = db.query(Category).all()
+    categories = db.query(Category).order_by(Category.sort_order, Category.id).all()
     return [_build_out(c, db) for c in categories]
 
 
@@ -30,7 +30,7 @@ def get_category(category_id: int, db: Session = Depends(get_db)):
 
 @router.post("", response_model=CategoryOut, status_code=201)
 def create_category(body: CategoryCreate, db: Session = Depends(get_db)):
-    category = Category(code_prefix=body.code_prefix)
+    category = Category(code_prefix=body.code_prefix, sort_order=body.sort_order)
     db.add(category)
     db.flush()
     for t in body.translations:

@@ -8,6 +8,7 @@ class Category(Base):
     id            = Column(Integer, primary_key=True, autoincrement=True)
     code_prefix   = Column(String(10), nullable=False, unique=True)
     product_count = Column(Integer, nullable=False, default=0)
+    sort_order    = Column(Integer, nullable=False, default=0)
 
 
 class CategoryTranslation(Base):
