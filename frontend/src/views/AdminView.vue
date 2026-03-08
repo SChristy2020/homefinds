@@ -188,7 +188,7 @@
     </section>
 
     <!-- ===== Category Edit Modal ===== -->
-    <BaseModal v-model="showCatModal">
+    <BaseModal v-model="showCatModal" no-backdrop-close>
       <h3 class="modal-title">{{ editingCatId ? '編輯類別' : '新增類別' }}</h3>
       <div class="form-group">
         <label class="form-label">代號</label>
@@ -223,7 +223,7 @@
     </BaseModal>
 
     <!-- ===== Product Edit Modal ===== -->
-    <BaseModal v-model="showProdModal" size="lg">
+    <BaseModal v-model="showProdModal" size="lg" no-backdrop-close>
       <h3 class="modal-title">{{ editingProdId ? '編輯商品' : '新增商品' }}</h3>
 
       <!-- Images -->

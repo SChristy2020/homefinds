@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="modelValue" class="modal-overlay" @click.self="$emit('update:modelValue', false)">
+      <div v-if="modelValue" class="modal-overlay" @click.self="!noBackdropClose && $emit('update:modelValue', false)">
         <div class="modal" :class="size === 'lg' ? 'modal-lg' : ''">
           <button class="modal-close" @click="$emit('update:modelValue', false)">×</button>
           <slot />
@@ -15,6 +15,7 @@
 defineProps({
   modelValue: Boolean,
   size: { type: String, default: 'md' }, // 'md' | 'lg'
+  noBackdropClose: { type: Boolean, default: false },
 })
 defineEmits(['update:modelValue'])
 </script>
