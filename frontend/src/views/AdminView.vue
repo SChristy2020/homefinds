@@ -265,7 +265,7 @@
         <label class="form-label">類別</label>
         <select v-model="prodForm.category" class="form-input">
           <option v-for="cat in categories" :key="cat.id" :value="getCatName(cat, 'en')">
-            {{ getCatName(cat, 'zh-TW') }} ({{ getCatName(cat, 'en') }})
+            {{ cat.code_prefix }} - {{ getCatName(cat, 'zh-TW') }} ({{ getCatName(cat, 'en') }})
           </option>
         </select>
       </div>
