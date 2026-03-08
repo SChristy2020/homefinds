@@ -42,10 +42,10 @@
               <td>{{ cat.code_prefix }}</td>
               <td>{{ cat.product_count }}</td>
               <td>{{ cat.sort_order }}</td>
-              <td class="row-actions">
+              <td><div class="row-actions">
                 <button class="action-btn edit" @click="openEditCat(cat)" title="編輯"><Pencil :size="14"/></button>
                 <button class="action-btn delete" @click="deleteCategory(cat.id)" title="刪除"><Trash2 :size="14"/></button>
-              </td>
+              </div></td>
             </tr>
           </tbody>
         </table>
@@ -95,10 +95,10 @@
               <td>${{ prod.price }}</td>
               <td><span class="status-badge" :class="prod.status">{{ prod.status }}</span></td>
               <td>{{ prod.pickup_available_time ? fmtDate(prod.pickup_available_time) : '隨時' }}</td>
-              <td class="row-actions">
+              <td><div class="row-actions">
                 <button class="action-btn edit" @click="openEditProd(prod)" title="編輯"><Pencil :size="14"/></button>
                 <button class="action-btn delete" @click="deleteProduct(prod.id)" title="刪除"><Trash2 :size="14"/></button>
-              </td>
+              </div></td>
             </tr>
           </tbody>
         </table>
