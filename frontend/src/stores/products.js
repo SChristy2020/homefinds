@@ -19,8 +19,10 @@ export const useProductsStore = defineStore('products', () => {
       return {
         ...p,
         name: t.name || p.code,
+        description: t.description || '',
         originalPrice: p.original_price ?? null,
         date: p.listed_date,
+        pickupTime: p.pickup_available_time || null,
         soldOut: p.status === 'sold',
       }
     })
