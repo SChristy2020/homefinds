@@ -58,6 +58,23 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    if body.category is not None and body.category != product.category:
+        old_cat_trans = db.query(CategoryTranslation).filter(
+            CategoryTranslation.locale == 'en',
+            CategoryTranslation.name == product.category
+        ).first()
+        if old_cat_trans:
+            old_cat = db.query(Category).filter(Category.id == old_cat_trans.category_id).first()
+            if old_cat and old_cat.product_count > 0:
+                old_cat.product_count -= 1
+        new_cat_trans = db.query(CategoryTranslation).filter(
+            CategoryTranslation.locale == 'en',
+            CategoryTranslation.name == body.category
+        ).first()
+        if new_cat_trans:
+            new_cat = db.query(Category).filter(Category.id == new_cat_trans.category_id).first()
+            if new_cat:
+                new_cat.product_count += 1
     for field, value in body.model_dump(exclude_none=True).items():
         setattr(product, field, value)
     db.commit()

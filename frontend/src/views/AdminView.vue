@@ -253,7 +253,7 @@
       </div>
 
       <!-- Fields -->
-      <div v-if="!editingProdId" class="form-row">
+      <div class="form-row">
         <label class="form-label">代號</label>
         <input v-model="prodForm.code" class="form-input" readonly style="background:#f5f5f5;cursor:default;" />
       </div>
@@ -461,6 +461,7 @@ const prodUploading = ref(false)
 const prodFileInput = ref(null)
 const dragSrcType = ref(null)
 const dragSrcIdx = ref(null)
+const suppressCodeGen = ref(false)
 
 async function loadProducts() {
   products.value = await api.get('/api/products')
@@ -488,8 +489,8 @@ function autoGenerateProdCode(categoryEnName) {
 }
 
 watch(() => prodForm.category, (newCat) => {
-  if (!editingProdId.value) autoGenerateProdCode(newCat)
-})
+  if (!suppressCodeGen.value) autoGenerateProdCode(newCat)
+}, { flush: 'sync' })
 
 function openAddProd() {
   editingProdId.value = null
@@ -511,8 +512,11 @@ function openAddProd() {
 }
 
 function openEditProd(prod) {
+  suppressCodeGen.value = true
   editingProdId.value = prod.id
+  prodForm.code = prod.code
   prodForm.category = prod.category
+  suppressCodeGen.value = false
   prodForm.original_price = prod.original_price
   prodForm.price = prod.price
   prodForm.status = prod.status
@@ -578,6 +582,7 @@ async function saveProdModal() {
       id = created.id
     } else {
       await api.put(`/api/products/${id}`, {
+        code:                  prodForm.code,
         category:              prodForm.category,
         price:                 prodForm.price,
         original_price:        prodForm.original_price || null,
