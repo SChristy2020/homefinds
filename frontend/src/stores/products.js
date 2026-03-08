@@ -1,6 +1,7 @@
 // stores/products.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { api } from '@/utils/api'
 
 export const useProductsStore = defineStore('products', () => {
   const products = ref([
@@ -16,11 +17,15 @@ export const useProductsStore = defineStore('products', () => {
     { id: 10, name: '香氛蠟燭',         category: 'Home & Misc',price: 8,  originalPrice: null, date: '2026/3/13', soldOut: false },
   ])
 
-  const categories = ['Bedroom', 'Kitchen', 'Bathroom', 'Home & Misc']
+  const categories = ref([])
 
-  function getByCategory(category) {
-    if (!category) return products.value
-    return products.value.filter(p => p.category === category)
+  async function fetchCategories() {
+    categories.value = await api.get('/api/categories')
+  }
+
+  function getByCategory(categoryEnName) {
+    if (!categoryEnName) return products.value
+    return products.value.filter(p => p.category === categoryEnName)
   }
 
   function search(query) {
@@ -35,5 +40,5 @@ export const useProductsStore = defineStore('products', () => {
     if (p) p.soldOut = true
   }
 
-  return { products, categories, getByCategory, search, markSoldOut }
+  return { products, categories, fetchCategories, getByCategory, search, markSoldOut }
 })

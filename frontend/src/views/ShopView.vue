@@ -5,12 +5,12 @@
       <div class="category-pills">
         <button
           v-for="cat in productsStore.categories"
-          :key="cat"
+          :key="cat.id"
           class="pill"
-          :class="{ active: selectedCategory === cat }"
-          @click="selectedCategory = cat"
+          :class="{ active: selectedCategory === getCatEnName(cat) }"
+          @click="selectedCategory = getCatEnName(cat)"
         >
-          {{ i18n.t('shop.categories.' + cat) }}
+          {{ getCatLabel(cat) }}
         </button>
       </div>
       <div class="shop-actions">
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, computed, provide } from 'vue'
+import { ref, computed, provide, onMounted } from 'vue'
 import { Search, ArrowUpDown } from 'lucide-vue-next'
 import { useProductsStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
@@ -56,7 +56,24 @@ const productsStore = useProductsStore()
 const cart = useCartStore()
 const i18n = useI18nStore()
 
-const selectedCategory = ref('Bedroom')
+const selectedCategory = ref('')
+
+onMounted(async () => {
+  await productsStore.fetchCategories()
+  if (productsStore.categories.length) {
+    selectedCategory.value = getCatEnName(productsStore.categories[0])
+  }
+})
+
+function getCatEnName(cat) {
+  return cat.translations?.find(t => t.locale === 'en')?.name || cat.code_prefix
+}
+
+function getCatLabel(cat) {
+  return cat.translations?.find(t => t.locale === i18n.locale.value)?.name
+    || cat.translations?.find(t => t.locale === 'en')?.name
+    || cat.code_prefix
+}
 const searchOpen = ref(false)
 const searchQuery = ref('')
 const sortAsc = ref(true)
