@@ -5,8 +5,8 @@
       <div class="category-pills">
         <button
           class="pill"
-          :class="{ active: selectedCategory === '' }"
-          @click="selectedCategory = ''"
+          :class="{ active: selectedCategories.length === 0 }"
+          @click="selectedCategories = []"
         >
           {{ i18n.t('shop.all') }}
         </button>
@@ -14,8 +14,8 @@
           v-for="cat in productsStore.categories"
           :key="cat.id"
           class="pill"
-          :class="{ active: selectedCategory === getCatEnName(cat) }"
-          @click="selectedCategory = getCatEnName(cat)"
+          :class="{ active: selectedCategories.includes(getCatEnName(cat)) }"
+          @click="toggleCategory(getCatEnName(cat))"
         >
           {{ getCatLabel(cat) }}
         </button>
@@ -63,11 +63,17 @@ const productsStore = useProductsStore()
 const cart = useCartStore()
 const i18n = useI18nStore()
 
-const selectedCategory = ref('')
+const selectedCategories = ref([])
 
 onMounted(async () => {
   await productsStore.fetchCategories()
 })
+
+function toggleCategory(enName) {
+  const idx = selectedCategories.value.indexOf(enName)
+  if (idx === -1) selectedCategories.value.push(enName)
+  else selectedCategories.value.splice(idx, 1)
+}
 
 function getCatEnName(cat) {
   return cat.translations?.find(t => t.locale === 'en')?.name || cat.code_prefix
@@ -93,7 +99,9 @@ provide('onOrderSuccess', (order) => {
 })
 
 const filteredProducts = computed(() => {
-  let list = productsStore.getByCategory(selectedCategory.value)
+  let list = selectedCategories.value.length === 0
+    ? productsStore.products
+    : productsStore.products.filter(p => selectedCategories.value.includes(p.category))
   if (searchQuery.value.trim()) {
     list = list.filter(p => p.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
   }
