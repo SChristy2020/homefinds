@@ -5,7 +5,7 @@
         v-for="product in products"
         :key="product.id"
         :product="product"
-        @click="$emit('select', product)"
+        @open="$emit('select', product)"
       />
     </div>
     <div v-if="products.length === 0" class="empty-state">
