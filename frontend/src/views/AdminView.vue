@@ -724,17 +724,28 @@ function removeRoomImage(idx) {
 }
 
 async function saveRoom() {
-  if (!roomId.value) return
   roomSaving.value = true
   try {
-    await api.put(`/api/room/${roomId.value}`, {
-      available_from:    roomForm.available_from,
-      available_to:      roomForm.available_to,
-      price_per_night:   roomForm.price_per_night,
-      price_7_nights:    roomForm.price_7_nights || null,
-      price_30_days:     roomForm.price_30_days || null,
-      price_full_period: roomForm.price_full_period || null,
-    })
+    if (!roomId.value) {
+      const created = await api.post('/api/room', {
+        available_from:    roomForm.available_from    || new Date().toISOString().slice(0, 10),
+        available_to:      roomForm.available_to      || new Date().toISOString().slice(0, 10),
+        price_per_night:   roomForm.price_per_night   || 0,
+        price_7_nights:    roomForm.price_7_nights    || null,
+        price_30_days:     roomForm.price_30_days     || null,
+        price_full_period: roomForm.price_full_period || null,
+      })
+      roomId.value = created.id
+    } else {
+      await api.put(`/api/room/${roomId.value}`, {
+        available_from:    roomForm.available_from,
+        available_to:      roomForm.available_to,
+        price_per_night:   roomForm.price_per_night,
+        price_7_nights:    roomForm.price_7_nights || null,
+        price_30_days:     roomForm.price_30_days || null,
+        price_full_period: roomForm.price_full_period || null,
+      })
+    }
     for (const locale of ['zh-TW', 'zh-CN', 'en']) {
       await api.put(`/api/room/${roomId.value}/translations/${locale}`, {
         locale,

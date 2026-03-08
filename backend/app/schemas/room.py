@@ -12,6 +12,14 @@ class RoomTranslationOut(RoomTranslationCreate):
     class Config:
         from_attributes = True
 
+class RoomCreate(BaseModel):
+    available_from:    date
+    available_to:      date
+    price_per_night:   float
+    price_7_nights:    Optional[float] = None
+    price_30_days:     Optional[float] = None
+    price_full_period: Optional[float] = None
+
 class RoomUpdate(BaseModel):
     available_from:    Optional[date]  = None
     available_to:      Optional[date]  = None

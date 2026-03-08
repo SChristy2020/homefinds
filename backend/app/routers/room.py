@@ -6,7 +6,7 @@ from pydantic import BaseModel as PydanticModel
 from app.database import get_db
 from app.models.room import Room, RoomImage, RoomTranslation
 from app.models.reservation import Reservation
-from app.schemas.room import RoomUpdate, RoomOut, RoomImageOut, RoomTranslationCreate, RoomTranslationOut
+from app.schemas.room import RoomCreate, RoomUpdate, RoomOut, RoomImageOut, RoomTranslationCreate, RoomTranslationOut
 
 class SortItem(PydanticModel):
     id: int
@@ -32,6 +32,14 @@ def get_availability(db: Session = Depends(get_db)):
     """回傳所有已出租的日期區間"""
     reservations = db.query(Reservation).all()
     return [{"check_in": str(r.check_in), "check_out": str(r.check_out)} for r in reservations]
+
+@router.post("", response_model=RoomOut, status_code=201)
+def create_room(body: RoomCreate, db: Session = Depends(get_db)):
+    room = Room(**body.model_dump())
+    db.add(room)
+    db.commit()
+    db.refresh(room)
+    return _build_out(room, db)
 
 @router.put("/{room_id}", response_model=RoomOut)
 def update_room(room_id: int, body: RoomUpdate, db: Session = Depends(get_db)):
