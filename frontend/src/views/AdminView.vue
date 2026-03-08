@@ -160,7 +160,9 @@
               <div v-else class="image-placeholder">{{ idx + 1 }}</div>
               <button class="image-remove" @click="removeRoomImage(idx)">×</button>
             </div>
-            <button class="image-add" @click="addRoomImage">+</button>
+            <button class="image-add" @click="addRoomImage" :disabled="roomUploading">
+            {{ roomUploading ? '上傳中...' : '+' }}
+          </button>
           </div>
           <p class="hint">可拖移圖片改變順序</p>
         </div>
@@ -237,7 +239,9 @@
             <div v-else class="image-placeholder">{{ idx + 1 }}</div>
             <button class="image-remove" @click="removeProdImage(idx)">×</button>
           </div>
-          <button class="image-add" @click="addProdImage">+</button>
+          <button class="image-add" @click="addProdImage" :disabled="prodUploading">
+            {{ prodUploading ? '上傳中...' : '+' }}
+          </button>
         </div>
         <p class="hint">可拖移圖片改變順序</p>
       </div>
@@ -302,6 +306,8 @@
       </div>
     </BaseModal>
 
+    <input ref="prodFileInput" type="file" accept="image/*" style="display:none" @change="onProdFileChange" />
+    <input ref="roomFileInput" type="file" accept="image/*" style="display:none" @change="onRoomFileChange" />
   </div>
 </template>
 
@@ -434,6 +440,8 @@ const prodTranslations = reactive({
 const prodImages = ref([])
 const deletedProdImageIds = ref([])
 const prodDragOver = ref(null)
+const prodUploading = ref(false)
+const prodFileInput = ref(null)
 const dragSrcType = ref(null)
 const dragSrcIdx = ref(null)
 
@@ -494,9 +502,22 @@ function openEditProd(prod) {
 }
 
 function addProdImage() {
-  const url = prompt('輸入圖片網址:')
-  if (!url?.trim()) return
-  prodImages.value.push({ tempId: Date.now(), url: url.trim(), isNew: true })
+  prodFileInput.value.click()
+}
+
+async function onProdFileChange(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  prodUploading.value = true
+  try {
+    const { url } = await api.upload(file)
+    prodImages.value.push({ tempId: Date.now(), url, isNew: true })
+  } catch {
+    toast.show('圖片上傳失敗')
+  } finally {
+    prodUploading.value = false
+    e.target.value = ''
+  }
 }
 
 function removeProdImage(idx) {
@@ -598,6 +619,8 @@ const roomId = ref(null)
 const roomDragOver = ref(null)
 const roomImages = ref([])
 const deletedRoomImageIds = ref([])
+const roomUploading = ref(false)
+const roomFileInput = ref(null)
 const roomForm = reactive({
   available_from: '',
   available_to: '',
@@ -639,9 +662,22 @@ async function loadRoom() {
 }
 
 function addRoomImage() {
-  const url = prompt('輸入圖片網址:')
-  if (!url?.trim()) return
-  roomImages.value.push({ tempId: Date.now(), url: url.trim(), isNew: true })
+  roomFileInput.value.click()
+}
+
+async function onRoomFileChange(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  roomUploading.value = true
+  try {
+    const { url } = await api.upload(file)
+    roomImages.value.push({ tempId: Date.now(), url, isNew: true })
+  } catch {
+    toast.show('圖片上傳失敗')
+  } finally {
+    roomUploading.value = false
+    e.target.value = ''
+  }
 }
 
 function removeRoomImage(idx) {
