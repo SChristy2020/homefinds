@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.category import Category, CategoryTranslation
+from app.models.product import Product
 from app.schemas.category import CategoryCreate, CategoryUpdate, CategoryOut, CategoryTranslationCreate, CategoryTranslationOut
 
 router = APIRouter()
@@ -9,6 +10,12 @@ router = APIRouter()
 
 def _build_out(category, db):
     translations = db.query(CategoryTranslation).filter(CategoryTranslation.category_id == category.id).all()
+    en_name = next((t.name for t in translations if t.locale == 'en'), None)
+    if en_name is not None:
+        real_count = db.query(Product).filter(Product.category == en_name).count()
+        if category.product_count != real_count:
+            category.product_count = real_count
+            db.commit()
     out = CategoryOut.model_validate(category)
     out.translations = translations
     return out
