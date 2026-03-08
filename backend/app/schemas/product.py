@@ -8,12 +8,6 @@ class ProductStatus(str, Enum):
     reserved  = "reserved"
     sold      = "sold"
 
-class ProductCategory(str, Enum):
-    bedroom   = "Bedroom"
-    kitchen   = "Kitchen"
-    bathroom  = "Bathroom"
-    misc      = "Home & Misc"
-
 class TranslationCreate(BaseModel):
     locale:      str
     name:        str
@@ -33,7 +27,7 @@ class ImageOut(BaseModel):
 
 class ProductCreate(BaseModel):
     code:                  str
-    category:              ProductCategory
+    category:              str
     price:                 float
     original_price:        Optional[float] = None
     status:                ProductStatus = ProductStatus.available
@@ -42,7 +36,7 @@ class ProductCreate(BaseModel):
     translations:          list[TranslationCreate] = []
 
 class ProductUpdate(BaseModel):
-    category:              Optional[ProductCategory] = None
+    category:              Optional[str] = None
     price:                 Optional[float] = None
     original_price:        Optional[float] = None
     status:                Optional[ProductStatus] = None

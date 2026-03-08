@@ -6,7 +6,7 @@ class Product(Base):
 
     id                    = Column(Integer, primary_key=True, autoincrement=True)
     code                  = Column(String(50),  nullable=False, unique=True)
-    category              = Column(Enum("Bedroom", "Kitchen", "Bathroom", "Home & Misc"), nullable=False)
+    category              = Column(String(50), nullable=False)
     price                 = Column(Numeric(10, 2), nullable=False)
     original_price        = Column(Numeric(10, 2), nullable=True)
     status                = Column(Enum("available", "reserved", "sold"), nullable=False, default="available")

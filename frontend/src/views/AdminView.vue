@@ -258,10 +258,9 @@
       <div class="form-row">
         <label class="form-label">類別</label>
         <select v-model="prodForm.category" class="form-input">
-          <option value="Bedroom">Bedroom</option>
-          <option value="Kitchen">Kitchen</option>
-          <option value="Bathroom">Bathroom</option>
-          <option value="Home & Misc">Home & Misc</option>
+          <option v-for="cat in categories" :key="cat.id" :value="getCatName(cat, 'en')">
+            {{ getCatName(cat, 'zh-TW') }} ({{ getCatName(cat, 'en') }})
+          </option>
         </select>
       </div>
       <div class="form-row">
@@ -431,7 +430,7 @@ const prodSortAsc = ref(true)
 const showProdModal = ref(false)
 const editingProdId = ref(null)
 const prodSaving = ref(false)
-const prodForm = reactive({ code: '', listed_date: '', category: 'Bedroom', original_price: null, price: 0, status: 'available', pickup_available_time: '' })
+const prodForm = reactive({ code: '', listed_date: '', category: '', original_price: null, price: 0, status: 'available', pickup_available_time: '' })
 const prodTranslations = reactive({
   'zh-TW': { name: '', description: '' },
   'zh-CN': { name: '', description: '' },
@@ -468,7 +467,7 @@ function openAddProd() {
   editingProdId.value = null
   prodForm.code = ''
   prodForm.listed_date = new Date().toISOString().slice(0, 10)
-  prodForm.category = 'Bedroom'
+  prodForm.category = categories.value.length ? getCatName(categories.value[0], 'en') || '' : ''
   prodForm.original_price = null
   prodForm.price = 0
   prodForm.status = 'available'
