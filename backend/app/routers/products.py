@@ -4,6 +4,7 @@ from typing import List
 from pydantic import BaseModel as PydanticModel
 from app.database import get_db
 from app.models.product import Product, ProductTranslation, ProductImage
+from app.models.category import Category, CategoryTranslation
 from app.schemas.product import ProductCreate, ProductUpdate, ProductOut, ImageOut, TranslationCreate, TranslationOut
 
 class SortItem(PydanticModel):
@@ -40,6 +41,14 @@ def create_product(body: ProductCreate, db: Session = Depends(get_db)):
     db.flush()
     for t in body.translations:
         db.add(ProductTranslation(product_id=product.id, **t.model_dump()))
+    cat_translation = db.query(CategoryTranslation).filter(
+        CategoryTranslation.locale == 'en',
+        CategoryTranslation.name == body.category
+    ).first()
+    if cat_translation:
+        category = db.query(Category).filter(Category.id == cat_translation.category_id).first()
+        if category:
+            category.product_count += 1
     db.commit()
     db.refresh(product)
     return _build_out(product, db)

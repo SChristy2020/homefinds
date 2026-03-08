@@ -255,7 +255,7 @@
       <!-- Fields -->
       <div v-if="!editingProdId" class="form-row">
         <label class="form-label">代號</label>
-        <input v-model="prodForm.code" class="form-input" placeholder="e.g. BED-001" />
+        <input v-model="prodForm.code" class="form-input" readonly style="background:#f5f5f5;cursor:default;" />
       </div>
       <div v-if="!editingProdId" class="form-row">
         <label class="form-label">上架日期</label>
@@ -317,7 +317,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue'
+import { ref, computed, onMounted, reactive, watch } from 'vue'
 import { Search, ArrowUpDown, Pencil, Trash2, PlusCircle } from 'lucide-vue-next'
 import { api } from '@/utils/api'
 import { useToastStore } from '@/stores/toast'
@@ -472,11 +472,21 @@ const filteredProducts = computed(() => {
     : list.sort((a, b) => b.id - a.id)
 })
 
+function autoGenerateProdCode(categoryEnName) {
+  const cat = categories.value.find(c => getCatName(c, 'en') === categoryEnName)
+  if (cat) prodForm.code = cat.code_prefix + (cat.product_count + 1)
+  else prodForm.code = ''
+}
+
+watch(() => prodForm.category, (newCat) => {
+  if (!editingProdId.value) autoGenerateProdCode(newCat)
+})
+
 function openAddProd() {
   editingProdId.value = null
-  prodForm.code = ''
   prodForm.listed_date = new Date().toISOString().slice(0, 10)
   prodForm.category = categories.value.length ? getCatName(categories.value[0], 'en') || '' : ''
+  autoGenerateProdCode(prodForm.category)
   prodForm.original_price = null
   prodForm.price = 0
   prodForm.status = 'available'
