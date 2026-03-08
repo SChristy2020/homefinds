@@ -1,7 +1,8 @@
 <template>
   <div class="product-card" :class="{ 'sold-out': product.soldOut }">
     <div class="product-img">
-      <div class="product-img-placeholder"><Home :size="28" /></div>
+      <img v-if="product.images && product.images.length" :src="product.images[0].url" :alt="product.name" class="product-img-photo" />
+      <div v-else class="product-img-placeholder"><Home :size="28" /></div>
     </div>
     <div class="product-info">
       <div class="product-name">{{ product.name }}</div>
@@ -36,6 +37,11 @@ const i18n = useI18nStore()
 .product-img {
   width: 100%; aspect-ratio: 1;
   display: flex; align-items: center; justify-content: center;
+}
+.product-img-photo {
+  width: 100%; height: 100%;
+  object-fit: cover; aspect-ratio: 1;
+  display: block;
 }
 .product-img-placeholder {
   width: 100%; height: 100%;
