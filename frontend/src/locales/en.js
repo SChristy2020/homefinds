@@ -6,6 +6,7 @@ export default {
     admin: 'Admin',
   },
   shop: {
+    all: 'All',
     searchPlaceholder: 'Search items...',
     soldOut: 'Sold Out',
     categories: {

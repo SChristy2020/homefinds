@@ -6,6 +6,7 @@ export default {
     admin: '網站管理',
   },
   shop: {
+    all: '全部',
     searchPlaceholder: '搜尋商品...',
     soldOut: '已售出',
     categories: {

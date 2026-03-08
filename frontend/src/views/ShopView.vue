@@ -4,6 +4,13 @@
     <div class="shop-filters">
       <div class="category-pills">
         <button
+          class="pill"
+          :class="{ active: selectedCategory === '' }"
+          @click="selectedCategory = ''"
+        >
+          {{ i18n.t('shop.all') }}
+        </button>
+        <button
           v-for="cat in productsStore.categories"
           :key="cat.id"
           class="pill"
@@ -60,9 +67,6 @@ const selectedCategory = ref('')
 
 onMounted(async () => {
   await productsStore.fetchCategories()
-  if (productsStore.categories.length) {
-    selectedCategory.value = getCatEnName(productsStore.categories[0])
-  }
 })
 
 function getCatEnName(cat) {
