@@ -94,7 +94,7 @@
               <td>{{ prod.original_price != null ? '$' + prod.original_price : '-' }}</td>
               <td>${{ prod.price }}</td>
               <td><span class="status-badge" :class="prod.status">{{ prod.status }}</span></td>
-              <td>{{ prod.pickup_available_time ? fmtDt(prod.pickup_available_time) : '-' }}</td>
+              <td>{{ prod.pickup_available_time ? fmtDate(prod.pickup_available_time) : '隨時' }}</td>
               <td class="row-actions">
                 <button class="action-btn edit" @click="openEditProd(prod)" title="編輯"><Pencil :size="14"/></button>
                 <button class="action-btn delete" @click="deleteProduct(prod.id)" title="刪除"><Trash2 :size="14"/></button>
@@ -287,7 +287,15 @@
       </div>
       <div class="form-row">
         <label class="form-label">可取貨時間</label>
-        <input type="datetime-local" v-model="prodForm.pickup_available_time" class="form-input" />
+        <div class="pickup-radio-group">
+          <label class="radio-option">
+            <input type="radio" v-model="pickupMode" value="anytime" /> 隨時
+          </label>
+          <label class="radio-option">
+            <input type="radio" v-model="pickupMode" value="date" /> 指定日期起
+          </label>
+          <input v-if="pickupMode === 'date'" type="date" v-model="prodForm.pickup_available_time" class="form-input date-input" style="margin-top:6px;" />
+        </div>
       </div>
 
       <!-- Translations -->
@@ -335,10 +343,10 @@ function getProdName(prod, locale) {
 function localeLabel(locale) {
   return locale === 'zh-TW' ? 'zh' : locale === 'zh-CN' ? 'cn' : 'en'
 }
-function fmtDt(dt) {
+function fmtDate(dt) {
   if (!dt) return '-'
   const d = new Date(dt)
-  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`
 }
 
 // ========== CATEGORIES ==========
@@ -439,6 +447,7 @@ const prodSortAsc = ref(true)
 const showProdModal = ref(false)
 const editingProdId = ref(null)
 const prodSaving = ref(false)
+const pickupMode = ref('anytime')
 const prodForm = reactive({ code: '', listed_date: '', category: '', original_price: null, price: 0, status: 'available', pickup_available_time: '' })
 const prodTranslations = reactive({
   'zh-TW': { name: '', description: '' },
@@ -490,7 +499,8 @@ function openAddProd() {
   prodForm.original_price = null
   prodForm.price = 0
   prodForm.status = 'available'
-  prodForm.pickup_available_time = ''
+  prodForm.pickup_available_time = '2026-04-18'
+  pickupMode.value = 'date'
   for (const locale of ['zh-TW', 'zh-CN', 'en']) {
     prodTranslations[locale].name = ''
     prodTranslations[locale].description = ''
@@ -506,9 +516,13 @@ function openEditProd(prod) {
   prodForm.original_price = prod.original_price
   prodForm.price = prod.price
   prodForm.status = prod.status
-  prodForm.pickup_available_time = prod.pickup_available_time
-    ? new Date(prod.pickup_available_time).toISOString().slice(0, 16)
-    : ''
+  if (prod.pickup_available_time) {
+    pickupMode.value = 'date'
+    prodForm.pickup_available_time = new Date(prod.pickup_available_time).toISOString().slice(0, 10)
+  } else {
+    pickupMode.value = 'anytime'
+    prodForm.pickup_available_time = ''
+  }
   for (const locale of ['zh-TW', 'zh-CN', 'en']) {
     const t = prod.translations?.find(t => t.locale === locale)
     prodTranslations[locale].name = t?.name || ''
@@ -556,7 +570,7 @@ async function saveProdModal() {
         price:                 prodForm.price,
         original_price:        prodForm.original_price || null,
         status:                prodForm.status,
-        pickup_available_time: prodForm.pickup_available_time || null,
+        pickup_available_time: pickupMode.value === 'date' ? (prodForm.pickup_available_time || null) : null,
         translations: ['zh-TW', 'zh-CN', 'en']
           .filter(l => prodTranslations[l].name)
           .map(l => ({ locale: l, name: prodTranslations[l].name, description: prodTranslations[l].description || null })),
@@ -568,7 +582,7 @@ async function saveProdModal() {
         price:                 prodForm.price,
         original_price:        prodForm.original_price || null,
         status:                prodForm.status,
-        pickup_available_time: prodForm.pickup_available_time || null,
+        pickup_available_time: pickupMode.value === 'date' ? (prodForm.pickup_available_time || null) : null,
       })
       for (const locale of ['zh-TW', 'zh-CN', 'en']) {
         if (prodTranslations[locale].name) {
@@ -865,6 +879,8 @@ onMounted(() => {
 .form-input:focus { border-color: var(--charcoal); }
 .form-input:disabled { opacity: 0.5; cursor: not-allowed; }
 .date-input { width: 150px; }
+.pickup-radio-group { display: flex; flex-direction: column; gap: 6px; }
+.radio-option { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; cursor: pointer; }
 .price-input { width: 120px; }
 .form-sep { color: var(--mid); font-size: 0.82rem; }
 .unit { font-size: 0.78rem; color: var(--mid); }
