@@ -74,7 +74,7 @@ function getCatEnName(cat) {
 }
 
 function getCatLabel(cat) {
-  return cat.translations?.find(t => t.locale === i18n.locale.value)?.name
+  return cat.translations?.find(t => t.locale === i18n.locale)?.name
     || cat.translations?.find(t => t.locale === 'en')?.name
     || cat.code_prefix
 }
