@@ -609,7 +609,7 @@ async function saveProdModal() {
     if (reorderData.length > 0) {
       await api.put(`/api/products/${id}/images/reorder`, reorderData)
     }
-    await loadProducts()
+    await Promise.all([loadProducts(), loadCategories()])
     showProdModal.value = false
     toast.show('已儲存')
   } catch (e) {
