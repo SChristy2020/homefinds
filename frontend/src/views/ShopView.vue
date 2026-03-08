@@ -66,7 +66,10 @@ const i18n = useI18nStore()
 const selectedCategories = ref([])
 
 onMounted(async () => {
-  await productsStore.fetchCategories()
+  await Promise.all([
+    productsStore.fetchCategories(),
+    productsStore.fetchProducts(),
+  ])
 })
 
 function toggleCategory(enName) {
