@@ -3,6 +3,7 @@ export default {
     shop: '购物',
     rent: '租房',
     orders: '我的订单',
+    admin: '网站管理',
   },
   shop: {
     searchPlaceholder: '搜索商品...',

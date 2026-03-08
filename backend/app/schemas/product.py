@@ -42,6 +42,7 @@ class ProductCreate(BaseModel):
     translations:          list[TranslationCreate] = []
 
 class ProductUpdate(BaseModel):
+    category:              Optional[ProductCategory] = None
     price:                 Optional[float] = None
     original_price:        Optional[float] = None
     status:                Optional[ProductStatus] = None

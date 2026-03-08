@@ -13,6 +13,9 @@
       <RouterLink class="nav-tab" :class="{ active: route.name === 'orders' }" to="/orders">
         {{ i18n.t('nav.orders') }}
       </RouterLink>
+      <RouterLink class="nav-tab" :class="{ active: route.name === 'admin' }" to="/admin">
+        {{ i18n.t('nav.admin') }}
+      </RouterLink>
     </nav>
   </header>
 </template>

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.category import Category, CategoryTranslation
-from app.schemas.category import CategoryCreate, CategoryUpdate, CategoryOut
+from app.schemas.category import CategoryCreate, CategoryUpdate, CategoryOut, CategoryTranslationCreate, CategoryTranslationOut
 
 router = APIRouter()
 
@@ -59,3 +59,21 @@ def delete_category(category_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Category not found")
     db.delete(category)
     db.commit()
+
+@router.put("/{category_id}/translations/{locale}", response_model=CategoryTranslationOut)
+def upsert_category_translation(category_id: int, locale: str, body: CategoryTranslationCreate, db: Session = Depends(get_db)):
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    translation = db.query(CategoryTranslation).filter(
+        CategoryTranslation.category_id == category_id,
+        CategoryTranslation.locale == locale
+    ).first()
+    if translation:
+        translation.name = body.name
+    else:
+        translation = CategoryTranslation(category_id=category_id, locale=locale, name=body.name)
+        db.add(translation)
+    db.commit()
+    db.refresh(translation)
+    return translation

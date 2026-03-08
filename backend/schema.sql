@@ -165,12 +165,25 @@ CREATE TABLE room (
   price_7_nights    DECIMAL(10,2) NULL COMMENT '7 晚優惠價',
   price_30_days     DECIMAL(10,2) NULL COMMENT '30 天優惠價',
   price_full_period DECIMAL(10,2) NULL COMMENT '整段開放日期全租價',
-  description       TEXT          NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- ─── 12. room_images ─────────────────────────
+-- ─── 12. room_translations ───────────────────
+CREATE TABLE room_translations (
+  id                  INT          NOT NULL AUTO_INCREMENT,
+  room_id             INT          NOT NULL,
+  locale              ENUM('en','zh-TW','zh-CN') NOT NULL,
+  description         TEXT         NULL    COMMENT '房間描述',
+  booking_description TEXT         NULL    COMMENT '預定描述',
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_room_locale (room_id, locale),
+  CONSTRAINT fk_rt_room FOREIGN KEY (room_id)
+    REFERENCES room(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ─── 13. room_images ─────────────────────────
 CREATE TABLE room_images (
   id         INT          NOT NULL AUTO_INCREMENT,
   room_id    INT          NOT NULL,

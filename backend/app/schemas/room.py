@@ -2,6 +2,16 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import date
 
+class RoomTranslationCreate(BaseModel):
+    locale:              str
+    description:         Optional[str] = None
+    booking_description: Optional[str] = None
+
+class RoomTranslationOut(RoomTranslationCreate):
+    id: int
+    class Config:
+        from_attributes = True
+
 class RoomUpdate(BaseModel):
     available_from:    Optional[date]  = None
     available_to:      Optional[date]  = None
@@ -9,7 +19,6 @@ class RoomUpdate(BaseModel):
     price_7_nights:    Optional[float] = None
     price_30_days:     Optional[float] = None
     price_full_period: Optional[float] = None
-    description:       Optional[str]   = None
 
 class RoomImageOut(BaseModel):
     id:         int
@@ -26,7 +35,7 @@ class RoomOut(BaseModel):
     price_7_nights:    Optional[float]
     price_30_days:     Optional[float]
     price_full_period: Optional[float]
-    description:       Optional[str]
+    translations:      list[RoomTranslationOut] = []
     images:            list[RoomImageOut] = []
 
     class Config:

@@ -1,0 +1,931 @@
+<template>
+  <div class="admin-view">
+
+    <!-- ===== 商品類別管理 ===== -->
+    <section class="admin-section">
+      <div class="section-header">
+        <h2 class="section-title">商品類別管理 <button class="icon-btn section-add-btn" @click="openAddCat" title="新增類別"><PlusCircle :size="16"/></button></h2>
+        <div class="table-controls">
+          <button class="icon-btn" @click="catSearchOpen = !catSearchOpen" title="搜尋"><Search :size="16"/></button>
+          <button class="icon-btn" @click="catSortAsc = !catSortAsc" title="排序"><ArrowUpDown :size="16"/></button>
+        </div>
+      </div>
+      <Transition name="slide-down">
+        <div v-if="catSearchOpen" class="search-bar">
+          <Search :size="14" class="search-icon"/>
+          <input v-model="catSearch" placeholder="搜尋類別..." autofocus />
+        </div>
+      </Transition>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>zh名稱</th>
+              <th>cn名稱</th>
+              <th>en名稱</th>
+              <th>代號</th>
+              <th>商品總數</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="filteredCategories.length === 0">
+              <td colspan="7" class="empty-row">無資料</td>
+            </tr>
+            <tr v-for="cat in filteredCategories" :key="cat.id">
+              <td>{{ cat.id }}</td>
+              <td>{{ getCatName(cat, 'zh-TW') }}</td>
+              <td>{{ getCatName(cat, 'zh-CN') }}</td>
+              <td>{{ getCatName(cat, 'en') }}</td>
+              <td>{{ cat.code_prefix }}</td>
+              <td>{{ cat.product_count }}</td>
+              <td class="row-actions">
+                <button class="action-btn edit" @click="openEditCat(cat)" title="編輯"><Pencil :size="14"/></button>
+                <button class="action-btn delete" @click="deleteCategory(cat.id)" title="刪除"><Trash2 :size="14"/></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== 商品管理 ===== -->
+    <section class="admin-section">
+      <div class="section-header">
+        <h2 class="section-title">商品管理 <button class="icon-btn section-add-btn" @click="openAddProd" title="新增商品"><PlusCircle :size="16"/></button></h2>
+        <div class="table-controls">
+          <button class="icon-btn" @click="prodSearchOpen = !prodSearchOpen" title="搜尋"><Search :size="16"/></button>
+          <button class="icon-btn" @click="prodSortAsc = !prodSortAsc" title="排序"><ArrowUpDown :size="16"/></button>
+        </div>
+      </div>
+      <Transition name="slide-down">
+        <div v-if="prodSearchOpen" class="search-bar">
+          <Search :size="14" class="search-icon"/>
+          <input v-model="prodSearch" placeholder="搜尋商品..." autofocus />
+        </div>
+      </Transition>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>zh名稱</th>
+              <th>代號</th>
+              <th>類別</th>
+              <th>原價</th>
+              <th>定價</th>
+              <th>狀態</th>
+              <th>可取貨時間</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="filteredProducts.length === 0">
+              <td colspan="9" class="empty-row">無資料</td>
+            </tr>
+            <tr v-for="prod in filteredProducts" :key="prod.id">
+              <td>{{ prod.id }}</td>
+              <td>{{ getProdName(prod, 'zh-TW') }}</td>
+              <td>{{ prod.code }}</td>
+              <td>{{ prod.category }}</td>
+              <td>{{ prod.original_price != null ? '$' + prod.original_price : '-' }}</td>
+              <td>${{ prod.price }}</td>
+              <td><span class="status-badge" :class="prod.status">{{ prod.status }}</span></td>
+              <td>{{ prod.pickup_available_time ? fmtDt(prod.pickup_available_time) : '-' }}</td>
+              <td class="row-actions">
+                <button class="action-btn edit" @click="openEditProd(prod)" title="編輯"><Pencil :size="14"/></button>
+                <button class="action-btn delete" @click="deleteProduct(prod.id)" title="刪除"><Trash2 :size="14"/></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== 租房設定 ===== -->
+    <section class="admin-section">
+      <h2 class="section-title">租房設定</h2>
+      <div v-if="!roomLoaded" class="loading">載入中...</div>
+      <div v-else class="room-form">
+
+        <!-- Dates -->
+        <div class="form-row">
+          <label class="form-label">可租屋日期</label>
+          <input type="date" v-model="roomForm.available_from" class="form-input date-input" />
+          <span class="form-sep">至</span>
+          <input type="date" v-model="roomForm.available_to" class="form-input date-input" />
+        </div>
+
+        <!-- Prices -->
+        <div class="prices-grid">
+          <div class="price-row">
+            <label class="form-label">每晚價格</label>
+            <input type="number" v-model.number="roomForm.price_per_night" class="form-input price-input" />
+            <span class="unit">USD</span>
+          </div>
+          <div class="price-row">
+            <label class="form-label">每7晚價格</label>
+            <input type="number" v-model.number="roomForm.price_7_nights" class="form-input price-input" />
+            <span class="unit">USD</span>
+          </div>
+          <div class="price-row">
+            <label class="form-label">每30天價格</label>
+            <input type="number" v-model.number="roomForm.price_30_days" class="form-input price-input" />
+            <span class="unit">USD</span>
+          </div>
+          <div class="price-row">
+            <label class="form-label">全租</label>
+            <input type="number" v-model.number="roomForm.price_full_period" class="form-input price-input" />
+            <span class="unit">USD</span>
+          </div>
+        </div>
+
+        <!-- Images -->
+        <div class="form-group">
+          <label class="form-label">圖片上傳</label>
+          <div class="image-list">
+            <div
+              v-for="(img, idx) in roomImages"
+              :key="img.id || img.tempId"
+              class="image-item"
+              :class="{ 'drag-over': roomDragOver === idx }"
+              draggable="true"
+              @dragstart="onDragStart(idx, 'room')"
+              @dragover.prevent="roomDragOver = idx"
+              @dragleave="roomDragOver = null"
+              @drop.prevent="onDrop(idx, 'room'); roomDragOver = null"
+            >
+              <img v-if="img.url" :src="img.url" class="image-thumb" @error="img.loadErr = true" />
+              <div v-else class="image-placeholder">{{ idx + 1 }}</div>
+              <button class="image-remove" @click="removeRoomImage(idx)">×</button>
+            </div>
+            <button class="image-add" @click="addRoomImage">+</button>
+          </div>
+          <p class="hint">可拖移圖片改變順序</p>
+        </div>
+
+        <!-- Descriptions per locale -->
+        <div class="desc-grid">
+          <div v-for="locale in ['zh-TW', 'zh-CN', 'en']" :key="locale" class="form-group">
+            <label class="form-label">{{ localeLabel(locale) }}描述</label>
+            <textarea v-model="roomTranslations[locale].description" rows="3" class="form-textarea" />
+          </div>
+          <div v-for="locale in ['zh-TW', 'zh-CN', 'en']" :key="'bd_' + locale" class="form-group">
+            <label class="form-label">{{ localeLabel(locale) }}付款描述</label>
+            <textarea v-model="roomTranslations[locale].booking_description" rows="3" class="form-textarea" />
+          </div>
+        </div>
+
+        <button class="btn-primary save-btn" @click="saveRoom" :disabled="roomSaving">
+          {{ roomSaving ? '儲存中...' : '租房設定存檔' }}
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Category Edit Modal ===== -->
+    <BaseModal v-model="showCatModal">
+      <h3 class="modal-title">{{ editingCatId ? '編輯類別' : '新增類別' }}</h3>
+      <div class="form-group">
+        <label class="form-label">代號</label>
+        <input v-model="catForm.code_prefix" class="form-input" placeholder="e.g. BED" />
+      </div>
+      <div v-if="editingCatId" class="form-group">
+        <label class="form-label">商品總數 <span class="hint">（僅顯示，不可編輯）</span></label>
+        <input :value="catForm.product_count" disabled class="form-input" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">zh-TW 名稱</label>
+        <input v-model="catForm.name_zh" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">zh-CN 名稱</label>
+        <input v-model="catForm.name_cn" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">en 名稱</label>
+        <input v-model="catForm.name_en" class="form-input" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" @click="showCatModal = false">取消</button>
+        <button class="btn-primary" @click="saveCatModal" :disabled="catSaving">
+          {{ catSaving ? '儲存中...' : '存檔' }}
+        </button>
+      </div>
+    </BaseModal>
+
+    <!-- ===== Product Edit Modal ===== -->
+    <BaseModal v-model="showProdModal" size="lg">
+      <h3 class="modal-title">{{ editingProdId ? '編輯商品' : '新增商品' }}</h3>
+
+      <!-- Images -->
+      <div class="form-group">
+        <label class="form-label">圖片</label>
+        <div class="image-list">
+          <div
+            v-for="(img, idx) in prodImages"
+            :key="img.id || img.tempId"
+            class="image-item"
+            :class="{ 'drag-over': prodDragOver === idx }"
+            draggable="true"
+            @dragstart="onDragStart(idx, 'prod')"
+            @dragover.prevent="prodDragOver = idx"
+            @dragleave="prodDragOver = null"
+            @drop.prevent="onDrop(idx, 'prod'); prodDragOver = null"
+          >
+            <img v-if="img.url" :src="img.url" class="image-thumb" />
+            <div v-else class="image-placeholder">{{ idx + 1 }}</div>
+            <button class="image-remove" @click="removeProdImage(idx)">×</button>
+          </div>
+          <button class="image-add" @click="addProdImage">+</button>
+        </div>
+        <p class="hint">可拖移圖片改變順序</p>
+      </div>
+
+      <!-- Fields -->
+      <div v-if="!editingProdId" class="form-row">
+        <label class="form-label">代號</label>
+        <input v-model="prodForm.code" class="form-input" placeholder="e.g. BED-001" />
+      </div>
+      <div v-if="!editingProdId" class="form-row">
+        <label class="form-label">上架日期</label>
+        <input type="date" v-model="prodForm.listed_date" class="form-input date-input" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">類別</label>
+        <select v-model="prodForm.category" class="form-input">
+          <option value="Bedroom">Bedroom</option>
+          <option value="Kitchen">Kitchen</option>
+          <option value="Bathroom">Bathroom</option>
+          <option value="Home & Misc">Home & Misc</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">原價</label>
+        <input type="number" v-model.number="prodForm.original_price" class="form-input" placeholder="無則留空" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">定價</label>
+        <input type="number" v-model.number="prodForm.price" class="form-input" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">狀態</label>
+        <select v-model="prodForm.status" class="form-input">
+          <option value="available">available</option>
+          <option value="reserved">reserved</option>
+          <option value="sold">sold</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">可取貨時間</label>
+        <input type="datetime-local" v-model="prodForm.pickup_available_time" class="form-input" />
+      </div>
+
+      <!-- Translations -->
+      <div v-for="locale in ['zh-TW', 'zh-CN', 'en']" :key="locale" class="translation-block">
+        <div class="translation-locale">{{ locale }}</div>
+        <div class="form-group">
+          <label class="form-label">名稱</label>
+          <input v-model="prodTranslations[locale].name" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">描述</label>
+          <textarea v-model="prodTranslations[locale].description" rows="2" class="form-textarea" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" @click="showProdModal = false">取消</button>
+        <button class="btn-primary" @click="saveProdModal" :disabled="prodSaving">
+          {{ prodSaving ? '儲存中...' : '存檔' }}
+        </button>
+      </div>
+    </BaseModal>
+
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, reactive } from 'vue'
+import { Search, ArrowUpDown, Pencil, Trash2, PlusCircle } from 'lucide-vue-next'
+import { api } from '@/utils/api'
+import { useToastStore } from '@/stores/toast'
+import BaseModal from '@/components/shared/BaseModal.vue'
+
+const toast = useToastStore()
+
+// ========== HELPERS ==========
+function getCatName(cat, locale) {
+  return cat.translations?.find(t => t.locale === locale)?.name || '-'
+}
+function getProdName(prod, locale) {
+  return prod.translations?.find(t => t.locale === locale)?.name || '-'
+}
+function localeLabel(locale) {
+  return locale === 'zh-TW' ? 'zh' : locale === 'zh-CN' ? 'cn' : 'en'
+}
+function fmtDt(dt) {
+  if (!dt) return '-'
+  const d = new Date(dt)
+  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+}
+
+// ========== CATEGORIES ==========
+const categories = ref([])
+const catSearch = ref('')
+const catSearchOpen = ref(false)
+const catSortAsc = ref(true)
+const showCatModal = ref(false)
+const editingCatId = ref(null)
+const catSaving = ref(false)
+const catForm = reactive({ code_prefix: '', product_count: 0, name_zh: '', name_cn: '', name_en: '' })
+
+async function loadCategories() {
+  categories.value = await api.get('/api/categories')
+}
+
+const filteredCategories = computed(() => {
+  let list = [...categories.value]
+  if (catSearch.value.trim()) {
+    const q = catSearch.value.toLowerCase()
+    list = list.filter(c =>
+      c.code_prefix.toLowerCase().includes(q) ||
+      c.translations?.some(t => t.name.toLowerCase().includes(q))
+    )
+  }
+  return catSortAsc.value
+    ? list.sort((a, b) => a.id - b.id)
+    : list.sort((a, b) => b.id - a.id)
+})
+
+function openAddCat() {
+  editingCatId.value = null
+  catForm.code_prefix = ''
+  catForm.product_count = 0
+  catForm.name_zh = ''
+  catForm.name_cn = ''
+  catForm.name_en = ''
+  showCatModal.value = true
+}
+
+function openEditCat(cat) {
+  editingCatId.value = cat.id
+  catForm.code_prefix = cat.code_prefix
+  catForm.product_count = cat.product_count
+  catForm.name_zh = getCatName(cat, 'zh-TW')
+  catForm.name_cn = getCatName(cat, 'zh-CN')
+  catForm.name_en = getCatName(cat, 'en')
+  showCatModal.value = true
+}
+
+async function saveCatModal() {
+  catSaving.value = true
+  try {
+    if (editingCatId.value) {
+      await api.put(`/api/categories/${editingCatId.value}`, { code_prefix: catForm.code_prefix })
+      await api.put(`/api/categories/${editingCatId.value}/translations/zh-TW`, { locale: 'zh-TW', name: catForm.name_zh })
+      await api.put(`/api/categories/${editingCatId.value}/translations/zh-CN`, { locale: 'zh-CN', name: catForm.name_cn })
+      await api.put(`/api/categories/${editingCatId.value}/translations/en`,    { locale: 'en',    name: catForm.name_en })
+    } else {
+      await api.post('/api/categories', {
+        code_prefix: catForm.code_prefix,
+        translations: [
+          { locale: 'zh-TW', name: catForm.name_zh },
+          { locale: 'zh-CN', name: catForm.name_cn },
+          { locale: 'en',    name: catForm.name_en },
+        ],
+      })
+    }
+    await loadCategories()
+    showCatModal.value = false
+    toast.show('已儲存')
+  } catch (e) {
+    toast.show('儲存失敗: ' + (e.detail || e))
+  } finally {
+    catSaving.value = false
+  }
+}
+
+async function deleteCategory(id) {
+  if (!confirm('確定要刪除此類別？此操作無法復原。')) return
+  try {
+    await api.delete(`/api/categories/${id}`)
+    await loadCategories()
+    toast.show('已刪除')
+  } catch (e) {
+    toast.show('刪除失敗')
+  }
+}
+
+// ========== PRODUCTS ==========
+const products = ref([])
+const prodSearch = ref('')
+const prodSearchOpen = ref(false)
+const prodSortAsc = ref(true)
+const showProdModal = ref(false)
+const editingProdId = ref(null)
+const prodSaving = ref(false)
+const prodForm = reactive({ code: '', listed_date: '', category: 'Bedroom', original_price: null, price: 0, status: 'available', pickup_available_time: '' })
+const prodTranslations = reactive({
+  'zh-TW': { name: '', description: '' },
+  'zh-CN': { name: '', description: '' },
+  'en':    { name: '', description: '' },
+})
+const prodImages = ref([])
+const deletedProdImageIds = ref([])
+const prodDragOver = ref(null)
+const dragSrcType = ref(null)
+const dragSrcIdx = ref(null)
+
+async function loadProducts() {
+  products.value = await api.get('/api/products')
+}
+
+const filteredProducts = computed(() => {
+  let list = [...products.value]
+  if (prodSearch.value.trim()) {
+    const q = prodSearch.value.toLowerCase()
+    list = list.filter(p =>
+      p.code.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.translations?.some(t => t.name.toLowerCase().includes(q))
+    )
+  }
+  return prodSortAsc.value
+    ? list.sort((a, b) => a.id - b.id)
+    : list.sort((a, b) => b.id - a.id)
+})
+
+function openAddProd() {
+  editingProdId.value = null
+  prodForm.code = ''
+  prodForm.listed_date = new Date().toISOString().slice(0, 10)
+  prodForm.category = 'Bedroom'
+  prodForm.original_price = null
+  prodForm.price = 0
+  prodForm.status = 'available'
+  prodForm.pickup_available_time = ''
+  for (const locale of ['zh-TW', 'zh-CN', 'en']) {
+    prodTranslations[locale].name = ''
+    prodTranslations[locale].description = ''
+  }
+  prodImages.value = []
+  deletedProdImageIds.value = []
+  showProdModal.value = true
+}
+
+function openEditProd(prod) {
+  editingProdId.value = prod.id
+  prodForm.category = prod.category
+  prodForm.original_price = prod.original_price
+  prodForm.price = prod.price
+  prodForm.status = prod.status
+  prodForm.pickup_available_time = prod.pickup_available_time
+    ? new Date(prod.pickup_available_time).toISOString().slice(0, 16)
+    : ''
+  for (const locale of ['zh-TW', 'zh-CN', 'en']) {
+    const t = prod.translations?.find(t => t.locale === locale)
+    prodTranslations[locale].name = t?.name || ''
+    prodTranslations[locale].description = t?.description || ''
+  }
+  prodImages.value = prod.images ? prod.images.map(img => ({ ...img })) : []
+  deletedProdImageIds.value = []
+  showProdModal.value = true
+}
+
+function addProdImage() {
+  const url = prompt('輸入圖片網址:')
+  if (!url?.trim()) return
+  prodImages.value.push({ tempId: Date.now(), url: url.trim(), isNew: true })
+}
+
+function removeProdImage(idx) {
+  const img = prodImages.value[idx]
+  if (img.id) deletedProdImageIds.value.push(img.id)
+  prodImages.value.splice(idx, 1)
+}
+
+async function saveProdModal() {
+  prodSaving.value = true
+  try {
+    let id = editingProdId.value
+    if (!id) {
+      const created = await api.post('/api/products', {
+        code:                  prodForm.code,
+        listed_date:           prodForm.listed_date,
+        category:              prodForm.category,
+        price:                 prodForm.price,
+        original_price:        prodForm.original_price || null,
+        status:                prodForm.status,
+        pickup_available_time: prodForm.pickup_available_time || null,
+        translations: ['zh-TW', 'zh-CN', 'en']
+          .filter(l => prodTranslations[l].name)
+          .map(l => ({ locale: l, name: prodTranslations[l].name, description: prodTranslations[l].description || null })),
+      })
+      id = created.id
+    } else {
+      await api.put(`/api/products/${id}`, {
+        category:              prodForm.category,
+        price:                 prodForm.price,
+        original_price:        prodForm.original_price || null,
+        status:                prodForm.status,
+        pickup_available_time: prodForm.pickup_available_time || null,
+      })
+      for (const locale of ['zh-TW', 'zh-CN', 'en']) {
+        if (prodTranslations[locale].name) {
+          await api.put(`/api/products/${id}/translations/${locale}`, {
+            locale,
+            name:        prodTranslations[locale].name,
+            description: prodTranslations[locale].description || null,
+          })
+        }
+      }
+    }
+    for (const imgId of deletedProdImageIds.value) {
+      await api.delete(`/api/products/${id}/images/${imgId}`)
+    }
+    for (let i = 0; i < prodImages.value.length; i++) {
+      const img = prodImages.value[i]
+      if (img.isNew) {
+        await api.post(`/api/products/${id}/images?url=${encodeURIComponent(img.url)}&sort_order=${i}`, {})
+      }
+    }
+    const reorderData = prodImages.value
+      .filter(img => img.id)
+      .map((img, i) => ({ id: img.id, sort_order: i }))
+    if (reorderData.length > 0) {
+      await api.put(`/api/products/${id}/images/reorder`, reorderData)
+    }
+    await loadProducts()
+    showProdModal.value = false
+    toast.show('已儲存')
+  } catch (e) {
+    toast.show('儲存失敗')
+  } finally {
+    prodSaving.value = false
+  }
+}
+
+async function deleteProduct(id) {
+  if (!confirm('確定要刪除此商品？此操作無法復原。')) return
+  try {
+    await api.delete(`/api/products/${id}`)
+    await loadProducts()
+    toast.show('已刪除')
+  } catch (e) {
+    toast.show('刪除失敗')
+  }
+}
+
+// ========== DRAG & DROP ==========
+function onDragStart(idx, type) {
+  dragSrcType.value = type
+  dragSrcIdx.value = idx
+}
+
+function onDrop(targetIdx, type) {
+  if (dragSrcType.value !== type || dragSrcIdx.value === null || dragSrcIdx.value === targetIdx) return
+  const list = type === 'room' ? roomImages.value : prodImages.value
+  const [moved] = list.splice(dragSrcIdx.value, 1)
+  list.splice(targetIdx, 0, moved)
+  dragSrcIdx.value = null
+}
+
+// ========== ROOM ==========
+const roomLoaded = ref(false)
+const roomSaving = ref(false)
+const roomId = ref(null)
+const roomDragOver = ref(null)
+const roomImages = ref([])
+const deletedRoomImageIds = ref([])
+const roomForm = reactive({
+  available_from: '',
+  available_to: '',
+  price_per_night: 0,
+  price_7_nights: null,
+  price_30_days: null,
+  price_full_period: null,
+})
+const roomTranslations = reactive({
+  'zh-TW': { description: '', booking_description: '' },
+  'zh-CN': { description: '', booking_description: '' },
+  'en':    { description: '', booking_description: '' },
+})
+
+async function loadRoom() {
+  try {
+    const rooms = await api.get('/api/room')
+    if (rooms.length) {
+      const room = rooms[0]
+      roomId.value = room.id
+      roomForm.available_from    = room.available_from
+      roomForm.available_to      = room.available_to
+      roomForm.price_per_night   = room.price_per_night
+      roomForm.price_7_nights    = room.price_7_nights
+      roomForm.price_30_days     = room.price_30_days
+      roomForm.price_full_period = room.price_full_period
+      for (const locale of ['zh-TW', 'zh-CN', 'en']) {
+        const t = room.translations?.find(t => t.locale === locale)
+        roomTranslations[locale].description         = t?.description || ''
+        roomTranslations[locale].booking_description = t?.booking_description || ''
+      }
+      roomImages.value = room.images ? room.images.map(img => ({ ...img })) : []
+    }
+  } catch (e) {
+    // API 錯誤或無資料時仍顯示表單
+  } finally {
+    roomLoaded.value = true
+  }
+}
+
+function addRoomImage() {
+  const url = prompt('輸入圖片網址:')
+  if (!url?.trim()) return
+  roomImages.value.push({ tempId: Date.now(), url: url.trim(), isNew: true })
+}
+
+function removeRoomImage(idx) {
+  const img = roomImages.value[idx]
+  if (img.id) deletedRoomImageIds.value.push(img.id)
+  roomImages.value.splice(idx, 1)
+}
+
+async function saveRoom() {
+  if (!roomId.value) return
+  roomSaving.value = true
+  try {
+    await api.put(`/api/room/${roomId.value}`, {
+      available_from:    roomForm.available_from,
+      available_to:      roomForm.available_to,
+      price_per_night:   roomForm.price_per_night,
+      price_7_nights:    roomForm.price_7_nights || null,
+      price_30_days:     roomForm.price_30_days || null,
+      price_full_period: roomForm.price_full_period || null,
+    })
+    for (const locale of ['zh-TW', 'zh-CN', 'en']) {
+      await api.put(`/api/room/${roomId.value}/translations/${locale}`, {
+        locale,
+        description:         roomTranslations[locale].description || null,
+        booking_description: roomTranslations[locale].booking_description || null,
+      })
+    }
+    for (const imgId of deletedRoomImageIds.value) {
+      await api.delete(`/api/room/${roomId.value}/images/${imgId}`)
+    }
+    deletedRoomImageIds.value = []
+    for (let i = 0; i < roomImages.value.length; i++) {
+      const img = roomImages.value[i]
+      if (img.isNew) {
+        await api.post(`/api/room/${roomId.value}/images?url=${encodeURIComponent(img.url)}&sort_order=${i}`, {})
+        delete img.isNew
+      }
+    }
+    const reorderData = roomImages.value
+      .filter(img => img.id)
+      .map((img, i) => ({ id: img.id, sort_order: i }))
+    if (reorderData.length > 0) {
+      await api.put(`/api/room/${roomId.value}/images/reorder`, reorderData)
+    }
+    await loadRoom()
+    toast.show('租房設定已儲存')
+  } catch (e) {
+    toast.show('儲存失敗')
+  } finally {
+    roomSaving.value = false
+  }
+}
+
+onMounted(() => {
+  loadCategories()
+  loadProducts()
+  loadRoom()
+})
+</script>
+
+<style scoped>
+.admin-view { display: flex; flex-direction: column; gap: 48px; }
+
+/* Section */
+.admin-section {
+  background: var(--warm-white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+}
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  display: flex; align-items: center; gap: 6px;
+}
+.table-controls { display: flex; gap: 8px; align-items: center; }
+.section-add-btn { color: var(--mid); }
+
+/* Search bar */
+.search-bar {
+  display: flex; gap: 8px; align-items: center;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 5px 12px; margin-bottom: 14px;
+}
+.search-bar input {
+  border: none; background: transparent;
+  font-family: var(--font-body); font-size: 0.82rem;
+  outline: none; flex: 1; color: var(--charcoal);
+}
+.search-icon { color: var(--mid); flex-shrink: 0; }
+
+/* DataTable */
+.table-wrap { overflow-x: auto; }
+.data-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.8rem; font-family: var(--font-body);
+}
+.data-table th {
+  text-align: left; padding: 8px 10px;
+  border-bottom: 1.5px solid var(--border);
+  color: var(--mid); font-weight: 600;
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--charcoal); vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--bg); }
+.empty-row { text-align: center; color: var(--light); padding: 20px; }
+
+/* Row actions */
+.row-actions { display: flex; gap: 6px; align-items: center; }
+.action-btn {
+  background: none; border: none; cursor: pointer;
+  padding: 4px; border-radius: 3px;
+  display: flex; align-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+.action-btn.edit { color: var(--accent); }
+.action-btn.edit:hover { background: #fff5f0; }
+.action-btn.delete { color: var(--mid); }
+.action-btn.delete:hover { color: #c0392b; background: #fff0f0; }
+
+/* Status badge */
+.status-badge {
+  font-size: 0.72rem; padding: 2px 8px;
+  border-radius: 999px; font-weight: 500;
+}
+.status-badge.available { background: #e8f5e9; color: #2e7d32; }
+.status-badge.reserved  { background: #fff8e1; color: #f57c00; }
+.status-badge.sold      { background: #fce4ec; color: #c62828; }
+
+/* Icon button */
+.icon-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--charcoal); padding: 4px;
+  display: flex; align-items: center;
+  transition: color 0.15s;
+}
+.icon-btn:hover { color: var(--accent); }
+
+/* Room form */
+.room-form { display: flex; flex-direction: column; gap: 18px; }
+.form-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.form-label {
+  font-size: 0.82rem; font-weight: 500;
+  color: var(--charcoal); min-width: 90px;
+  font-family: var(--font-body);
+}
+.form-input {
+  font-family: var(--font-body); font-size: 0.82rem;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 6px 10px; color: var(--charcoal);
+  background: var(--bg); outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--charcoal); }
+.form-input:disabled { opacity: 0.5; cursor: not-allowed; }
+.date-input { width: 150px; }
+.price-input { width: 120px; }
+.form-sep { color: var(--mid); font-size: 0.82rem; }
+.unit { font-size: 0.78rem; color: var(--mid); }
+
+.prices-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.price-row { display: flex; align-items: center; gap: 10px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-textarea {
+  font-family: var(--font-body); font-size: 0.82rem;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 7px 10px; color: var(--charcoal);
+  background: var(--bg); outline: none; resize: vertical;
+  transition: border-color 0.15s;
+}
+.form-textarea:focus { border-color: var(--charcoal); }
+
+.desc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* Images */
+.image-list { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+.image-item {
+  position: relative; width: 72px; height: 72px;
+  border: 1.5px solid var(--border); border-radius: 4px;
+  overflow: hidden; cursor: grab;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.image-item.drag-over {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px #f9a87566;
+}
+.image-thumb {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.image-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; color: var(--light);
+  background: var(--border);
+}
+.image-remove {
+  position: absolute; top: 2px; right: 2px;
+  background: rgba(0,0,0,0.55); color: #fff;
+  border: none; border-radius: 50%;
+  width: 18px; height: 18px; font-size: 0.75rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.image-add {
+  width: 72px; height: 72px;
+  border: 1.5px dashed var(--border); border-radius: 4px;
+  background: none; cursor: pointer;
+  font-size: 1.5rem; color: var(--light);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+.image-add:hover { border-color: var(--charcoal); color: var(--charcoal); }
+
+.hint { font-size: 0.72rem; color: var(--light); margin: 0; }
+
+/* Save button */
+.save-btn { margin-top: 8px; align-self: center; padding: 10px 40px; }
+
+/* Modal */
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem; font-weight: 600;
+  color: var(--charcoal); margin-bottom: 20px;
+}
+.modal-actions {
+  display: flex; justify-content: flex-end; gap: 10px;
+  margin-top: 24px;
+}
+.translation-block {
+  border-top: 1px solid var(--border);
+  padding-top: 14px; margin-top: 10px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.translation-locale {
+  font-size: 0.75rem; font-weight: 600;
+  color: var(--mid); text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Buttons */
+.btn-primary {
+  font-family: var(--font-body); font-size: 0.82rem; font-weight: 500;
+  padding: 8px 22px;
+  background: var(--charcoal); color: #fff;
+  border: 1.5px solid var(--charcoal); border-radius: var(--radius);
+  cursor: pointer; transition: opacity 0.15s;
+}
+.btn-primary:hover:not(:disabled) { opacity: 0.85; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary {
+  font-family: var(--font-body); font-size: 0.82rem; font-weight: 500;
+  padding: 8px 22px;
+  background: transparent; color: var(--charcoal);
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-secondary:hover { background: var(--border); }
+
+.loading { color: var(--mid); font-size: 0.85rem; padding: 20px 0; }
+
+/* Transitions */
+.slide-down-enter-active, .slide-down-leave-active { transition: all 0.2s ease; }
+.slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-6px); }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .prices-grid { grid-template-columns: 1fr; }
+  .desc-grid { grid-template-columns: 1fr; }
+}
+</style>

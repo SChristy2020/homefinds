@@ -3,6 +3,7 @@ export default {
     shop: 'Shop',
     rent: 'Room for Rent',
     orders: 'My Orders',
+    admin: 'Admin',
   },
   shop: {
     searchPlaceholder: 'Search items...',

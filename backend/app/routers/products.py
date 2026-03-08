@@ -1,8 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List
+from pydantic import BaseModel as PydanticModel
 from app.database import get_db
 from app.models.product import Product, ProductTranslation, ProductImage
-from app.schemas.product import ProductCreate, ProductUpdate, ProductOut, ImageOut
+from app.schemas.product import ProductCreate, ProductUpdate, ProductOut, ImageOut, TranslationCreate, TranslationOut
+
+class SortItem(PydanticModel):
+    id: int
+    sort_order: int
 
 router = APIRouter()
 
@@ -49,6 +55,33 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
     db.refresh(product)
     return _build_out(product, db)
 
+@router.delete("/{product_id}", status_code=204)
+def delete_product(product_id: int, db: Session = Depends(get_db)):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    db.delete(product)
+    db.commit()
+
+@router.put("/{product_id}/translations/{locale}", response_model=TranslationOut)
+def upsert_product_translation(product_id: int, locale: str, body: TranslationCreate, db: Session = Depends(get_db)):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    translation = db.query(ProductTranslation).filter(
+        ProductTranslation.product_id == product_id,
+        ProductTranslation.locale == locale
+    ).first()
+    if translation:
+        for field, value in body.model_dump(exclude_none=True, exclude={"locale"}).items():
+            setattr(translation, field, value)
+    else:
+        translation = ProductTranslation(product_id=product_id, **body.model_dump())
+        db.add(translation)
+    db.commit()
+    db.refresh(translation)
+    return translation
+
 @router.post("/{product_id}/images", response_model=ImageOut, status_code=201)
 def add_image(product_id: int, url: str, sort_order: int = 0, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.id == product_id).first()
@@ -59,6 +92,23 @@ def add_image(product_id: int, url: str, sort_order: int = 0, db: Session = Depe
     db.commit()
     db.refresh(image)
     return image
+
+@router.delete("/{product_id}/images/{image_id}", status_code=204)
+def delete_product_image(product_id: int, image_id: int, db: Session = Depends(get_db)):
+    image = db.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.product_id == product_id).first()
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found")
+    db.delete(image)
+    db.commit()
+
+@router.put("/{product_id}/images/reorder", status_code=200)
+def reorder_product_images(product_id: int, body: List[SortItem], db: Session = Depends(get_db)):
+    for item in body:
+        image = db.query(ProductImage).filter(ProductImage.id == item.id, ProductImage.product_id == product_id).first()
+        if image:
+            image.sort_order = item.sort_order
+    db.commit()
+    return {"ok": True}
 
 @router.get("/{product_id}/waiting-list")
 def get_waiting_list(product_id: int, db: Session = Depends(get_db)):

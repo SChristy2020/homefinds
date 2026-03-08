@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Numeric, Date, Text, String, ForeignKey
+from sqlalchemy import Column, Integer, Numeric, Date, Text, String, Enum, ForeignKey
 from app.database import Base
 
 class Room(Base):
@@ -11,7 +11,16 @@ class Room(Base):
     price_7_nights    = Column(Numeric(10,2), nullable=True)
     price_30_days     = Column(Numeric(10,2), nullable=True)
     price_full_period = Column(Numeric(10,2), nullable=True)
-    description       = Column(Text,          nullable=True)
+
+
+class RoomTranslation(Base):
+    __tablename__ = "room_translations"
+
+    id                  = Column(Integer, primary_key=True, autoincrement=True)
+    room_id             = Column(Integer, ForeignKey("room.id", ondelete="CASCADE"), nullable=False)
+    locale              = Column(Enum("en", "zh-TW", "zh-CN"), nullable=False)
+    description         = Column(Text, nullable=True)
+    booking_description = Column(Text, nullable=True)
 
 
 class RoomImage(Base):
