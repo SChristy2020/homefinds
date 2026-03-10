@@ -125,11 +125,17 @@ const totalOriginal = computed(() =>
   cart.items.reduce((s, i) => s + (i.originalPrice ?? i.price), 0)
 )
 
-const isValid = computed(() =>
-  form.value.firstName && form.value.lastName &&
-  form.value.email && form.value.phone &&
-  cart.items.length > 0
-)
+const NAME_RE  = /^[a-zA-Z\u4e00-\u9fff\u3400-\u4dbf\s-]+$/
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const isValid = computed(() => {
+  const f = form.value
+  return cart.items.length > 0 &&
+    f.firstName && NAME_RE.test(f.firstName) &&
+    f.lastName  && NAME_RE.test(f.lastName)  &&
+    f.email     && EMAIL_RE.test(f.email)    &&
+    f.phone     && f.phone.replace(/\D/g, '').length >= 7
+})
 
 function getItemName(item) {
   const trans = item.translations
