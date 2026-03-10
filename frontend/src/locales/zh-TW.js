@@ -46,6 +46,8 @@ export default {
     zelleByEmail: '透過我的 Email',
     zelleOther: '其他',
     zelleOtherPlaceholder: '輸入匯款資訊',
+    estimatedPickup: '預計取貨時間(後續可修改)',
+    estimatedPickupPlaceholder: '請輸入取貨時間',
   },
   cart: {
     title: '購物車',
@@ -53,6 +55,14 @@ export default {
     total: '總計',
     confirm: '確認',
     cancel: '取消',
+    reserve: '立即預定',
+    colThumb: '縮圖',
+    colName: '物品名稱',
+    colPickup: '可取貨時間',
+    colPrice: '價錢',
+    itemCountPrefix: '共',
+    itemCountSuffix: ' 樣物品，總計：',
+    anytime: '隨時',
   },
   orderSuccess: {
     title: '預定成功!',

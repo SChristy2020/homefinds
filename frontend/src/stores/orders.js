@@ -11,7 +11,7 @@ export const useOrdersStore = defineStore('orders', () => {
       id: Date.now(),
       ...orderData,
       items: cartItems.map(i => ({ ...i })),
-      pickupTime: '4/23 13:00',
+      pickupTime: orderData.estimatedPickup || '',
       createdAt: new Date(),
     }
     orders.value.push(order)

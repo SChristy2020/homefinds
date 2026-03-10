@@ -10,12 +10,18 @@
         <input :value="modelValue.lastName" :placeholder="i18n.t('userForm.lastName')" @input="update('lastName', $event.target.value)" />
       </div>
     </div>
-    <div class="form-group">
-      <label>{{ i18n.t('userForm.salutation') }}</label>
-      <div class="radio-group">
-        <label v-for="s in salutations" :key="s">
-          <input type="radio" :checked="modelValue.salutation === s" @change="update('salutation', s)" /> {{ s }}
-        </label>
+    <div class="form-row">
+      <div class="form-group">
+        <label>{{ i18n.t('userForm.salutation') }}</label>
+        <div class="radio-group">
+          <label v-for="s in salutations" :key="s">
+            <input type="radio" :checked="modelValue.salutation === s" @change="update('salutation', s)" /> {{ s }}
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{ i18n.t('userForm.estimatedPickup') }}</label>
+        <PickupDatePicker :modelValue="modelValue.estimatedPickup" :placeholder="i18n.t('userForm.estimatedPickupPlaceholder')" @update:modelValue="update('estimatedPickup', $event)" />
       </div>
     </div>
     <div class="form-group">
@@ -46,6 +52,7 @@
 
 <script setup>
 import { useI18nStore } from '@/stores/i18n'
+import PickupDatePicker from '@/components/shared/PickupDatePicker.vue'
 
 const props = defineProps({ modelValue: Object })
 const emit = defineEmits(['update:modelValue'])

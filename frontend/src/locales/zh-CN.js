@@ -46,6 +46,8 @@ export default {
     zelleByEmail: '透过我的 Email',
     zelleOther: '其他',
     zelleOtherPlaceholder: '输入汇款信息',
+    estimatedPickup: '预计取货时间(后续可修改)',
+    estimatedPickupPlaceholder: '请输入取货时间',
   },
   cart: {
     title: '购物车',
@@ -53,6 +55,14 @@ export default {
     total: '合计',
     confirm: '确认',
     cancel: '取消',
+    reserve: '立即预定',
+    colThumb: '缩图',
+    colName: '物品名称',
+    colPickup: '可取货时间',
+    colPrice: '价格',
+    itemCountPrefix: '共',
+    itemCountSuffix: ' 件商品，合计：',
+    anytime: '随时',
   },
   orderSuccess: {
     title: '预定成功!',

@@ -46,6 +46,8 @@ export default {
     zelleByEmail: 'Use my email',
     zelleOther: 'Other',
     zelleOtherPlaceholder: 'Enter Zelle info',
+    estimatedPickup: 'Est. Pickup Time (editable later)',
+    estimatedPickupPlaceholder: 'e.g. 4/23 13:00',
   },
   cart: {
     title: 'My Cart',
@@ -53,6 +55,14 @@ export default {
     total: 'Total',
     confirm: 'Confirm',
     cancel: 'Cancel',
+    reserve: 'Reserve Now',
+    colThumb: 'Photo',
+    colName: 'Item',
+    colPickup: 'Pickup Time',
+    colPrice: 'Price',
+    itemCountPrefix: '',
+    itemCountSuffix: ' item(s), Total:',
+    anytime: 'Anytime',
   },
   orderSuccess: {
     title: 'Reserved!',

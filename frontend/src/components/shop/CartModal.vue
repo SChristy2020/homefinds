@@ -8,16 +8,42 @@
     </div>
 
     <template v-else>
-      <!-- Cart Items -->
-      <div class="cart-items">
-        <div v-for="item in cart.items" :key="item.id" class="cart-item-card">
-          <div class="cart-item-img"></div>
-          <div class="cart-item-price">
-            <div v-if="item.originalPrice" class="strikethrough" style="font-size:0.7rem;">${{ item.originalPrice }}</div>
-            ${{ item.price }}
-          </div>
-          <button class="btn-outline" style="font-size:0.72rem;padding:3px 10px;" @click="cart.remove(item.id)">{{ i18n.t('cart.cancel') }}</button>
-        </div>
+      <!-- Cart Items Table -->
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th class="col-num"></th>
+            <th class="col-thumb">{{ i18n.t('cart.colThumb') }}</th>
+            <th class="col-name">{{ i18n.t('cart.colName') }}</th>
+            <th class="col-pickup">{{ i18n.t('cart.colPickup') }}</th>
+            <th class="col-price">{{ i18n.t('cart.colPrice') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in cart.items" :key="item.id">
+            <td class="col-num">{{ index + 1 }}</td>
+            <td class="col-thumb">
+              <div class="cart-thumb">
+                <img v-if="item.images && item.images.length" :src="item.images[0].url" :alt="item.name" />
+              </div>
+            </td>
+            <td class="col-name">{{ getItemName(item) }}</td>
+            <td class="col-pickup">{{ item.pickupTime || i18n.t('cart.anytime') }}</td>
+            <td class="col-price">
+              <span v-if="item.originalPrice" class="strikethrough">${{ item.originalPrice }}</span>
+              ${{ item.price }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Total Summary -->
+      <div class="total-summary">
+        <span>{{ i18n.t('cart.itemCountPrefix') }}{{ cart.count }}{{ i18n.t('cart.itemCountSuffix') }}</span>
+        <span class="total-amount">
+          <span v-if="totalOriginal > cart.total" class="strikethrough">${{ totalOriginal }}</span>
+          ${{ cart.total }}
+        </span>
       </div>
 
       <div class="section-divider"></div>
@@ -25,9 +51,52 @@
       <!-- Checkout Form -->
       <UserInfoForm v-model="form" />
 
-      <div class="total-row">
-        <span class="total-label">{{ i18n.t('cart.total') }}: ${{ cart.total }}</span>
-        <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('cart.confirm') }}</button>
+      <!-- Reserve Button -->
+      <div class="action-row">
+        <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('cart.reserve') }}</button>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Inline Guide Section -->
+      <div class="guide-inline">
+        <h3 class="guide-inline-title">{{ i18n.t('guide.sectionTitle') }}</h3>
+
+        <div class="guide-step">
+          <h4>{{ i18n.t('guide.step1Title') }}</h4>
+          <ul>
+            <li v-for="(item, i) in i18n.t('guide.step1Items')" :key="i">{{ item }}</li>
+            <li class="warning">{{ i18n.t('guide.step1Warning') }}</li>
+          </ul>
+        </div>
+
+        <div class="guide-step">
+          <h4>{{ i18n.t('guide.step2Title') }}</h4>
+          <p>{{ i18n.t('guide.step2Intro') }}</p>
+          <ul>
+            <li v-for="(item, i) in i18n.t('guide.step2Items').slice(0, 2)" :key="i">{{ item }}</li>
+            <li>
+              {{ i18n.t('guide.step2PayLabel') }}
+              <div class="zelle-info">
+                <span>{{ i18n.t('guide.zelleAccount') }}</span>
+                <span>{{ i18n.t('guide.zelleName') }}</span>
+              </div>
+            </li>
+            <li v-for="(item, i) in i18n.t('guide.step2Items').slice(2)" :key="'b'+i">{{ item }}</li>
+          </ul>
+        </div>
+
+        <div class="guide-step">
+          <h4>{{ i18n.t('guide.step3Title') }}</h4>
+          <ul>
+            <li v-for="(item, i) in i18n.t('guide.step3Items')" :key="i">{{ item }}</li>
+          </ul>
+        </div>
+
+        <p class="guide-contact">
+          {{ i18n.t('guide.contact') }}
+          <a href="mailto:qsa8647332@gmail.com">qsa8647332@gmail.com</a>
+        </p>
       </div>
     </template>
   </BaseModal>
@@ -50,7 +119,11 @@ const ordersStore = useOrdersStore()
 const onOrderSuccess = inject('onOrderSuccess')
 const i18n = useI18nStore()
 
-const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', zelleRefund: 'phone', zelleRefundOther: '' })
+const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', estimatedPickup: '', zelleRefund: 'phone', zelleRefundOther: '' })
+
+const totalOriginal = computed(() =>
+  cart.items.reduce((s, i) => s + (i.originalPrice ?? i.price), 0)
+)
 
 const isValid = computed(() =>
   form.value.firstName && form.value.lastName &&
@@ -58,13 +131,22 @@ const isValid = computed(() =>
   cart.items.length > 0
 )
 
+function getItemName(item) {
+  const trans = item.translations
+  if (trans) {
+    const t = trans.find(t => t.locale === i18n.locale) || trans.find(t => t.locale === 'en')
+    if (t?.name) return t.name
+  }
+  return item.name || item.code
+}
+
 function handleConfirm() {
   if (!isValid.value) return
   const order = ordersStore.addOrder({ ...form.value }, cart.items)
   cart.clear()
   emit('update:modelValue', false)
   onOrderSuccess(order)
-  form.value = { firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', zelleRefund: 'phone', zelleRefundOther: '' }
+  form.value = { firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', estimatedPickup: '', zelleRefund: 'phone', zelleRefundOther: '' }
 }
 </script>
 
@@ -74,20 +156,124 @@ function handleConfirm() {
   font-size: 1.25rem; font-weight: 600;
   margin-bottom: 20px;
 }
-.cart-items { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; }
-.cart-item-card {
-  border: 1.5px solid var(--border); border-radius: var(--radius);
-  padding: 10px; text-align: center; width: 110px;
+
+/* Cart Table */
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 0.88rem;
 }
-.cart-item-img {
-  width: 80px; height: 80px; margin: 0 auto 6px;
+.cart-table thead th {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1.5px solid var(--border);
+  font-size: 0.82rem;
+  color: #888;
+  font-weight: 500;
+}
+.cart-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+.cart-table tbody tr:last-child { border-bottom: none; }
+.cart-table tbody td {
+  padding: 8px 8px;
+  vertical-align: middle;
+}
+.col-num { width: 24px; color: #999; font-size: 0.8rem; text-align: center; }
+.col-thumb { width: 52px; }
+.col-pickup { color: #666; }
+.col-price { white-space: nowrap; font-weight: 600; text-align: right; }
+.cart-table thead th.col-price { text-align: right; }
+
+.cart-thumb {
+  width: 40px; height: 40px;
   background: linear-gradient(135deg, #2a2a2a 0%, #4a4040 100%);
-  border-radius: 3px;
+  border-radius: 4px;
+  overflow: hidden;
 }
-.cart-item-price { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
-.total-row {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 16px; padding-top: 14px; border-top: 1.5px solid var(--border);
+.cart-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Total */
+.total-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0 14px;
+  font-size: 1rem;
+  font-weight: 600;
 }
-.total-label { font-size: 1.1rem; font-weight: 600; }
+.total-amount { font-size: 1.1rem; }
+
+/* Reserve Button */
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+/* Inline Guide */
+.guide-inline {
+  border-radius: var(--radius);
+  font-size: 0.83rem;
+}
+.guide-inline-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin: 0 0 12px;
+}
+.guide-step { margin-bottom: 12px; }
+.guide-step h4 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent, #c9a96e);
+  margin: 0 0 6px;
+}
+.guide-step p {
+  font-size: 0.82rem;
+  color: #555;
+  margin: 0 0 4px;
+}
+.guide-step ul {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.guide-step li {
+  font-size: 0.82rem;
+  color: #444;
+  line-height: 1.5;
+}
+.guide-step li.warning {
+  color: #c0392b;
+  font-weight: 600;
+  list-style: none;
+  margin-left: -16px;
+}
+.zelle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+.guide-contact {
+  font-size: 0.82rem;
+  color: #555;
+  margin: 8px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid #dde5ef;
+}
+.guide-contact a {
+  color: var(--accent, #c9a96e);
+  text-decoration: none;
+}
+.guide-contact a:hover { text-decoration: underline; }
 </style>
