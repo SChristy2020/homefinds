@@ -111,4 +111,31 @@ export default {
     months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
     titleFormat: '{month} {year}',
   },
+  guide: {
+    title: "Buyer's Guide",
+    sectionTitle: '🛍️ Shopping & Pickup Guide',
+    step1Title: 'Step 1. Pre-order (Reserve Your Spot)',
+    step1Items: [
+      'Confirmation: Once reserved, you will be added to the "Pre-order Waitlist" (displayed anonymously).',
+      'Check Status: View your records on the product page or under "My Orders." An automated email will also be sent to you.',
+    ],
+    step1Warning: '⚠️  IMPORTANT: A "Pre-order" does NOT guarantee the item is yours!',
+    step2Title: 'Step 2. Payment (Secure Your Item)',
+    step2Intro: 'To ensure a smooth process, we follow these rules:',
+    step2Items: [
+      'First-Pay, First-Serve: The item goes to the person who completes the payment first.',
+      'Waitlist Priority: If no one completes an early payment, the first person on the waitlist will get the item.',
+      'Verification: Once Christy confirms the payment, you will receive an email and the item will be marked as "Sold."',
+      'Note for #1 Spot: If you are the first person on the waitlist, you may choose to "Pay upon Pickup."',
+    ],
+    step2PayLabel: 'Payment Method: Please transfer the total amount via Zelle:',
+    zelleAccount: 'Account: (984)373-9392',
+    zelleName: 'Name: SHU-CHING LI',
+    step3Title: 'Step 3. Pickup',
+    step3Items: [
+      'Schedule: Please arrive on time according to your "Estimated Pickup Time."',
+      'Edit Info: You can modify your pickup time later in the "My Orders" section.',
+    ],
+    contact: '💡Questions? Contact Christy:',
+  },
 }

@@ -4,6 +4,7 @@
     <RouterView />
   </main>
   <CartBubble v-if="route.name === 'shop'" />
+  <GuideBubble />
   <LanguageBubble />
   <ToastNotification />
 </template>
@@ -13,6 +14,7 @@ import { useRoute } from 'vue-router'
 import AppHeader from '@/components/shared/AppHeader.vue'
 import CartBubble from '@/components/shop/CartBubble.vue'
 import LanguageBubble from '@/components/shared/LanguageBubble.vue'
+import GuideBubble from '@/components/shared/GuideBubble.vue'
 import ToastNotification from '@/components/shared/ToastNotification.vue'
 
 const route = useRoute()
