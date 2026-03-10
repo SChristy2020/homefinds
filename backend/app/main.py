@@ -1,12 +1,18 @@
 import os
-import uuid
+import cloudinary
+import cloudinary.uploader
+from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from app.routers import users, products, orders, waiting_list, reservations, room, categories
 
-UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "..", "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+from pathlib import Path
+load_dotenv(Path(__file__).parent.parent / ".env")
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+)
 
 app = FastAPI(title="HomeFinds API", version="1.0.0")
 
@@ -17,8 +23,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 app.include_router(users.router,       prefix="/api/users",        tags=["Users"])
 app.include_router(products.router,    prefix="/api/products",     tags=["Products"])
@@ -34,12 +38,9 @@ ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 async def upload_image(file: UploadFile = File(...)):
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=400, detail="只允許上傳圖片檔案 (jpeg/png/webp/gif)")
-    ext = os.path.splitext(file.filename or "")[1].lower() or ".jpg"
-    filename = f"{uuid.uuid4().hex}{ext}"
-    dest = os.path.join(UPLOAD_DIR, filename)
-    with open(dest, "wb") as f:
-        f.write(await file.read())
-    return {"url": f"/uploads/{filename}"}
+    data = await file.read()
+    result = cloudinary.uploader.upload(data, folder="homefinds")
+    return {"url": result["secure_url"]}
 
 @app.get("/")
 def root():
