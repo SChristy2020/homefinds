@@ -1,56 +1,71 @@
 // stores/orders.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { api } from '@/utils/api'
 
 export const useOrdersStore = defineStore('orders', () => {
-  const orders = ref([])        // shop orders
-  const waitingLists = ref({})  // { productId: [{ lastName, phone, email }] }
+  const orders = ref([])
 
-  function addOrder(orderData, cartItems) {
-    const order = {
-      id: Date.now(),
-      ...orderData,
-      items: cartItems.map(i => ({ ...i })),
-      pickupTime: orderData.estimatedPickup || '',
-      createdAt: new Date(),
-    }
-    orders.value.push(order)
-
-    // Register each item in waiting list and record position
-    order.items.forEach(item => {
-      if (!waitingLists.value[item.id]) waitingLists.value[item.id] = []
-      waitingLists.value[item.id].push({
-        lastName: orderData.lastName,
-        phone: orderData.phone,
-        email: orderData.email,
+  async function createOrder(formData, cartItems) {
+    // 1. 查找現有 user，若無則建立
+    let user
+    try {
+      const params = new URLSearchParams({
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
       })
-      item.waitingPosition = waitingLists.value[item.id].length
+      user = await api.get(`/api/users/lookup?${params}`)
+    } catch {
+      user = await api.post('/api/users', {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        salutation: formData.salutation,
+        email: formData.email,
+        phone: formData.phone,
+        zelle_refund: formData.zelleRefund,
+        zelle_refund_other: formData.zelleRefundOther || null,
+      })
+    }
+
+    // 2. 解析取貨時間
+    let pickupTime = null
+    if (formData.estimatedPickup) {
+      const parts = formData.estimatedPickup.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/)
+      if (parts) {
+        pickupTime = new Date(+parts[3], +parts[1] - 1, +parts[2], +parts[4], +parts[5]).toISOString()
+      }
+    }
+
+    // 3. 建立訂單
+    const order = await api.post('/api/orders', {
+      user_id: user.id,
+      pickup_time: pickupTime,
+      items: cartItems.map(i => ({ product_id: i.id, price: i.price })),
     })
+    orders.value.push(order)
     return order
   }
 
-  function cancelItem(orderId, productId) {
-    const order = orders.value.find(o => o.id === orderId)
-    if (!order) return
-    order.items = order.items.filter(i => i.id !== productId)
-    if (waitingLists.value[productId]) {
-      waitingLists.value[productId] = waitingLists.value[productId]
-        .filter(e => e.email !== order.email)
+  async function fetchOrdersByUser(userId) {
+    const result = await api.get(`/api/orders/user/${userId}`)
+    orders.value = result
+    return result
+  }
+
+  async function cancelOrderItem(itemId) {
+    await api.put(`/api/orders/items/${itemId}/cancel`)
+    for (const order of orders.value) {
+      const item = order.items?.find(i => i.id === itemId)
+      if (item) {
+        item.status = 'cancelled'
+        break
+      }
     }
   }
 
-  function findOrder(lastName, email, phone) {
-    if (!lastName || !email || !phone) return null
-    return orders.value.find(o =>
-      o.lastName.toLowerCase() === lastName.toLowerCase() &&
-      o.email.toLowerCase() === email.toLowerCase() &&
-      o.phone === phone
-    ) || null
-  }
+  // 保留介面相容性，waiting list 功能需後端另行實作
+  function getWaitingList() { return [] }
 
-  function getWaitingList(productId) {
-    return waitingLists.value[productId] || []
-  }
-
-  return { orders, waitingLists, addOrder, cancelItem, findOrder, getWaitingList }
+  return { orders, createOrder, fetchOrdersByUser, cancelOrderItem, getWaitingList }
 })

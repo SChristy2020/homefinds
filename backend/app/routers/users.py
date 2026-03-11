@@ -8,9 +8,6 @@ router = APIRouter()
 
 @router.post("", response_model=UserOut, status_code=201)
 def create_user(body: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == body.email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
     user = User(**body.model_dump())
     db.add(user)
     db.commit()

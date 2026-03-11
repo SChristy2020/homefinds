@@ -194,7 +194,7 @@ const hasNotFirst = computed(() =>
   props.order?.items.some(i => i.waitingPosition > 1) ?? false
 )
 
-const ㄏ = computed(() => {
+const orderNumber = computed(() => {
   if (!props.order) return ''
   const shortId = String(props.order.id).slice(-6)
   const total = totalPrice.value

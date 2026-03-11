@@ -62,13 +62,13 @@ const foundOrder = ref(null)
 async function handleLookup() {
   const user = await userStore.lookup(form.value.name, form.value.email, form.value.phone)
   if (user) {
-    const result = ordersStore.findOrder(form.value.name, form.value.email, form.value.phone)
-    foundOrder.value = result || { _noOrders: true }
+    const result = await ordersStore.fetchOrdersByUser(user.id)
+    foundOrder.value = result.length > 0 ? result[result.length - 1] : { _noOrders: true }
   }
 }
 
-function handleCancel(productId) {
-  ordersStore.cancelItem(foundOrder.value.id, productId)
+async function handleCancel(itemId) {
+  await ordersStore.cancelOrderItem(itemId)
   toast.show(i18n.t('orders.cancelToast'))
   foundOrder.value = ordersStore.orders.find(o => o.id === foundOrder.value.id) || null
 }

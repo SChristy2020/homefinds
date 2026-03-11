@@ -9,7 +9,7 @@ class User(Base):
     first_name         = Column(String(50),  nullable=False)
     last_name          = Column(String(50),  nullable=False)
     salutation         = Column(String(10),  nullable=False)
-    email              = Column(String(100), nullable=False, unique=True)
+    email              = Column(String(100), nullable=False)
     phone              = Column(String(20),  nullable=False)
     zelle_refund       = Column(Enum("phone", "email", "other"), nullable=False, default="phone")
     zelle_refund_other = Column(String(100), nullable=True)

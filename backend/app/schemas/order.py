@@ -13,12 +13,13 @@ class OrderItemCreate(BaseModel):
     price:      float
 
 class OrderItemOut(BaseModel):
-    id:           int
-    product_id:   int
-    price:        float
-    status:       str
-    cancelled_at: Optional[datetime]
-    updated_at:   datetime
+    id:               int
+    product_id:       int
+    price:            float
+    status:           str
+    cancelled_at:     Optional[datetime]
+    updated_at:       datetime
+    waiting_position: Optional[int] = None
 
     class Config:
         from_attributes = True

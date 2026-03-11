@@ -4,14 +4,29 @@ from datetime import datetime
 from app.database import get_db
 from app.models.order import Order, OrderItem
 from app.models.user import User
-from app.schemas.order import OrderCreate, OrderOut
+from app.schemas.order import OrderCreate, OrderOut, OrderItemOut
 
 router = APIRouter()
 
 def _build_out(order, db):
     items = db.query(OrderItem).filter(OrderItem.order_id == order.id).all()
     out = OrderOut.model_validate(order)
-    out.items = items
+    enriched = []
+    for item in items:
+        position = (
+            db.query(OrderItem)
+            .join(Order, OrderItem.order_id == Order.id)
+            .filter(
+                OrderItem.product_id == item.product_id,
+                OrderItem.status != "cancelled",
+                Order.created_at <= order.created_at,
+            )
+            .count()
+        )
+        item_out = OrderItemOut.model_validate(item)
+        item_out.waiting_position = position
+        enriched.append(item_out)
+    out.items = enriched
     return out
 
 @router.post("", response_model=OrderOut, status_code=201)

@@ -178,12 +178,39 @@ function getItemName(item) {
   return item.name || item.code
 }
 
-function handleConfirm() {
+async function handleConfirm() {
   if (!isValid.value) return
-  const order = ordersStore.addOrder({ ...form.value }, cart.items)
+  const cartSnapshot = [...cart.items]
+  const formSnapshot = { ...form.value }
+  const order = await ordersStore.createOrder(formSnapshot, cart.items)
+
+  // 補上用戶資訊和商品細節（後端回傳的 order 不含這些）
+  const enriched = {
+    ...order,
+    firstName:       formSnapshot.firstName,
+    lastName:        formSnapshot.lastName,
+    salutation:      formSnapshot.salutation,
+    email:           formSnapshot.email,
+    phone:           formSnapshot.phone,
+    estimatedPickup: formSnapshot.estimatedPickup,
+    items: order.items.map(item => {
+      const src = cartSnapshot.find(c => c.id === item.product_id) || {}
+      return {
+        ...item,
+        price:           Number(item.price),
+        originalPrice:   src.originalPrice ? Number(src.originalPrice) : undefined,
+        name:            src.name,
+        translations:    src.translations,
+        images:          src.images,
+        pickupTime:      src.pickupTime,
+        waitingPosition: item.waiting_position,
+      }
+    }),
+  }
+
   cart.clear()
   emit('update:modelValue', false)
-  onOrderSuccess(order)
+  onOrderSuccess(enriched)
   form.value = { firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', estimatedPickup: '', zelleRefund: 'phone', zelleRefundOther: '' }
 }
 </script>
