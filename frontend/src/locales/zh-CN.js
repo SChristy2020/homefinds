@@ -48,6 +48,7 @@ export default {
     zelleOtherPlaceholder: '输入汇款信息',
     estimatedPickup: '预计取货时间(后续可修改)',
     estimatedPickupPlaceholder: '请输入取货时间',
+    pickupWarningPrefix: '*订单中，有物品的最早取货时间为：',
   },
   cart: {
     title: '购物车',

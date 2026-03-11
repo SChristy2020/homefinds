@@ -149,6 +149,7 @@ function nextMonth() {
 function selectDate(day) {
   if (!day || day.full < today || day.full > CUTOFF_DATE) return
   selectedDate.value = day.full
+  emit('update:modelValue', displayValue.value)
 }
 
 function confirm() {
@@ -163,7 +164,10 @@ onMounted(() => {
 
 // Close on outside click
 function onOutsideClick(e) {
-  if (root.value && !root.value.contains(e.target)) open.value = false
+  if (root.value && !root.value.contains(e.target)) {
+    if (open.value) emit('update:modelValue', displayValue.value)
+    open.value = false
+  }
 }
 onMounted(() => document.addEventListener('mousedown', onOutsideClick))
 onUnmounted(() => document.removeEventListener('mousedown', onOutsideClick))

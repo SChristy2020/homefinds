@@ -49,7 +49,7 @@
       <div class="section-divider"></div>
 
       <!-- Checkout Form -->
-      <UserInfoForm v-model="form" />
+      <UserInfoForm v-model="form" :pickupWarningDate="pickupWarningDate" />
 
       <!-- Reserve Button -->
       <div class="action-row">
@@ -124,6 +124,28 @@ const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', ph
 const totalOriginal = computed(() =>
   cart.items.reduce((s, i) => s + (i.originalPrice ?? i.price), 0)
 )
+
+const latestPickupTime = computed(() => {
+  if (cart.items.length === 0) return null
+  return cart.items.reduce((latest, item) => {
+    const d = new Date(item.pickupTime)
+    return d > latest ? d : latest
+  }, new Date(cart.items[0].pickupTime))
+})
+
+// Compute warning label entirely here so reactivity is simple (string prop, no Date crossing)
+const pickupWarningDate = computed(() => {
+  const min = latestPickupTime.value
+  const ep = form.value.estimatedPickup
+  if (!min || !ep) return ''
+  const parts = ep.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/)
+  if (!parts) return ''
+  const selected = new Date(+parts[3], +parts[1] - 1, +parts[2])
+  selected.setHours(0, 0, 0, 0)
+  const minDay = new Date(min); minDay.setHours(0, 0, 0, 0)
+  if (selected >= minDay) return ''
+  return `${minDay.getFullYear()}/${String(minDay.getMonth() + 1).padStart(2, '0')}/${String(minDay.getDate()).padStart(2, '0')}`
+})
 
 const NAME_RE  = /^[a-zA-Z\u4e00-\u9fff\u3400-\u4dbf\s-]+$/
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

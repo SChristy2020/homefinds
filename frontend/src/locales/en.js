@@ -48,6 +48,7 @@ export default {
     zelleOtherPlaceholder: 'Enter Zelle info',
     estimatedPickup: 'Est. Pickup Time (editable later)',
     estimatedPickupPlaceholder: 'e.g. 4/23 13:00',
+    pickupWarningPrefix: '*The earliest pickup for certain items in your order is:',
   },
   cart: {
     title: 'My Cart',

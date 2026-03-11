@@ -48,6 +48,7 @@ export default {
     zelleOtherPlaceholder: '輸入匯款資訊',
     estimatedPickup: '預計取貨時間(後續可修改)',
     estimatedPickupPlaceholder: '請輸入取貨時間',
+    pickupWarningPrefix: '*訂單中，有物品最早的取貨時間為：',
   },
   cart: {
     title: '購物車',
