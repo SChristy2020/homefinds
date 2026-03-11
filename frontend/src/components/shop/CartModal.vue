@@ -2,13 +2,8 @@
   <BaseModal :modelValue="modelValue" size="lg" @update:modelValue="$emit('update:modelValue', $event)">
     <h2 class="modal-title">{{ i18n.t('cart.title') }}</h2>
 
-    <div v-if="cart.items.length === 0" class="empty-state">
-      <div class="empty-state-icon"><ShoppingCart :size="40" /></div>
-      <p>{{ i18n.t('cart.empty') }}</p>
-    </div>
-
-    <template v-else>
-      <!-- Cart Items Table -->
+    <!-- Cart Items Table (only when not empty) -->
+    <template v-if="cart.items.length > 0">
       <table class="cart-table">
         <thead>
           <tr>
@@ -45,60 +40,66 @@
           ${{ cart.total }}
         </span>
       </div>
-
-      <div class="section-divider"></div>
-
-      <!-- Checkout Form -->
-      <UserInfoForm v-model="form" :pickupWarningDate="pickupWarningDate" />
-
-      <!-- Reserve Button -->
-      <div class="action-row">
-        <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('cart.reserve') }}</button>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <!-- Inline Guide Section -->
-      <div class="guide-inline">
-        <h3 class="guide-inline-title">{{ i18n.t('guide.sectionTitle') }}</h3>
-
-        <div class="guide-step">
-          <h4>{{ i18n.t('guide.step1Title') }}</h4>
-          <ul>
-            <li v-for="(item, i) in i18n.t('guide.step1Items')" :key="i">{{ item }}</li>
-            <li class="warning">{{ i18n.t('guide.step1Warning') }}</li>
-          </ul>
-        </div>
-
-        <div class="guide-step">
-          <h4>{{ i18n.t('guide.step2Title') }}</h4>
-          <p>{{ i18n.t('guide.step2Intro') }}</p>
-          <ul>
-            <li v-for="(item, i) in i18n.t('guide.step2Items').slice(0, 2)" :key="i">{{ item }}</li>
-            <li>
-              {{ i18n.t('guide.step2PayLabel') }}
-              <div class="zelle-info">
-                <span>{{ i18n.t('guide.zelleAccount') }}</span>
-                <span>{{ i18n.t('guide.zelleName') }}</span>
-              </div>
-            </li>
-            <li v-for="(item, i) in i18n.t('guide.step2Items').slice(2)" :key="'b'+i">{{ item }}</li>
-          </ul>
-        </div>
-
-        <div class="guide-step">
-          <h4>{{ i18n.t('guide.step3Title') }}</h4>
-          <ul>
-            <li v-for="(item, i) in i18n.t('guide.step3Items')" :key="i">{{ item }}</li>
-          </ul>
-        </div>
-
-        <p class="guide-contact">
-          {{ i18n.t('guide.contact') }}
-          <a href="mailto:qsa8647332@gmail.com">qsa8647332@gmail.com</a>
-        </p>
-      </div>
     </template>
+
+    <!-- Empty state -->
+    <div v-else class="empty-state">
+      <div class="empty-state-icon"><ShoppingCart :size="40" /></div>
+      <p>{{ i18n.t('cart.empty') }}</p>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- Checkout Form -->
+    <UserInfoForm v-model="form" :pickupWarningDate="pickupWarningDate" />
+
+    <!-- Reserve Button -->
+    <div class="action-row">
+      <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('cart.reserve') }}</button>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- Inline Guide Section -->
+    <div class="guide-inline">
+      <h3 class="guide-inline-title">{{ i18n.t('guide.sectionTitle') }}</h3>
+
+      <div class="guide-step">
+        <h4>{{ i18n.t('guide.step1Title') }}</h4>
+        <ul>
+          <li v-for="(item, i) in i18n.t('guide.step1Items')" :key="i">{{ item }}</li>
+          <li class="warning">{{ i18n.t('guide.step1Warning') }}</li>
+        </ul>
+      </div>
+
+      <div class="guide-step">
+        <h4>{{ i18n.t('guide.step2Title') }}</h4>
+        <p>{{ i18n.t('guide.step2Intro') }}</p>
+        <ul>
+          <li v-for="(item, i) in i18n.t('guide.step2Items').slice(0, 2)" :key="i">{{ item }}</li>
+          <li>
+            {{ i18n.t('guide.step2PayLabel') }}
+            <div class="zelle-info">
+              <span>{{ i18n.t('guide.zelleAccount') }}</span>
+              <span>{{ i18n.t('guide.zelleName') }}</span>
+            </div>
+          </li>
+          <li v-for="(item, i) in i18n.t('guide.step2Items').slice(2)" :key="'b'+i">{{ item }}</li>
+        </ul>
+      </div>
+
+      <div class="guide-step">
+        <h4>{{ i18n.t('guide.step3Title') }}</h4>
+        <ul>
+          <li v-for="(item, i) in i18n.t('guide.step3Items')" :key="i">{{ item }}</li>
+        </ul>
+      </div>
+
+      <p class="guide-contact">
+        {{ i18n.t('guide.contact') }}
+        <a href="mailto:qsa8647332@gmail.com">qsa8647332@gmail.com</a>
+      </p>
+    </div>
   </BaseModal>
 </template>
 
