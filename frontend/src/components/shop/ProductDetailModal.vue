@@ -75,7 +75,7 @@
       </template>
       <template v-else>
         <div v-for="(entry, i) in waitingList" :key="i" class="waiting-item">
-          {{ i + 1 }}. {{ entry.lastName }} &nbsp; {{ entry.phone }} &nbsp; {{ maskEmail(entry.email) }}
+          {{ i + 1 }}. {{ entry.lastName }} &nbsp; {{ maskPhone(entry.phone) }} &nbsp; {{ maskEmail(entry.email) }}
         </div>
       </template>
       <ul class="mechanism-list">
@@ -137,10 +137,21 @@ function formatPickupTime(dt) {
   return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
 }
 
+function maskPhone(phone) {
+  if (!phone) return ''
+  const str = String(phone)
+  if (str.length <= 3) return str
+  return '*'.repeat(str.length - 3) + str.slice(-3)
+}
+
 function maskEmail(email) {
   if (!email) return ''
   const [local, domain] = email.split('@')
-  return local.slice(0, 3) + 'xxxxx@' + (domain || 'xxx.xxx.xx')
+  const maskedLocal = local.slice(0, 3) + '*'.repeat(Math.max(0, local.length - 3))
+  const maskedDomain = domain
+    ? domain.slice(0, 3) + '*'.repeat(Math.max(0, domain.length - 3))
+    : '***'
+  return maskedLocal + '@' + maskedDomain
 }
 </script>
 
