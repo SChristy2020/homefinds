@@ -28,7 +28,7 @@
               </div>
             </td>
             <td class="col-name">{{ getItemName(item) }}</td>
-            <td class="col-pickup">{{ item.pickupTime || i18n.t('cart.anytime') }}</td>
+            <td class="col-pickup">{{ formatPickupDate(item.pickupTime) }}</td>
             <td class="col-price">
               <span v-if="item.originalPrice" class="strikethrough">${{ item.originalPrice }}</span>
               ${{ item.price }}
@@ -136,6 +136,11 @@ const isValid = computed(() => {
     f.email     && EMAIL_RE.test(f.email)    &&
     f.phone     && f.phone.replace(/\D/g, '').length >= 7
 })
+
+function formatPickupDate(pickupTime) {
+  if (!pickupTime) return i18n.t('cart.anytime')
+  return new Date(pickupTime).toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' })
+}
 
 function getItemName(item) {
   const trans = item.translations
