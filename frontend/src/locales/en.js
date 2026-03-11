@@ -39,6 +39,7 @@ export default {
     firstName: 'First Name',
     lastName: 'Last Name',
     salutation: 'Title',
+    salutations: ['Mr.', 'Ms.'],
     phone: 'Phone',
     phonePlaceholder: '(xxx)xxx-xxxx',
     zelleRefundQ: 'In case of duplicate payment, how should we Zelle you a refund?',

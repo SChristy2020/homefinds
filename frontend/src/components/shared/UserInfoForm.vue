@@ -20,8 +20,8 @@
       <div class="form-group">
         <label>{{ i18n.t('userForm.salutation') }}</label>
         <div class="radio-group">
-          <label v-for="s in salutations" :key="s">
-            <input type="radio" :checked="modelValue.salutation === s" @change="update('salutation', s)" /> {{ s }}
+          <label v-for="(key, i) in salutationKeys" :key="key">
+            <input type="radio" :checked="modelValue.salutation === key" @change="update('salutation', key)" /> {{ salutationLabels[i] }}
           </label>
         </div>
       </div>
@@ -72,7 +72,8 @@ const props = defineProps({ modelValue: Object, pickupWarningDate: { type: Strin
 const emit = defineEmits(['update:modelValue'])
 const i18n = useI18nStore()
 
-const salutations = ['Mr.', 'Mrs.', 'Ms.', 'Miss', 'Dr.']
+const salutationKeys = ['Mr.', 'Ms.']
+const salutationLabels = computed(() => i18n.t('userForm.salutations'))
 
 const touched = ref({ firstName: false, lastName: false, email: false, phone: false })
 

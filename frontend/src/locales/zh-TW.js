@@ -39,6 +39,7 @@ export default {
     firstName: '名字',
     lastName: '姓氏',
     salutation: '稱呼',
+    salutations: ['先生', '小姐'],
     phone: '電話',
     phonePlaceholder: '(xxx)xxx-xxxx',
     zelleRefundQ: '若遇到重複付款，該如何透過 Zelle 退費給您？',
