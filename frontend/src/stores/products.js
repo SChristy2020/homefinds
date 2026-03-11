@@ -25,6 +25,7 @@ export const useProductsStore = defineStore('products', () => {
         date: p.listed_date,
         pickupTime: p.pickup_available_time || null,
         soldOut: p.status === 'sold',
+        waitingList: (p.waiting_list_summary || []).filter(e => !e.is_cancelled),
       }
     })
   )

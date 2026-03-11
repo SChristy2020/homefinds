@@ -4,7 +4,9 @@ from datetime import datetime
 from app.database import get_db
 from app.models.order import Order, OrderItem
 from app.models.user import User
+from app.models.waiting_list import WaitingList
 from app.schemas.order import OrderCreate, OrderOut, OrderItemOut
+from app.routers.waiting_list import _refresh_summary
 
 router = APIRouter()
 
@@ -41,6 +43,16 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
 
     for item in body.items:
         db.add(OrderItem(order_id=order.id, product_id=item.product_id, price=item.price))
+        position = db.query(WaitingList).filter(
+            WaitingList.product_id == item.product_id,
+            WaitingList.is_cancelled == 0,
+        ).count() + 1
+        db.add(WaitingList(product_id=item.product_id, user_id=body.user_id, position=position))
+
+    db.flush()
+
+    for item in body.items:
+        _refresh_summary(item.product_id, db)
 
     user.has_purchase = 1
     db.commit()
@@ -77,5 +89,15 @@ def cancel_order_item(item_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order item not found")
     item.status = "cancelled"
     item.cancelled_at = datetime.now()
+
+    wl_entry = db.query(WaitingList).filter(
+        WaitingList.product_id == item.product_id,
+        WaitingList.user_id == db.query(Order.user_id).filter(Order.id == item.order_id).scalar_subquery(),
+        WaitingList.is_cancelled == 0,
+    ).first()
+    if wl_entry:
+        wl_entry.is_cancelled = 1
+        _refresh_summary(item.product_id, db)
+
     db.commit()
     return {"message": "Item cancelled"}

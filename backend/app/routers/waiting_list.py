@@ -43,7 +43,9 @@ def _refresh_summary(product_id: int, db: Session):
         user = db.query(User).filter(User.id == e.user_id).first()
         summary.append({
             "user_id":      e.user_id,
-            "name":         f"{user.first_name} {user.last_name}" if user else "",
+            "last_name":    user.last_name if user else "",
+            "email":        user.email if user else "",
+            "phone":        user.phone if user else "",
             "position":     e.position,
             "is_cancelled": bool(e.is_cancelled),
         })

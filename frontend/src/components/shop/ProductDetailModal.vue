@@ -75,7 +75,7 @@
       </template>
       <template v-else>
         <div v-for="(entry, i) in waitingList" :key="i" class="waiting-item">
-          {{ i + 1 }}. {{ entry.lastName }} &nbsp; {{ maskPhone(entry.phone) }} &nbsp; {{ maskEmail(entry.email) }}
+          {{ i + 1 }}. {{ entry.last_name }} &nbsp; {{ maskPhone(entry.phone) }} &nbsp; {{ maskEmail(entry.email) }}
         </div>
       </template>
       <ul class="mechanism-list">
@@ -89,7 +89,6 @@
 import { ref, computed } from 'vue'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import { useCartStore } from '@/stores/cart'
-import { useOrdersStore } from '@/stores/orders'
 import { useToastStore } from '@/stores/toast'
 import { useI18nStore } from '@/stores/i18n'
 import { useProductsStore } from '@/stores/products'
@@ -98,7 +97,6 @@ const props = defineProps({ modelValue: Boolean, product: Object })
 defineEmits(['update:modelValue'])
 
 const cart = useCartStore()
-const ordersStore = useOrdersStore()
 const toast = useToastStore()
 const i18n = useI18nStore()
 const productsStore = useProductsStore()
@@ -106,7 +104,7 @@ const productsStore = useProductsStore()
 const images = computed(() => props.product?.images || [])
 const current = ref(0)
 
-const waitingList = computed(() => ordersStore.getWaitingList(props.product?.id))
+const waitingList = computed(() => props.product?.waitingList || [])
 
 const categoryLabel = computed(() => {
   const cat = productsStore.categories.find(c => {
