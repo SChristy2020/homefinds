@@ -54,7 +54,7 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     for item in body.items:
         _refresh_summary(item.product_id, db)
 
-    user.has_purchase = 1
+    user.has_reservation = 1
     db.commit()
     db.refresh(order)
     return _build_out(order, db)
