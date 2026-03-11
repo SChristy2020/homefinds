@@ -12,6 +12,7 @@
             <th class="col-name">{{ i18n.t('cart.colName') }}</th>
             <th class="col-pickup">{{ i18n.t('cart.colPickup') }}</th>
             <th class="col-price">{{ i18n.t('cart.colPrice') }}</th>
+            <th class="col-delete"></th>
           </tr>
         </thead>
         <tbody>
@@ -27,6 +28,9 @@
             <td class="col-price">
               <span v-if="item.originalPrice" class="strikethrough">${{ item.originalPrice }}</span>
               ${{ item.price }}
+            </td>
+            <td class="col-delete">
+              <button class="btn-delete" @click="cart.remove(item.id)"><Trash2 :size="15" /></button>
             </td>
           </tr>
         </tbody>
@@ -105,7 +109,7 @@
 
 <script setup>
 import { ref, computed, inject } from 'vue'
-import { ShoppingCart } from 'lucide-vue-next'
+import { ShoppingCart, Trash2 } from 'lucide-vue-next'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import UserInfoForm from '@/components/shared/UserInfoForm.vue'
 import { useCartStore } from '@/stores/cart'
@@ -219,6 +223,14 @@ function handleConfirm() {
 .col-pickup { color: #666; }
 .col-price { white-space: nowrap; font-weight: 600; text-align: right; }
 .cart-table thead th.col-price { text-align: right; }
+.col-delete { width: 32px; text-align: center; }
+.btn-delete {
+  background: none; border: none; cursor: pointer;
+  color: #bbb; padding: 4px; border-radius: 4px;
+  display: inline-flex; align-items: center;
+  transition: color 0.15s;
+}
+.btn-delete:hover { color: #c0392b; }
 
 .cart-thumb {
   width: 40px; height: 40px;
