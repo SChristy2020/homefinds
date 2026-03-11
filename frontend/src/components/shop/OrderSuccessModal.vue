@@ -1,32 +1,206 @@
 <template>
-  <BaseModal :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)">
+  <BaseModal :modelValue="modelValue" size="lg" @update:modelValue="$emit('update:modelValue', $event)">
+    <!-- Title -->
     <div class="success-title">{{ i18n.t('orderSuccess.title') }}</div>
     <div class="success-icon"><Gift :size="48" /></div>
 
-    <div v-if="order" class="success-info">
-      <p><strong>{{ order.firstName }} {{ order.lastName }}</strong></p>
-      <p>{{ i18n.t('orderSuccess.salutation') }}: {{ order.salutation }}</p>
-      <p>Email: {{ order.email }}</p>
-      <p>Phone: {{ order.phone }}</p>
-    </div>
+    <template v-if="order">
+      <!-- Greeting & Pickup Info -->
+      <div class="greeting-block">
+        <p class="greeting-line">
+          <strong>Hi {{ order.salutation }} {{ order.firstName }}, {{ i18n.t('orderSuccess.greeting') }}</strong>
+        </p>
+        <p class="pickup-line">
+          {{ i18n.t('orderSuccess.pickupInfo', { date: formattedPickup }) }}
+          <em>{{ i18n.t('orderSuccess.pickupChangeablePrefix') }}<RouterLink class="orders-link" to="/orders">{{ i18n.t('orderSuccess.pickupChangeableLink') }}</RouterLink>{{ i18n.t('orderSuccess.pickupChangeableSuffix') }}</em>
+        </p>
+        <ul class="contact-list">
+          <li>Email: <strong>{{ order.email }}</strong></li>
+          <li>Phone: <strong>{{ order.phone }}</strong></li>
+        </ul>
+      </div>
 
-    <div class="section-divider"></div>
+      <!-- Payment Notice -->
+      <div class="payment-notice">
+        <p class="payment-title">
+          <span class="warn-icon">⚠️</span> {{ i18n.t('orderSuccess.paymentTitle') }}
+        </p>
+        <ul>
+          <li v-for="(note, i) in i18n.t('orderSuccess.paymentNotes')" :key="i" v-html="note"></li>
+        </ul>
+      </div>
 
-    <ol class="success-notes">
-      <li>{{ i18n.t('orderSuccess.note1') }}</li>
-      <li>{{ i18n.t('orderSuccess.note2') }}</li>
-      <li>{{ i18n.t('orderSuccess.note3') }}</li>
-    </ol>
+      <!-- Zelle Info -->
+      <div class="zelle-block">
+        <p class="zelle-title">💰 {{ i18n.t('orderSuccess.zelleTitle') }}</p>
+        <ul>
+          <li>{{ i18n.t('guide.zelleAccount') }}</li>
+          <li>{{ i18n.t('guide.zelleName') }}</li>
+          <li>{{ i18n.t('orderSuccess.zelleNote') }}</li>
+        </ul>
+      </div>
+
+      <!-- Order Number -->
+      <p class="order-number-label">
+        <strong>{{ i18n.t('orderSuccess.orderNumberLabel') }}</strong>
+        <span class="order-number-value">{{ orderNumber }}</span>
+      </p>
+
+      <!-- Items Table -->
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th class="col-num"></th>
+            <th class="col-thumb">{{ i18n.t('cart.colThumb') }}</th>
+            <th class="col-name">{{ i18n.t('cart.colName') }}</th>
+            <th class="col-pickup">{{ i18n.t('cart.colPickup') }}</th>
+            <th class="col-price">{{ i18n.t('cart.colPrice') }}</th>
+            <th class="col-position">{{ i18n.t('orderSuccess.colPosition') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in order.items" :key="item.id">
+            <td class="col-num">{{ index + 1 }}</td>
+            <td class="col-thumb">
+              <div class="item-thumb">
+                <img v-if="item.images && item.images.length" :src="item.images[0].url" :alt="item.name" />
+              </div>
+            </td>
+            <td class="col-name">{{ getItemName(item) }}</td>
+            <td class="col-pickup">{{ formatPickupDate(item.pickupTime) }}</td>
+            <td class="col-price">
+              <span v-if="item.originalPrice" class="strikethrough">${{ item.originalPrice }}</span>
+              ${{ item.price }}
+            </td>
+            <td class="col-position" :class="{ 'not-first': item.waitingPosition > 1 }">
+              {{ positionLabel(item.waitingPosition) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Total Summary -->
+      <div class="total-summary">
+        <span>{{ i18n.t('cart.itemCountPrefix') }}{{ order.items.length }}{{ i18n.t('cart.itemCountSuffix') }}</span>
+        <span class="total-amount">
+          <span v-if="totalOriginal > totalPrice" class="strikethrough">${{ totalOriginal }}</span>
+          ${{ totalPrice }}
+        </span>
+      </div>
+
+      <!-- Not-first warning -->
+      <p v-if="hasNotFirst" class="not-first-warning">{{ i18n.t('orderSuccess.notFirstWarning') }}</p>
+
+      <div class="section-divider"></div>
+
+      <!-- Guide Section -->
+      <div class="guide-inline">
+        <h3 class="guide-inline-title">{{ i18n.t('guide.sectionTitle') }}</h3>
+
+        <div class="guide-step">
+          <h4>{{ i18n.t('guide.step1Title') }}</h4>
+          <ul>
+            <li v-for="(item, i) in i18n.t('guide.step1Items')" :key="i">{{ item }}</li>
+            <li class="warning">{{ i18n.t('guide.step1Warning') }}</li>
+          </ul>
+        </div>
+
+        <div class="guide-step">
+          <h4>{{ i18n.t('guide.step2Title') }}</h4>
+          <p>{{ i18n.t('guide.step2Intro') }}</p>
+          <ol>
+            <li v-for="(item, i) in i18n.t('guide.step2Items').slice(0, 2)" :key="i">{{ item }}</li>
+            <li>
+              {{ i18n.t('guide.step2PayLabel') }}
+              <div class="zelle-info">
+                <span>a. {{ i18n.t('guide.zelleAccount') }}</span>
+                <span>b. {{ i18n.t('guide.zelleName') }}</span>
+                <span>c. {{ i18n.t('guide.zelleNoteLabel') }}</span>
+              </div>
+            </li>
+            <li v-for="(item, i) in i18n.t('guide.step2Items').slice(2)" :key="'b'+i">{{ item }}</li>
+          </ol>
+        </div>
+
+        <div class="guide-step">
+          <h4>{{ i18n.t('guide.step3Title') }}</h4>
+          <ul>
+            <li v-for="(item, i) in i18n.t('guide.step3Items')" :key="i">{{ item }}</li>
+          </ul>
+        </div>
+
+        <p class="guide-contact">
+          {{ i18n.t('guide.contact') }}
+          <a href="mailto:qsa8647332@gmail.com">qsa8647332@gmail.com</a>
+        </p>
+      </div>
+    </template>
   </BaseModal>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import { Gift } from 'lucide-vue-next'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import { useI18nStore } from '@/stores/i18n'
-defineProps({ modelValue: Boolean, order: Object })
+
+const props = defineProps({ modelValue: Boolean, order: Object })
 defineEmits(['update:modelValue'])
 const i18n = useI18nStore()
+
+function positionLabel(pos) {
+  if (!pos) return ''
+  const labels = i18n.t('orderSuccess.positionLabels')
+  if (pos <= labels.length) return labels[pos - 1]
+  return i18n.t('orderSuccess.positionFallback').replace('{n}', pos)
+}
+
+function getItemName(item) {
+  const trans = item.translations
+  if (trans) {
+    const t = trans.find(t => t.locale === i18n.locale) || trans.find(t => t.locale === 'en')
+    if (t?.name) return t.name
+  }
+  return item.name || item.code
+}
+
+function formatPickupDate(pickupTime) {
+  if (!pickupTime) return i18n.t('cart.anytime')
+  const d = new Date(pickupTime)
+  return d.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' })
+}
+
+const formattedPickup = computed(() => {
+  if (!props.order?.estimatedPickup) return ''
+  const ep = props.order.estimatedPickup
+  const parts = ep.match(/(\d+)\/(\d+)\/(\d+)/)
+  if (!parts) return ep
+  const m = String(parts[1]).padStart(2, '0')
+  const d = String(parts[2]).padStart(2, '0')
+  const y = parts[3]
+  return `${y}/${m}/${d}`
+})
+
+const totalPrice = computed(() =>
+  props.order?.items.reduce((s, i) => s + i.price, 0) ?? 0
+)
+
+const totalOriginal = computed(() =>
+  props.order?.items.reduce((s, i) => s + (i.originalPrice ?? i.price), 0) ?? 0
+)
+
+const hasNotFirst = computed(() =>
+  props.order?.items.some(i => i.waitingPosition > 1) ?? false
+)
+
+const ㄏ = computed(() => {
+  if (!props.order) return ''
+  const shortId = String(props.order.id).slice(-6)
+  const total = totalPrice.value
+  const count = String(props.order.items.length).padStart(2, '0')
+  return `${shortId}${total}${count}`
+})
 </script>
 
 <style scoped>
@@ -35,10 +209,143 @@ const i18n = useI18nStore()
   font-size: 1.4rem; font-weight: 700;
   text-align: center; margin-bottom: 10px;
 }
-.success-icon { display: flex; justify-content: center; color: var(--accent); margin-bottom: 20px; }
-.success-info { font-size: 0.83rem; color: var(--mid); margin-bottom: 4px; }
-.success-info p { margin-bottom: 3px; }
-.success-notes { font-size: 0.8rem; color: var(--mid); padding-left: 16px; }
-.success-notes li { margin-bottom: 8px; }
-.success-notes li::marker { color: var(--accent); }
+.success-icon { display: flex; justify-content: center; color: var(--accent); margin-bottom: 16px; }
+
+/* Greeting */
+.greeting-block { margin-bottom: 12px; font-size: 0.88rem; }
+.greeting-line { margin-bottom: 4px; }
+.pickup-line { color: var(--mid); margin-bottom: 6px; }
+.pickup-line em { font-style: italic; }
+.orders-link { color: var(--accent); text-decoration: underline; font-style: normal; }
+.orders-link:hover { opacity: 0.8; }
+.contact-list { list-style: disc; padding-left: 20px; margin: 0; }
+.contact-list li { margin-bottom: 2px; }
+
+/* Payment Notice */
+.payment-notice {
+  background: #fffbf0;
+  border: 1.5px solid #f0d080;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.83rem;
+}
+.payment-title {
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+.warn-icon { margin-right: 4px; }
+.payment-notice ul { margin: 0; padding-left: 18px; }
+.payment-notice li { margin-bottom: 4px; line-height: 1.5; }
+
+/* Zelle Block */
+.zelle-block {
+  margin-bottom: 10px;
+  font-size: 0.83rem;
+}
+.zelle-title { font-weight: 700; margin-bottom: 6px; }
+.zelle-block ul { list-style: disc; padding-left: 20px; margin: 0; }
+.zelle-block li { margin-bottom: 3px; }
+
+/* Order Number */
+.order-number-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.order-number-value {
+  font-family: monospace;
+  background: #f4f4f4;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-left: 6px;
+  letter-spacing: 0.05em;
+}
+
+/* Items Table */
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+.items-table thead th {
+  text-align: left;
+  padding: 6px 6px;
+  border-bottom: 1.5px solid var(--border);
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 500;
+}
+.items-table tbody tr { border-bottom: 1px solid var(--border); }
+.items-table tbody tr:last-child { border-bottom: none; }
+.items-table tbody td { padding: 7px 6px; vertical-align: middle; }
+.col-num { width: 22px; color: #999; font-size: 0.78rem; text-align: center; }
+.col-thumb { width: 50px; }
+.col-pickup { color: #666; }
+.col-price { white-space: nowrap; font-weight: 600; text-align: right; }
+.items-table thead th.col-price { text-align: right; }
+.items-table thead th.col-position { text-align: center; }
+.col-position { white-space: nowrap; font-weight: 600; text-align: center; font-size: 0.8rem; color: #2e7d32; vertical-align: middle; }
+.col-position.not-first { color: #c0392b; }
+
+.item-thumb {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, #2a2a2a 0%, #4a4040 100%);
+  border-radius: 4px; overflow: hidden;
+}
+.item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Total */
+.total-summary {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0 4px;
+  font-size: 1rem; font-weight: 600;
+}
+.total-amount { font-size: 1.05rem; }
+
+/* Not first warning */
+.not-first-warning {
+  color: #c0392b;
+  font-size: 0.83rem;
+  font-weight: 600;
+  margin: 6px 0 0;
+}
+
+/* Guide Section */
+.guide-inline { font-size: 0.83rem; margin-top: 4px; }
+.guide-inline-title {
+  font-size: 0.92rem; font-weight: 700;
+  color: var(--charcoal); margin: 0 0 12px;
+}
+.guide-step { margin-bottom: 12px; }
+.guide-step h4 {
+  font-size: 0.88rem; font-weight: 700;
+  color: var(--accent, #c9a96e); margin: 0 0 6px;
+}
+.guide-step p { font-size: 0.82rem; color: #555; margin: 0 0 4px; }
+.guide-step ul, .guide-step ol {
+  margin: 0; padding-left: 18px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.guide-step li { font-size: 0.82rem; color: #444; line-height: 1.5; }
+.guide-step li.warning {
+  color: #c0392b; font-weight: 600;
+  list-style: none; margin-left: -18px;
+}
+.zelle-info {
+  display: flex; flex-direction: column; gap: 2px;
+  margin-top: 4px; padding: 6px 10px;
+  border-radius: 6px; font-weight: 600; color: var(--charcoal);
+}
+.guide-contact {
+  font-size: 0.82rem; color: #555;
+  margin: 8px 0 0; padding-top: 10px;
+  border-top: 1px solid #dde5ef;
+}
+.guide-contact a { color: var(--accent, #c9a96e); text-decoration: none; }
+.guide-contact a:hover { text-decoration: underline; }
+
+.strikethrough { text-decoration: line-through; color: #aaa; margin-right: 4px; font-weight: 400; }
 </style>

@@ -16,14 +16,15 @@ export const useOrdersStore = defineStore('orders', () => {
     }
     orders.value.push(order)
 
-    // Register each item in waiting list
-    cartItems.forEach(item => {
+    // Register each item in waiting list and record position
+    order.items.forEach(item => {
       if (!waitingLists.value[item.id]) waitingLists.value[item.id] = []
       waitingLists.value[item.id].push({
         lastName: orderData.lastName,
         phone: orderData.phone,
         email: orderData.email,
       })
+      item.waitingPosition = waitingLists.value[item.id].length
     })
     return order
   }
