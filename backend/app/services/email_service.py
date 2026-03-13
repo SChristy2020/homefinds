@@ -182,7 +182,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
     # ── Pickup info line ──────────────────────────────────────────────────────
     pickup_line = (
         f'<p style="color:#666;font-size:13px;margin:4px 0 8px;">期待於 {pickup_display} 與您見面領取物品。'
-        f'<em>（領取時間可至 HomeFinds 網站「我的訂單」進行變更）</em></p>'
+        f'<em>（領取時間可至「<a href="https://schristy2020.github.io/homefinds/#/orders" style="color:#c9a96e;text-decoration:underline;">我的訂單</a>」進行變更）</em></p>'
         if pickup_display
         else ""
     )
@@ -205,7 +205,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
           <tr>
             <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
               <div style="font-size:36px;margin-bottom:8px;">🎁</div>
-              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">預訂成功!</h1>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;"><a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a> 預訂成功!</h1>
             </td>
           </tr>
 
