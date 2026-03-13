@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
-from app.database import get_db
+import threading
+from app.database import get_db, SessionLocal
 from app.models.order import Order, OrderItem
 from app.models.user import User
 from app.models.waiting_list import WaitingList
@@ -81,7 +82,14 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(order)
     order_out = _build_out(order, db)
-    send_order_confirmation(user, order_out, db, locale=body.locale)
+    def _send_email():
+        new_db = SessionLocal()
+        try:
+            send_order_confirmation(user, order_out, new_db, locale=body.locale)
+        finally:
+            new_db.close()
+
+    threading.Thread(target=_send_email, daemon=True).start()
     return order_out
 
 @router.get("/user/{user_id}", response_model=list[OrderOut])
