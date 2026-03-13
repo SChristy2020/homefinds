@@ -153,7 +153,7 @@ function positionLabel(pos) {
   if (!pos) return ''
   const labels = i18n.t('orderSuccess.positionLabels')
   if (pos <= labels.length) return labels[pos - 1]
-  return i18n.t('orderSuccess.positionFallback').replace('{n}', pos)
+  return i18n.t('orderSuccess.positionFallback', { n: pos })
 }
 
 function getItemName(item) {

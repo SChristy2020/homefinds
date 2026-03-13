@@ -7,17 +7,9 @@ from app.models.product import Product, ProductTranslation, ProductImage
 
 OWNER_EMAIL = "qsa8647332@gmail.com"
 
-POSITION_LABELS = [
-    "第一順位", "第二順位", "第三順位", "第四順位", "第五順位",
-    "第六順位", "第七順位", "第八順位", "第九順位", "第十順位",
-]
-
-
 def _position_label(pos):
     if not pos:
         return ""
-    if pos <= len(POSITION_LABELS):
-        return POSITION_LABELS[pos - 1]
     return f"第{pos}順位"
 
 
