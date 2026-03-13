@@ -322,9 +322,7 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
     msg.set_content(html, subtype="html", charset="utf-8")
 
     try:
-        with smtplib.SMTP(smtp_host, smtp_port) as server:
-            server.ehlo()
-            server.starttls()
+        with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=30) as server:
             server.login(smtp_user, smtp_pass)
             server.send_message(msg)
         print(f"Order confirmation email sent to {recipients}")
