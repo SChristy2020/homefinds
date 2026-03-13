@@ -7,6 +7,7 @@ from app.models.user import User
 from app.models.waiting_list import WaitingList
 from app.schemas.order import OrderCreate, OrderOut, OrderItemOut
 from app.routers.waiting_list import _refresh_summary
+from app.services.email_service import send_order_confirmation
 
 router = APIRouter()
 
@@ -57,7 +58,9 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     user.has_reservation = 1
     db.commit()
     db.refresh(order)
-    return _build_out(order, db)
+    order_out = _build_out(order, db)
+    send_order_confirmation(user, order_out, db)
+    return order_out
 
 @router.get("/user/{user_id}", response_model=list[OrderOut])
 def get_orders_by_user(user_id: int, db: Session = Depends(get_db)):
