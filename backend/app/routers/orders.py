@@ -82,10 +82,13 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(order)
     order_out = _build_out(order, db)
+    _user_id = user.id
+    _locale = body.locale
     def _send_email():
         new_db = SessionLocal()
         try:
-            send_order_confirmation(user, order_out, new_db, locale=body.locale)
+            new_user = new_db.query(User).filter(User.id == _user_id).first()
+            send_order_confirmation(new_user, order_out, new_db, locale=_locale)
         finally:
             new_db.close()
 
