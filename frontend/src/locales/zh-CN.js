@@ -47,7 +47,7 @@ export default {
     zelleByEmail: '透过我的 Email',
     zelleOther: '其他',
     zelleOtherPlaceholder: '输入汇款信息',
-    estimatedPickup: '预计取货时间(后续可修改)',
+    estimatedPickup: '预计取货时间 *后续可修改',
     estimatedPickupPlaceholder: '请输入取货时间',
     pickupWarningPrefix: '*订单中，有物品的最早取货时间为：',
   },
