@@ -310,7 +310,8 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
     )
 
     subject = tr["subject"].replace("{order_number}", order_number)
-    recipients = list({user.email, OWNER_EMAIL})  # deduplicate
+    resend_domain_verified = os.getenv("RESEND_DOMAIN_VERIFIED", "false").lower() == "true"
+    recipients = list({user.email, OWNER_EMAIL}) if resend_domain_verified else [OWNER_EMAIL]
 
     try:
         resend.api_key = resend_api_key
