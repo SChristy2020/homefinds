@@ -162,6 +162,10 @@ export default {
       'Schedule: Please arrive on time according to your "Estimated Pickup Time."',
       'Edit Info: You can modify your pickup time later in the "My Orders" section.',
     ],
+    step3LocationLabel: 'Pickup Location:',
+    step3LocationName: 'Crowne at 501',
+    step3LocationAddress: '2031 Honeycutt Dr Suite 1100, Durham, NC 27707',
+
     contact: '💡Questions? Contact Christy:',
   },
 }

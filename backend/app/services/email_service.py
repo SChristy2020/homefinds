@@ -57,6 +57,9 @@ EMAIL_TRANSLATIONS = {
             "取貨時間：請依「預計取貨時間」準時到現場。",
             "修改資料：後續若需更改取貨時間，可至「我的訂單」進行編輯。",
         ],
+        "step3_location_label": "取貨地點：",
+        "step3_location_name": "Crowne at 501",
+        "step3_location_address": "2031 Honeycutt Dr Suite 1100, Durham, NC 27707",
         "footer": "💡 有任何問題？歡迎聯絡 Christy:",
         "anytime": "隨時",
         "salutation_map": {"Mr": "先生", "Ms": "小姐", "Mrs": "小姐"},
@@ -115,6 +118,9 @@ EMAIL_TRANSLATIONS = {
             "取货时间：请依「预计取货时间」准时到现场。",
             "修改资料：后续若需更改取货时间，可至「我的订单」进行编辑。",
         ],
+        "step3_location_label": "取货地点：",
+        "step3_location_name": "Crowne at 501",
+        "step3_location_address": "2031 Honeycutt Dr Suite 1100, Durham, NC 27707",
         "footer": "💡 有任何问题？欢迎联络 Christy:",
         "anytime": "随时",
         "salutation_map": {"Mr": "先生", "Ms": "小姐", "Mrs": "小姐"},
@@ -173,6 +179,9 @@ EMAIL_TRANSLATIONS = {
             "Schedule: Please arrive on time according to your \"Estimated Pickup Time.\"",
             "Edit Info: You can modify your pickup time later in the \"My Orders\" section.",
         ],
+        "step3_location_label": "Pickup Location:",
+        "step3_location_name": "Crowne at 501",
+        "step3_location_address": "2031 Honeycutt Dr Suite 1100, Durham, NC 27707",
         "footer": "💡 Questions? Contact Christy:",
         "anytime": "Anytime",
         "salutation_map": {"Mr": "Mr.", "Ms": "Ms.", "Mrs": "Mrs."},
@@ -424,6 +433,19 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
         f'<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">{item}</li>'
         for item in tr["step3_items"]
     )
+    step3_items_html += f"""<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">
+                    <span style="display:block;">{tr["step3_location_label"]}</span>
+                    <a href="https://maps.app.goo.gl/HiHjmGr1PLTvgbex9" target="_blank"
+                       style="display:inline-block;margin-top:4px;padding:6px 10px;background:#f9f7f4;border-radius:6px;text-decoration:none;">
+                      <span style="font-weight:600;color:#c9a96e;display:block;">{tr["step3_location_name"]}</span>
+                      <span style="font-size:11px;color:#666;">{tr["step3_location_address"]}</span>
+                    </a>
+                    <br/>
+                    <img src="https://schristy2020.github.io/homefinds/images/pickup-location.jpg"
+                         alt="Pickup Location"
+                         width="300"
+                         style="margin-top:8px;border-radius:8px;display:block;max-width:100%;" />
+                  </li>"""
 
     total_label = tr["total"].replace("{count}", str(len(items_data)))
 

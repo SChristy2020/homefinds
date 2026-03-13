@@ -30,7 +30,22 @@
       <h4>{{ i18n.t('guide.step3Title') }}</h4>
       <ul>
         <li v-for="(item, i) in i18n.t('guide.step3Items')" :key="i">{{ item }}</li>
+        <li>
+          {{ i18n.t('guide.step3LocationLabel') }}
+          <a class="location-info" href="https://maps.app.goo.gl/HiHjmGr1PLTvgbex9" target="_blank" rel="noopener">
+            <span class="location-name">{{ i18n.t('guide.step3LocationName') }}</span>
+            <span class="location-address">{{ i18n.t('guide.step3LocationAddress') }}</span>
+          </a>
+        </li>
       </ul>
+      <img src="/images/pickup-location.jpg" alt="Pickup Location" class="pickup-map-img" />
+      <iframe
+        class="pickup-map-iframe"
+        src="https://maps.google.com/maps?q=2031+Honeycutt+Dr+Suite+1100,+Durham,+NC+27707&output=embed"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
     </div>
 
     <p class="guide-contact">
@@ -79,4 +94,23 @@ const i18n = useI18nStore()
 }
 .guide-contact a { color: var(--accent, #c9a96e); text-decoration: none; }
 .guide-contact a:hover { text-decoration: underline; }
+.location-info {
+  display: flex; flex-direction: column; gap: 2px;
+  margin-top: 4px; padding: 6px 10px;
+  background: #f9f7f4; border-radius: 6px;
+}
+.location-info { color: inherit; text-decoration: none; }
+.location-info:hover .location-name { text-decoration: underline; }
+.location-name { font-weight: 600; color: var(--accent, #c9a96e); }
+.location-address { font-size: 0.78rem; color: #666; }
+.pickup-map-img {
+  width: 100%; max-width: 360px;
+  margin: 8px auto 0; border-radius: 8px;
+  display: block;
+}
+.pickup-map-iframe {
+  width: 100%; height: 200px;
+  margin-top: 8px; border-radius: 8px;
+  border: none; display: block;
+}
 </style>

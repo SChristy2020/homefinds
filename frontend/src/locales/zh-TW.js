@@ -222,6 +222,10 @@ export default {
       '取貨時間：請依「預計取貨時間」準時到現場。',
       '修改資料：後續若需更改取貨時間，可至「我的訂單」進行編輯。',
     ],
+    step3LocationLabel: '取貨地點：',
+    step3LocationName: 'Crowne at 501',
+    step3LocationAddress: '2031 Honeycutt Dr Suite 1100, Durham, NC 27707',
+
     contact: '💡 有任何問題？歡迎聯絡 Christy:',
   },
 }
