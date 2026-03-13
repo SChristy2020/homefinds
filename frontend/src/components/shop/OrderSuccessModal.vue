@@ -1,5 +1,5 @@
 <template>
-  <BaseModal :modelValue="modelValue" size="lg" @update:modelValue="$emit('update:modelValue', $event)">
+  <BaseModal :modelValue="modelValue" size="lg" noBackdropClose @update:modelValue="$emit('update:modelValue', $event)">
     <!-- Title -->
     <div class="success-title">{{ i18n.t('orderSuccess.title') }}</div>
     <div class="success-icon"><Gift :size="48" /></div>
