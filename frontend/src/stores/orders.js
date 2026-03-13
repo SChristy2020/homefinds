@@ -40,12 +40,22 @@ export const useOrdersStore = defineStore('orders', () => {
 
     // 3. 建立訂單
     const i18n = useI18nStore()
-    const order = await api.post('/api/orders', {
-      user_id: user.id,
-      pickup_time: pickupTime,
-      items: cartItems.map(i => ({ product_id: i.id, price: i.price })),
-      locale: i18n.locale,
-    })
+    let order
+    try {
+      order = await api.post('/api/orders', {
+        user_id: user.id,
+        pickup_time: pickupTime,
+        items: cartItems.map(i => ({ product_id: i.id, price: i.price })),
+        locale: i18n.locale,
+      })
+    } catch (err) {
+      if (err.status === 409 && err.detail?.duplicate_product_ids) {
+        const dupError = new Error('duplicate')
+        dupError.duplicateProductIds = err.detail.duplicate_product_ids
+        throw dupError
+      }
+      throw err
+    }
     orders.value.push(order)
     return order
   }

@@ -38,6 +38,28 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # Check for duplicate reservations (same user already has active order for these products)
+    duplicate_product_ids = []
+    for item in body.items:
+        existing = (
+            db.query(OrderItem)
+            .join(Order, OrderItem.order_id == Order.id)
+            .filter(
+                Order.user_id == user.id,
+                OrderItem.product_id == item.product_id,
+                OrderItem.status != "cancelled",
+            )
+            .first()
+        )
+        if existing:
+            duplicate_product_ids.append(item.product_id)
+
+    if duplicate_product_ids:
+        raise HTTPException(
+            status_code=409,
+            detail={"duplicate_product_ids": duplicate_product_ids},
+        )
+
     order = Order(user_id=body.user_id, pickup_time=body.pickup_time)
     db.add(order)
     db.flush()

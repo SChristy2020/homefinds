@@ -65,6 +65,8 @@ export default {
     itemCountPrefix: '',
     itemCountSuffix: ' item(s), Total:',
     anytime: 'Anytime',
+    alreadyReservedItem: '*You have already reserved this item',
+    alreadyReservedBtn: '*You have already reserved an item. Please remove it to continue.',
   },
   orderSuccess: {
     title: 'Booking Confirmed!',

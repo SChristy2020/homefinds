@@ -65,6 +65,8 @@ export default {
     itemCountPrefix: '共',
     itemCountSuffix: ' 樣物品，總計：',
     anytime: '隨時',
+    alreadyReservedItem: '*你已預訂過該商品',
+    alreadyReservedBtn: '*您已預訂過某商品，請移除後繼續',
   },
   orderSuccess: {
     title: '預訂成功!',

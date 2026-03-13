@@ -23,7 +23,10 @@
                 <img v-if="item.images && item.images.length" :src="item.images[0].url" :alt="item.name" />
               </div>
             </td>
-            <td class="col-name">{{ getItemName(item) }}</td>
+            <td class="col-name">
+              {{ getItemName(item) }}
+              <div v-if="duplicateProductIds.includes(item.id)" class="duplicate-item-error">{{ i18n.t('cart.alreadyReservedItem') }}</div>
+            </td>
             <td class="col-pickup">{{ formatPickupDate(item.pickupTime) }}</td>
             <td class="col-price">
               <span v-if="item.originalPrice" class="strikethrough">${{ item.originalPrice }}</span>
@@ -60,6 +63,7 @@
     <!-- Reserve Button -->
     <div class="action-row">
       <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('cart.reserve') }}</button>
+      <div v-if="duplicateProductIds.length" class="duplicate-btn-error">{{ i18n.t('cart.alreadyReservedBtn') }}</div>
     </div>
 
     <div class="section-divider"></div>
@@ -70,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue'
+import { ref, computed, inject, watch } from 'vue'
 import { ShoppingCart, Trash2 } from 'lucide-vue-next'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import UserInfoForm from '@/components/shared/UserInfoForm.vue'
@@ -88,6 +92,12 @@ const onOrderSuccess = inject('onOrderSuccess')
 const i18n = useI18nStore()
 
 const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', estimatedPickup: '', zelleRefund: 'phone', zelleRefundOther: '' })
+const duplicateProductIds = ref([])
+
+// 當 user 身份欄位變動時清除重複錯誤
+watch(() => [form.value.lastName, form.value.email, form.value.phone], () => {
+  duplicateProductIds.value = []
+})
 
 const totalOriginal = computed(() =>
   cart.items.reduce((s, i) => s + (i.originalPrice ?? i.price), 0)
@@ -143,9 +153,19 @@ function getItemName(item) {
 
 async function handleConfirm() {
   if (!isValid.value) return
+  duplicateProductIds.value = []
   const cartSnapshot = [...cart.items]
   const formSnapshot = { ...form.value }
-  const order = await ordersStore.createOrder(formSnapshot, cart.items)
+  let order
+  try {
+    order = await ordersStore.createOrder(formSnapshot, cart.items)
+  } catch (err) {
+    if (err.message === 'duplicate' && err.duplicateProductIds) {
+      duplicateProductIds.value = err.duplicateProductIds
+      return
+    }
+    throw err
+  }
 
   // 補上用戶資訊和商品細節（後端回傳的 order 不含這些）
   const enriched = {
@@ -244,9 +264,22 @@ async function handleConfirm() {
 /* Reserve Button */
 .action-row {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: flex-end;
   margin-top: 16px;
   margin-bottom: 20px;
+}
+
+.duplicate-item-error {
+  font-size: 0.78rem;
+  color: #c0392b;
+  margin-top: 3px;
+}
+
+.duplicate-btn-error {
+  font-size: 0.82rem;
+  color: #c0392b;
+  margin-top: 6px;
 }
 
 </style>
