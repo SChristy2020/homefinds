@@ -28,6 +28,7 @@ class OrderCreate(BaseModel):
     user_id:     int
     pickup_time: Optional[datetime] = None
     items:       list[OrderItemCreate]
+    locale:      str = "zh-TW"
 
 class OrderOut(BaseModel):
     id:          int

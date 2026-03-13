@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api } from '@/utils/api'
+import { useI18nStore } from '@/stores/i18n'
 
 export const useOrdersStore = defineStore('orders', () => {
   const orders = ref([])
@@ -38,10 +39,12 @@ export const useOrdersStore = defineStore('orders', () => {
     }
 
     // 3. 建立訂單
+    const i18n = useI18nStore()
     const order = await api.post('/api/orders', {
       user_id: user.id,
       pickup_time: pickupTime,
       items: cartItems.map(i => ({ product_id: i.id, price: i.price })),
+      locale: i18n.locale,
     })
     orders.value.push(order)
     return order

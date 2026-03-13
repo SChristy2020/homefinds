@@ -1,16 +1,204 @@
 import os
 import smtplib
 from email.message import EmailMessage
-# from email.policy import SMTPUTF8
 
 from app.models.product import Product, ProductTranslation, ProductImage
 
 OWNER_EMAIL = "qsa8647332@gmail.com"
 
-def _position_label(pos):
+# ── Email translations ────────────────────────────────────────────────────────
+EMAIL_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "預訂成功！訂單編號 {order_number} - HomeFinds",
+        "header": "Christy's HomeFinds 預訂成功!",
+        "greeting": "Hi {last_name} {salutation}, 感謝您的預訂！",
+        "pickup_info": "期待於 {date} 與您見面領取物品。",
+        "pickup_editable": "（領取時間可至「{link}」進行變更）",
+        "my_orders_link_text": "我的訂單",
+        "payment_title": "⚠️ 付款重要須知：本場採用「先付款先得」制！",
+        "payment_notes": [
+            "即時認購：不論目前排序，<strong>先完成匯款者直接獲得該物品</strong>。",
+            "成交確認：Christy 確認款項後會發通知，商品也<strong>將立即轉為「已售出」</strong>！",
+            "退款保證：若確認後發現商品已由他人搶先買走，Christy 將主動聯繫並透過 Zelle 退款。",
+        ],
+        "zelle_title": "💰 Zelle 匯款資訊：",
+        "zelle_account": "帳號: (984)373-9392",
+        "zelle_name": "戶名: SHU CHING LI",
+        "zelle_note": "備註: 請務必註明您的「訂單編號」",
+        "order_number_label": "訂單編號：",
+        "col_thumb": "縮圖",
+        "col_name": "物品名稱",
+        "col_pickup": "可取貨時間",
+        "col_price": "價錢",
+        "col_position": "目前順位",
+        "total": "共 {count} 樣物品，總計：",
+        "guide_title": "🛍️ 購物與取貨流程說明",
+        "step1_title": "Step 1. 預定（保留順位）",
+        "step1_items": [
+            "預定成功：完成後系統會將您排入「預定排序名單」，名單皆以匿名呈現。",
+            "狀態確認：可至商品頁面或「我的訂單」查看預定紀錄，系統也會自動寄信給您。",
+        ],
+        "step1_warning": "⚠️ 重要提醒：「預定成功」不代表「購買成功」！",
+        "step2_title": "Step 2. 付款（確認獲得）",
+        "step2_intro": "為了確保交易效率，採取以下原則：",
+        "step2_items": [
+            "優先獲得權：物品由「先行完成付款者」獲得。",
+            "遞補規則：若無人先行付款，則由「預定排序名單」之第一順位獲得。",
+            "確認交易：Christy 確認收到款項後會寄信通知，並將商品改為「已售出」。",
+            "例外：第一順位者亦可選擇於「取貨時付款」。",
+        ],
+        "step2_pay_label": "付款方式：請依訂單總金額透過 Zelle 匯款：",
+        "step2_zelle_a": "a. 帳號: (984)373-9392",
+        "step2_zelle_b": "b. 戶名: SHU CHING LI",
+        "step2_zelle_c": "c. 備註: 訂單編號",
+        "step3_title": "Step 3. 取貨",
+        "step3_items": [
+            "取貨時間：請依「預計取貨時間」準時到現場。",
+            "修改資料：後續若需更改取貨時間，可至「我的訂單」進行編輯。",
+        ],
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+        "anytime": "隨時",
+        "salutation_map": {"Mr": "先生", "Ms": "小姐", "Mrs": "小姐"},
+        "position_labels": [
+            "第一順位", "第二順位", "第三順位", "第四順位", "第五順位",
+            "第六順位", "第七順位", "第八順位", "第九順位", "第十順位",
+        ],
+        "position_fallback": "第{n}順位",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "预定成功！订单编号 {order_number} - HomeFinds",
+        "header": "Christy's HomeFinds 预定成功!",
+        "greeting": "Hi {last_name} {salutation}, 感谢您的预定！",
+        "pickup_info": "期待于 {date} 与您见面领取物品。",
+        "pickup_editable": "（领取时间可至\"{link}\"进行变更）",
+        "my_orders_link_text": "我的订单",
+        "payment_title": "⚠️ 付款重要须知：本场采用\"先付款先得\"制！",
+        "payment_notes": [
+            "即时认购：不论目前排序，<strong>先完成汇款者直接获得该物品</strong>。",
+            "成交确认：Christy 确认款项后会发通知，商品也<strong>将立即转为\"已售出\"</strong>！",
+            "退款保证：若确认后发现商品已由他人抢先买走，Christy 将主动联系并通过 Zelle 退款。",
+        ],
+        "zelle_title": "💰 Zelle 汇款信息：",
+        "zelle_account": "帐号: (984)373-9392",
+        "zelle_name": "户名: SHU CHING LI",
+        "zelle_note": "备注: 请务必注明您的\"订单编号\"",
+        "order_number_label": "订单编号：",
+        "col_thumb": "缩图",
+        "col_name": "物品名称",
+        "col_pickup": "可取货时间",
+        "col_price": "价格",
+        "col_position": "目前顺位",
+        "total": "共 {count} 件商品，合计：",
+        "guide_title": "🛍️ 购物与取货流程说明",
+        "step1_title": "Step 1. 预定（保留顺位）",
+        "step1_items": [
+            "预定成功：完成后系统会将您排入「预定排序名单」，名单皆以匿名呈现。",
+            "状态确认：可至商品页面或「我的订单」查看预定记录，系统也会自动寄信给您。",
+        ],
+        "step1_warning": "⚠️ 重要提醒：「预定成功」不代表「购买成功」！",
+        "step2_title": "Step 2. 付款（确认获得）",
+        "step2_intro": "为了确保交易效率，采取以下原则：",
+        "step2_items": [
+            "优先获得权：物品由「先行完成付款者」获得。",
+            "递补规则：若无人先行付款，则由「预定排序名单」之第一顺位获得。",
+            "确认交易：Christy 确认收到款项后会寄信通知，并将商品改为「已售出」。",
+            "例外：第一顺位者亦可选择于「取货时付款」。",
+        ],
+        "step2_pay_label": "付款方式：请依订单总金额透过 Zelle 汇款：",
+        "step2_zelle_a": "a. 帐号: (984)373-9392",
+        "step2_zelle_b": "b. 户名: SHU CHING LI",
+        "step2_zelle_c": "c. 备注: 订单编号",
+        "step3_title": "Step 3. 取货",
+        "step3_items": [
+            "取货时间：请依「预计取货时间」准时到现场。",
+            "修改资料：后续若需更改取货时间，可至「我的订单」进行编辑。",
+        ],
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+        "anytime": "随时",
+        "salutation_map": {"Mr": "先生", "Ms": "小姐", "Mrs": "小姐"},
+        "position_labels": [
+            "第一顺位", "第二顺位", "第三顺位", "第四顺位", "第五顺位",
+            "第六顺位", "第七顺位", "第八顺位", "第九顺位", "第十顺位",
+        ],
+        "position_fallback": "第{n}顺位",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "Booking Confirmed! Order #{order_number} - HomeFinds",
+        "header": "Christy's HomeFinds Booking Confirmed!",
+        "greeting": "Hi {salutation} {last_name}, Thank you for your order!",
+        "pickup_info": "We look forward to seeing you on {date} for pickup.",
+        "pickup_editable": "(Pickup time can be updated in \"{link}\")",
+        "my_orders_link_text": "My Orders",
+        "payment_title": "⚠️ Payment Notice: We operate on a \"First-Come, First-Served\" basis!",
+        "payment_notes": [
+            "Instant Buy: Regardless of your current queue position, the first person to complete the payment gets the item.",
+            "Confirmation: Once Christy confirms the payment, the item will be marked as <strong>\"Sold Out\"</strong> immediately!",
+            "Money-Back Guarantee: If the item is purchased by someone else before your payment is confirmed, Christy will contact you for a full refund via Zelle.",
+        ],
+        "zelle_title": "💰 Zelle Payment Details:",
+        "zelle_account": "Account: (984)373-9392",
+        "zelle_name": "Name: SHU CHING LI",
+        "zelle_note": "Note: Please include your \"Order ID\" in the memo.",
+        "order_number_label": "Order ID:",
+        "col_thumb": "Photo",
+        "col_name": "Item",
+        "col_pickup": "Pickup Time",
+        "col_price": "Price",
+        "col_position": "Current Rank",
+        "total": "{count} item(s), Total:",
+        "guide_title": "🛍️ Shopping & Pickup Guide",
+        "step1_title": "Step 1. Pre-order (Reserve Your Spot)",
+        "step1_items": [
+            "Confirmation: Once reserved, you will be added to the \"Pre-order Waitlist\" (displayed anonymously).",
+            "Check Status: View your records on the product page or under \"My Orders.\" An automated email will also be sent to you.",
+        ],
+        "step1_warning": "⚠️ IMPORTANT: A \"Pre-order\" does NOT guarantee the item is yours!",
+        "step2_title": "Step 2. Payment (Secure Your Item)",
+        "step2_intro": "To ensure a smooth process, we follow these rules:",
+        "step2_items": [
+            "First-Pay, First-Serve: The item goes to the person who completes the payment first.",
+            "Waitlist Priority: If no one completes an early payment, the first person on the waitlist will get the item.",
+            "Verification: Once Christy confirms the payment, you will receive an email and the item will be marked as \"Sold.\"",
+            "Note for #1 Spot: If you are the first person on the waitlist, you may choose to \"Pay upon Pickup.\"",
+        ],
+        "step2_pay_label": "Payment Method: Please transfer the total amount via Zelle:",
+        "step2_zelle_a": "a. Account: (984)373-9392",
+        "step2_zelle_b": "b. Name: SHU CHING LI",
+        "step2_zelle_c": "c. Memo: Order ID",
+        "step3_title": "Step 3. Pickup",
+        "step3_items": [
+            "Schedule: Please arrive on time according to your \"Estimated Pickup Time.\"",
+            "Edit Info: You can modify your pickup time later in the \"My Orders\" section.",
+        ],
+        "footer": "💡 Questions? Contact Christy:",
+        "anytime": "Anytime",
+        "salutation_map": {"Mr": "Mr.", "Ms": "Ms.", "Mrs": "Mrs."},
+        "position_labels": [
+            "1st Place", "2nd Place", "3rd Place", "4th Place", "5th Place",
+            "6th Place", "7th Place", "8th Place", "9th Place", "10th Place",
+        ],
+        "position_fallback": "{n}th Place",
+    },
+}
+
+# Map frontend locale codes to DB ProductTranslation locale codes
+_LOCALE_TO_DB = {
+    "zh-TW": "zh-TW",
+    "zh-CN": "zh-CN",
+    "en": "en",
+}
+
+
+def _position_label(pos, tr):
     if not pos:
         return ""
-    return f"第{pos}順位"
+    labels = tr["position_labels"]
+    if 1 <= pos <= len(labels):
+        return labels[pos - 1]
+    return tr["position_fallback"].replace("{n}", str(pos))
 
 
 def _format_price(value):
@@ -18,7 +206,7 @@ def _format_price(value):
     return str(int(value)) if value == int(value) else str(value)
 
 
-def send_order_confirmation(user, order_out, db):
+def send_order_confirmation(user, order_out, db, locale="zh-TW"):
     smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
     smtp_user = os.getenv("SMTP_USER", "")
@@ -27,6 +215,9 @@ def send_order_confirmation(user, order_out, db):
     if not smtp_user or not smtp_pass:
         print("Email skipped: SMTP_USER / SMTP_PASSWORD not configured")
         return
+
+    tr = EMAIL_TRANSLATIONS.get(locale, EMAIL_TRANSLATIONS["zh-TW"])
+    db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
 
     # ── Build items data ──────────────────────────────────────────────────────
     items_data = []
@@ -38,8 +229,15 @@ def send_order_confirmation(user, order_out, db):
 
         translation = db.query(ProductTranslation).filter(
             ProductTranslation.product_id == item.product_id,
-            ProductTranslation.locale == "zh-TW",
+            ProductTranslation.locale == db_locale,
         ).first()
+
+        # Fallback to zh-TW if no translation found for the requested locale
+        if not translation and db_locale != "zh-TW":
+            translation = db.query(ProductTranslation).filter(
+                ProductTranslation.product_id == item.product_id,
+                ProductTranslation.locale == "zh-TW",
+            ).first()
 
         image = (
             db.query(ProductImage)
@@ -62,7 +260,7 @@ def send_order_confirmation(user, order_out, db):
         )
         pickup_time = product.pickup_available_time if product else None
         pickup_str = (
-            pickup_time.strftime("%Y/%m/%d") if pickup_time else "隨時"
+            pickup_time.strftime("%Y/%m/%d") if pickup_time else tr["anytime"]
         )
 
         total_price += price
@@ -92,8 +290,7 @@ def send_order_confirmation(user, order_out, db):
     )
 
     # ── Salutation ────────────────────────────────────────────────────────────
-    salutation_map = {"Mr": "先生", "Ms": "小姐", "Mrs": "小姐"}
-    salutation = salutation_map.get(user.salutation, user.salutation)
+    salutation = tr["salutation_map"].get(user.salutation, user.salutation)
 
     html = _build_html(
         user=user,
@@ -103,15 +300,12 @@ def send_order_confirmation(user, order_out, db):
         order_number=order_number,
         total_price=total_price,
         total_original=total_original,
+        tr=tr,
     )
 
-    subject = f"預訂成功！訂單編號 {order_number} - HomeFinds"
+    subject = tr["subject"].replace("{order_number}", order_number)
     recipients = list({user.email, OWNER_EMAIL})  # deduplicate
 
-    # 清除任何意外夾帶的不換行空格，避免 ASCII 編碼錯誤
-    # html = html.replace('\xa0', ' ')
-
-    # msg = EmailMessage(policy=SMTPUTF8)
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = smtp_user
@@ -130,7 +324,7 @@ def send_order_confirmation(user, order_out, db):
 
 
 def _build_html(user, salutation, pickup_display, items_data, order_number,
-                total_price, total_original):
+                total_price, total_original, tr):
     # ── Items rows ────────────────────────────────────────────────────────────
     item_rows = ""
     for i, item in enumerate(items_data, 1):
@@ -141,7 +335,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
         )
         pos = item["waiting_position"]
         pos_color = "#2e7d32" if pos == 1 else "#c0392b"
-        pos_label = _position_label(pos)
+        pos_label = _position_label(pos, tr)
 
         thumb_cell = (
             f'<img src="{item["img_url"]}" width="40" height="40" '
@@ -171,20 +365,74 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
         if total_original > total_price else ""
     )
 
+    # ── Greeting ──────────────────────────────────────────────────────────────
+    greeting = (
+        tr["greeting"]
+        .replace("{last_name}", user.last_name)
+        .replace("{salutation}", salutation)
+    )
+
     # ── Pickup info line ──────────────────────────────────────────────────────
+    orders_link = (
+        f'<a href="https://schristy2020.github.io/homefinds/#/orders" '
+        f'style="color:#c9a96e;text-decoration:underline;">{tr["my_orders_link_text"]}</a>'
+    )
+    pickup_editable = tr["pickup_editable"].replace("{link}", orders_link)
     pickup_line = (
-        f'<p style="color:#666;font-size:13px;margin:4px 0 8px;">期待於 {pickup_display} 與您見面領取物品。'
-        f'<em>（領取時間可至「<a href="https://schristy2020.github.io/homefinds/#/orders" style="color:#c9a96e;text-decoration:underline;">我的訂單</a>」進行變更）</em></p>'
+        f'<p style="color:#666;font-size:13px;margin:4px 0 8px;">'
+        f'{tr["pickup_info"].replace("{date}", pickup_display)}'
+        f'<em>{pickup_editable}</em></p>'
         if pickup_display
         else ""
     )
 
+    # ── Payment notes ─────────────────────────────────────────────────────────
+    payment_notes_html = "".join(
+        f'<li style="margin-bottom:5px;line-height:1.5;">{note}</li>'
+        for note in tr["payment_notes"]
+    )
+
+    # ── Step 1 items ──────────────────────────────────────────────────────────
+    step1_items_html = "".join(
+        f'<li style="font-size:12px;color:#444;line-height:1.5;">{item}</li>'
+        for item in tr["step1_items"]
+    )
+
+    # ── Step 2 items ──────────────────────────────────────────────────────────
+    step2_items_html = ""
+    for item in tr["step2_items"]:
+        step2_items_html += f'<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">{item}</li>'
+    # Insert pay method item at index 2 (after 2nd item)
+    step2_pay_item = f"""<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">
+                    {tr["step2_pay_label"]}
+                    <div style="margin-top:4px;padding:6px 10px;font-weight:600;color:#1a1a1a;">
+                      <div>{tr["step2_zelle_a"]}</div>
+                      <div>{tr["step2_zelle_b"]}</div>
+                      <div>{tr["step2_zelle_c"]}</div>
+                    </div>
+                  </li>"""
+    # Rebuild step2 with pay item inserted at position 3 (between item 2 and 3)
+    step2_items_list = tr["step2_items"]
+    step2_items_html = ""
+    for idx, item in enumerate(step2_items_list):
+        step2_items_html += f'<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">{item}</li>'
+        if idx == 1:  # after 2nd item, insert pay info
+            step2_items_html += step2_pay_item
+
+    # ── Step 3 items ──────────────────────────────────────────────────────────
+    step3_items_html = "".join(
+        f'<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">{item}</li>'
+        for item in tr["step3_items"]
+    )
+
+    total_label = tr["total"].replace("{count}", str(len(items_data)))
+
     return f"""<!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="{tr["html_lang"]}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>預訂成功！</title>
+  <title>{tr["header"]}</title>
 </head>
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:'Noto Sans TC',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
@@ -197,7 +445,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
           <tr>
             <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
               <div style="font-size:36px;margin-bottom:8px;">🎁</div>
-              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;"><a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a> 預訂成功!</h1>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;"><a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a> {tr["header"].replace("Christy's HomeFinds ", "")}</h1>
             </td>
           </tr>
 
@@ -207,7 +455,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
 
               <!-- Greeting -->
               <p style="font-size:15px;font-weight:700;margin:0 0 4px;">
-                Hi {user.last_name} {salutation}, 感謝您的預訂！
+                {greeting}
               </p>
               {pickup_line}
               <ul style="margin:0 0 16px;padding-left:20px;font-size:13px;list-style:disc;">
@@ -218,28 +466,26 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
               <!-- Payment Notice -->
               <div style="background:#fffbf0;border:1.5px solid #f0d080;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;">
                 <p style="font-weight:700;margin:0 0 8px;font-size:13px;">
-                  ⚠️ 付款重要須知：本場採用「先付款先得」制！
+                  {tr["payment_title"]}
                 </p>
                 <ul style="margin:0;padding-left:18px;">
-                  <li style="margin-bottom:5px;line-height:1.5;">即時認購：不論目前排序，<strong>先完成匯款者直接獲得該物品</strong>。</li>
-                  <li style="margin-bottom:5px;line-height:1.5;">成交確認：Christy 確認款項後會發通知，商品也<strong>將立即轉為「已售出」</strong>！</li>
-                  <li style="line-height:1.5;">退款保證：若確認後發現商品已由他人搶先買走，Christy 將主動聯繫並透過 Zelle 退款。</li>
+                  {payment_notes_html}
                 </ul>
               </div>
 
               <!-- Zelle Info -->
               <div style="margin-bottom:16px;font-size:13px;">
-                <p style="font-weight:700;margin:0 0 6px;">💰 Zelle 匯款資訊：</p>
+                <p style="font-weight:700;margin:0 0 6px;">{tr["zelle_title"]}</p>
                 <ul style="margin:0;padding-left:20px;list-style:disc;">
-                  <li style="margin-bottom:3px;">帳號: (984)373-9392</li>
-                  <li style="margin-bottom:3px;">戶名: SHU CHING LI</li>
-                  <li>備註: 請務必註明您的「訂單編號」</li>
+                  <li style="margin-bottom:3px;">{tr["zelle_account"]}</li>
+                  <li style="margin-bottom:3px;">{tr["zelle_name"]}</li>
+                  <li>{tr["zelle_note"]}</li>
                 </ul>
               </div>
 
               <!-- Order Number -->
               <p style="font-size:14px;font-weight:700;margin:0 0 16px;">
-                訂單編號：
+                {tr["order_number_label"]}
                 <span style="font-family:monospace;background:#f4f4f4;border-radius:4px;padding:3px 10px;letter-spacing:0.05em;margin-left:4px;">
                   {order_number}
                 </span>
@@ -251,11 +497,11 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
                 <thead>
                   <tr style="border-bottom:1.5px solid #e0e0e0;">
                     <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:center;width:24px;"></th>
-                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;width:50px;">縮圖</th>
-                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">物品名稱</th>
-                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">可取貨時間</th>
-                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:right;">價錢</th>
-                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:center;">目前順位</th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;width:50px;">{tr["col_thumb"]}</th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">{tr["col_name"]}</th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">{tr["col_pickup"]}</th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:right;">{tr["col_price"]}</th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:center;">{tr["col_position"]}</th>
                   </tr>
                 </thead>
                 <tbody>{item_rows}
@@ -266,7 +512,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
               <div style="display:flex;justify-content:space-between;padding:8px 0 4px;font-size:15px;font-weight:600;border-top:1px solid #eee;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td style="font-size:14px;font-weight:600;">共 {len(items_data)} 樣物品，總計：</td>
+                    <td style="font-size:14px;font-weight:600;">{total_label}</td>
                     <td style="text-align:right;font-size:15px;font-weight:700;">
                       {total_original_html}${_format_price(total_price)}
                     </td>
@@ -278,44 +524,31 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
               <hr style="border:none;border-top:1px solid #e8e8e8;margin:20px 0;" />
 
               <!-- Guide Section -->
-              <h3 style="font-size:14px;font-weight:700;color:#1a1a1a;margin:0 0 14px;">🛍️ 購物與取貨流程說明</h3>
+              <h3 style="font-size:14px;font-weight:700;color:#1a1a1a;margin:0 0 14px;">{tr["guide_title"]}</h3>
 
               <!-- Step 1 -->
               <div style="margin-bottom:14px;font-size:13px;">
-                <p style="font-size:13px;font-weight:700;color:#c9a96e;margin:0 0 6px;">Step 1. 預定（保留順位）</p>
+                <p style="font-size:13px;font-weight:700;color:#c9a96e;margin:0 0 6px;">{tr["step1_title"]}</p>
                 <ol style="margin:0;padding-left:18px;">
-                  <li style="font-size:12px;color:#444;line-height:1.5;">預定成功：完成後系統會將您排入「預定排序名單」，名單皆以匿名呈現。</li>
-                  <li style="font-size:12px;color:#444;line-height:1.5;">狀態確認：可至商品頁面或「我的訂單」查看預定紀錄，系統也會自動寄信給您。</li>
-                  <li style="font-size:12px;color:#c0392b;font-weight:600;list-style:none;margin-left:-18px;">⚠️ 重要提醒：「預定成功」不代表「購買成功」！</li>
+                  {step1_items_html}
+                  <li style="font-size:12px;color:#c0392b;font-weight:600;list-style:none;margin-left:-18px;">{tr["step1_warning"]}</li>
                 </ol>
               </div>
 
               <!-- Step 2 -->
               <div style="margin-bottom:14px;font-size:13px;">
-                <p style="font-size:13px;font-weight:700;color:#c9a96e;margin:0 0 6px;">Step 2. 付款（確認獲得）</p>
-                <p style="font-size:12px;color:#555;margin:0 0 6px;">為了確保交易效率，採取以下原則：</p>
+                <p style="font-size:13px;font-weight:700;color:#c9a96e;margin:0 0 6px;">{tr["step2_title"]}</p>
+                <p style="font-size:12px;color:#555;margin:0 0 6px;">{tr["step2_intro"]}</p>
                 <ol style="margin:0;padding-left:18px;">
-                  <li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">優先獲得權：物品由「先行完成付款者」獲得。</li>
-                  <li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">遞補規則：若無人先行付款，則由「預定排序名單」之第一順位獲得。</li>
-                  <li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">
-                    付款方式：請依訂單總金額透過 Zelle 匯款：
-                    <div style="margin-top:4px;padding:6px 10px;font-weight:600;color:#1a1a1a;">
-                      <div>a. 帳號: (984)373-9392</div>
-                      <div>b. 戶名: SHU CHING LI</div>
-                      <div>c. 備註: 訂單編號</div>
-                    </div>
-                  </li>
-                  <li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">確認交易：Christy 確認收到款項後會寄信通知，並將商品改為「已售出」。</li>
-                  <li style="font-size:12px;color:#444;line-height:1.5;">例外：第一順位者亦可選擇於「取貨時付款」。</li>
+                  {step2_items_html}
                 </ol>
               </div>
 
               <!-- Step 3 -->
               <div style="margin-bottom:14px;font-size:13px;">
-                <p style="font-size:13px;font-weight:700;color:#c9a96e;margin:0 0 6px;">Step 3. 取貨</p>
+                <p style="font-size:13px;font-weight:700;color:#c9a96e;margin:0 0 6px;">{tr["step3_title"]}</p>
                 <ul style="margin:0;padding-left:18px;">
-                  <li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">取貨時間：請依「預計取貨時間」準時到現場。</li>
-                  <li style="font-size:12px;color:#444;line-height:1.5;">修改資料：後續若需更改取貨時間，可至「我的訂單」進行編輯。</li>
+                  {step3_items_html}
                 </ul>
               </div>
 
@@ -325,7 +558,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
           <!-- Footer -->
           <tr>
             <td style="padding:16px 28px 28px;border-top:1px solid #f0f0f0;font-size:12px;color:#888;text-align:center;">
-              💡 有任何問題？歡迎聯絡 Christy:
+              {tr["footer"]}
               <a href="mailto:qsa8647332@gmail.com" style="color:#c9a96e;text-decoration:none;">qsa8647332@gmail.com</a>
             </td>
           </tr>

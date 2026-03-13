@@ -80,7 +80,7 @@ export default {
       'Money-Back Guarantee: If the item is purchased by someone else before your payment is confirmed, Christy will contact you for a full refund via Zelle.',
     ],
     zelleTitle: 'Zelle Payment Details:',
-    zelleNote: 'Note: Please make sure to include your "Order Number" in the memo.',
+    zelleNote: 'Note: Please make sure to include your "Order ID" in the memo.',
     orderNumberLabel: 'Order ID:',
     colPosition: 'Current Rank',
     notFirstWarning: '*Some items are not in 1st place! Pay now to skip the line and secure them instantly!',

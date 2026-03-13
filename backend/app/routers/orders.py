@@ -59,7 +59,7 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(order)
     order_out = _build_out(order, db)
-    send_order_confirmation(user, order_out, db)
+    send_order_confirmation(user, order_out, db, locale=body.locale)
     return order_out
 
 @router.get("/user/{user_id}", response_model=list[OrderOut])
