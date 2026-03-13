@@ -1,6 +1,5 @@
 import os
-import smtplib
-from email.message import EmailMessage
+import resend
 
 from app.models.product import Product, ProductTranslation, ProductImage
 
@@ -216,13 +215,11 @@ def _format_price(value):
 
 
 def send_order_confirmation(user, order_out, db, locale="zh-TW"):
-    smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-    smtp_port = int(os.getenv("SMTP_PORT", "587"))
-    smtp_user = os.getenv("SMTP_USER", "")
-    smtp_pass = os.getenv("SMTP_PASSWORD", "")
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
 
-    if not smtp_user or not smtp_pass:
-        print("Email skipped: SMTP_USER / SMTP_PASSWORD not configured")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
         return
 
     tr = EMAIL_TRANSLATIONS.get(locale, EMAIL_TRANSLATIONS["zh-TW"])
@@ -315,16 +312,14 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
     subject = tr["subject"].replace("{order_number}", order_number)
     recipients = list({user.email, OWNER_EMAIL})  # deduplicate
 
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = smtp_user
-    msg["To"] = ", ".join(recipients)
-    msg.set_content(html, subtype="html", charset="utf-8")
-
     try:
-        with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=30) as server:
-            server.login(smtp_user, smtp_pass)
-            server.send_message(msg)
+        resend.api_key = resend_api_key
+        resend.Emails.send({
+            "from": from_email,
+            "to": recipients,
+            "subject": subject,
+            "html": html,
+        })
         print(f"Order confirmation email sent to {recipients}")
     except Exception as e:
         print(f"Email sending failed: {e}")

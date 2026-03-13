@@ -7,3 +7,4 @@ pydantic[email]==2.9.2
 cryptography==43.0.3
 python-multipart==0.0.9
 cloudinary==1.41.0
+resend==2.10.0
