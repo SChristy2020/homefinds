@@ -163,6 +163,17 @@ def mark_order_unpaid(order_id: int, db: Session = Depends(get_db)):
     db.refresh(order)
     return _build_out(order, db)
 
+@router.put("/{order_id}/cancelled", response_model=OrderOut)
+def mark_order_cancelled(order_id: int, db: Session = Depends(get_db)):
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    order.order_status = "cancelled"
+    order.paid_at = None
+    db.commit()
+    db.refresh(order)
+    return _build_out(order, db)
+
 @router.put("/{order_id}/pickup_time", response_model=OrderOut)
 def update_pickup_time(order_id: int, body: OrderPickupTimeUpdate, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()

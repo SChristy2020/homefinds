@@ -86,11 +86,29 @@
               <td class="td-order-no">{{ order.order_number }}</td>
               <td>{{ activeItemCount(order) }}</td>
               <td>{{ orderTotal(order) }}</td>
-              <td :class="statusClass(order)">
+              <td :class="editingStatusOrderId !== order.id ? statusClass(order) : ''">
                 <template v-if="isAdmin">
-                  <button class="btn-pay-toggle" :class="order.order_status === 'paid' ? 'btn-pay-paid' : 'btn-pay-unpaid'" @click.stop="togglePayStatus(order)">
-                    {{ statusLabel(order) }}
-                  </button>
+                  <template v-if="editingStatusOrderId !== order.id">
+                    <span class="status-display">
+                      <span>{{ statusLabel(order) }}</span>
+                      <button class="btn-edit-icon" @click.stop="startEditStatus(order)" title="編輯">
+                        <Pencil :size="12" />
+                      </button>
+                    </span>
+                  </template>
+                  <template v-else>
+                    <div class="status-edit-wrap" @click.stop>
+                      <select v-model="editingStatusValue" class="status-select">
+                        <option value="paid">{{ i18n.t('orders.paid') }}</option>
+                        <option value="pending_payment">{{ i18n.t('orders.pending_payment') }}</option>
+                        <option value="cancelled">{{ i18n.t('orders.cancelled') }}</option>
+                      </select>
+                      <div class="pickup-edit-actions">
+                        <button class="btn-save-pickup" @click.stop="saveStatus(order)">{{ i18n.t('orders.savePickup') }}</button>
+                        <button class="btn-cancel-pickup" @click.stop="cancelEditStatus">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                      </div>
+                    </div>
+                  </template>
                 </template>
                 <template v-else>
                   {{ statusLabel(order) }}
@@ -283,6 +301,8 @@ onMounted(async () => {
 })
 const editingOrderId = ref(null)
 const editPickupValue = ref('')
+const editingStatusOrderId = ref(null)
+const editingStatusValue = ref('')
 
 function onNameInput() {
   form.value.name = form.value.name.replace(/[^a-zA-Z\u4e00-\u9fff\u3400-\u4dbf\s'-]/g, '')
@@ -337,9 +357,20 @@ async function savePickupTime(order) {
   editingOrderId.value = null
 }
 
-async function togglePayStatus(order) {
-  await ordersStore.updatePayStatus(order.id, order.order_status !== 'paid')
+function startEditStatus(order) {
+  editingStatusOrderId.value = order.id
+  editingStatusValue.value = order.order_status === 'paid' ? 'paid' : 'pending_payment'
+}
+
+function cancelEditStatus() {
+  editingStatusOrderId.value = null
+  editingStatusValue.value = ''
+}
+
+async function saveStatus(order) {
+  await ordersStore.updateOrderStatus(order.id, editingStatusValue.value)
   toast.show(i18n.t('orders.payStatusToast'))
+  editingStatusOrderId.value = null
 }
 
 async function handleCancel(itemId) {
@@ -496,16 +527,6 @@ function fromPickerFormat(str) {
 .status-unpaid    { color: var(--mid); }
 .status-cancelled { color: var(--red, #c0392b); }
 
-/* Admin pay toggle button */
-.btn-pay-toggle {
-  border: none; cursor: pointer; font-size: 0.82rem; font-weight: 600;
-  padding: 2px 8px; border-radius: 4px; transition: opacity 0.15s;
-  white-space: nowrap;
-}
-.btn-pay-toggle:hover { opacity: 0.75; }
-.btn-pay-paid   { background: #e8f5e9; color: #2e7d32; }
-.btn-pay-unpaid { background: #f5f5f5; color: var(--mid); }
-
 /* Admin buyer columns */
 .td-buyer      { white-space: nowrap; font-size: 0.82rem; }
 .td-buyer-info { white-space: nowrap; font-size: 0.78rem; color: var(--mid); }
@@ -520,6 +541,23 @@ function fromPickerFormat(str) {
   transition: opacity 0.15s;
 }
 .btn-edit-icon:hover { opacity: 0.7; }
+
+.status-display {
+  display: inline-flex; align-items: center; white-space: nowrap;
+}
+
+/* Inline status edit */
+.status-edit-wrap {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.status-select {
+  font-family: var(--font-body); font-size: 0.8rem;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 4px 8px; color: var(--charcoal);
+  background: #fff; outline: none;
+  cursor: pointer;
+}
+.status-select:focus { border-color: var(--charcoal); }
 
 /* Inline pickup edit */
 .pickup-edit-wrap {
