@@ -65,8 +65,18 @@
               <th class="sortable" @click="toggleSort('pickup')">
                 {{ i18n.t('orders.pickupTimeLabel') }}<SortIcon col="pickup" :active="sortColumn" :dir="sortDirection" />
               </th>
+              <template v-if="isAdmin">
+                <th class="sortable" @click="toggleSort('buyer')">
+                  {{ i18n.t('orders.buyer') }}<SortIcon col="buyer" :active="sortColumn" :dir="sortDirection" />
+                </th>
+                <th>{{ i18n.t('orders.buyerEmail') }}</th>
+                <th>{{ i18n.t('orders.buyerPhone') }}</th>
+              </template>
               <th class="sortable" @click="toggleSort('created')">
                 {{ i18n.t('orders.createdAt') }}<SortIcon col="created" :active="sortColumn" :dir="sortDirection" />
+              </th>
+              <th v-if="isAdmin" class="sortable" @click="toggleSort('updated')">
+                {{ i18n.t('orders.updatedAt') }}<SortIcon col="updated" :active="sortColumn" :dir="sortDirection" />
               </th>
             </tr>
           </thead>
@@ -77,7 +87,14 @@
               <td>{{ activeItemCount(order) }}</td>
               <td>{{ orderTotal(order) }}</td>
               <td :class="order.is_paid ? 'status-paid' : 'status-unpaid'">
-                {{ order.is_paid ? i18n.t('orders.paid') : i18n.t('orders.unpaid') }}
+                <template v-if="isAdmin">
+                  <button class="btn-pay-toggle" :class="order.is_paid ? 'btn-pay-paid' : 'btn-pay-unpaid'" @click.stop="togglePayStatus(order)">
+                    {{ order.is_paid ? i18n.t('orders.paid') : i18n.t('orders.unpaid') }}
+                  </button>
+                </template>
+                <template v-else>
+                  {{ order.is_paid ? i18n.t('orders.paid') : i18n.t('orders.unpaid') }}
+                </template>
               </td>
               <td class="td-pickup">
                 <template v-if="editingOrderId !== order.id">
@@ -96,12 +113,18 @@
                   </div>
                 </template>
               </td>
+              <template v-if="isAdmin">
+                <td class="td-buyer">{{ order.buyer_last_name }} {{ order.buyer_first_name }}</td>
+                <td class="td-buyer-info">{{ order.buyer_email }}</td>
+                <td class="td-buyer-info">{{ order.buyer_phone }}</td>
+              </template>
               <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
+              <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
             </tr>
 
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
-              <td colspan="6">
+              <td :colspan="isAdmin ? 10 : 6">
                 <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" @cancel="handleCancel" />
 
                 <!-- Total summary -->
@@ -168,6 +191,8 @@ const userStore = useUserStore()
 const toast = useToastStore()
 const i18n = useI18nStore()
 
+const isAdmin = computed(() => userStore.currentUser?.is_admin === 1)
+
 const form = ref({ name: '', email: '', phone: '' })
 const errors = ref({ name: '', email: '', phone: '' })
 
@@ -197,6 +222,8 @@ const filteredOrders = computed(() => {
     else if (sortColumn.value === 'paid')   { aVal = a.is_paid ? 1 : 0; bVal = b.is_paid ? 1 : 0 }
     else if (sortColumn.value === 'pickup') { aVal = a.pickup_time || ''; bVal = b.pickup_time || '' }
     else if (sortColumn.value === 'created') { aVal = a.created_at || ''; bVal = b.created_at || '' }
+    else if (sortColumn.value === 'updated') { aVal = a.updated_at || ''; bVal = b.updated_at || '' }
+    else if (sortColumn.value === 'buyer') { aVal = (a.buyer_last_name || '') + (a.buyer_first_name || ''); bVal = (b.buyer_last_name || '') + (b.buyer_first_name || '') }
     else { aVal = a.id; bVal = b.id }
     if (aVal < bVal) return sortDirection.value === 'asc' ? -1 : 1
     if (aVal > bVal) return sortDirection.value === 'asc' ? 1 : -1
@@ -247,7 +274,11 @@ const SortIcon = {
 
 onMounted(async () => {
   if (userStore.currentUser && ordersStore.orders.length === 0) {
-    await ordersStore.fetchOrdersByUser(userStore.currentUser.id)
+    if (userStore.currentUser.is_admin === 1) {
+      await ordersStore.fetchAllOrders()
+    } else {
+      await ordersStore.fetchOrdersByUser(userStore.currentUser.id)
+    }
   }
 })
 const editingOrderId = ref(null)
@@ -304,6 +335,11 @@ async function savePickupTime(order) {
   await ordersStore.updatePickupTime(order.id, isoStr)
   toast.show(i18n.t('orders.savePickupToast'))
   editingOrderId.value = null
+}
+
+async function togglePayStatus(order) {
+  await ordersStore.updatePayStatus(order.id, !order.is_paid)
+  toast.show(i18n.t('orders.payStatusToast'))
 }
 
 async function handleCancel(itemId) {
@@ -451,6 +487,20 @@ function fromPickerFormat(str) {
 /* Payment status */
 .status-paid   { color: #2e7d32; font-weight: 600; }
 .status-unpaid { color: var(--mid); }
+
+/* Admin pay toggle button */
+.btn-pay-toggle {
+  border: none; cursor: pointer; font-size: 0.82rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px; transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.btn-pay-toggle:hover { opacity: 0.75; }
+.btn-pay-paid   { background: #e8f5e9; color: #2e7d32; }
+.btn-pay-unpaid { background: #f5f5f5; color: var(--mid); }
+
+/* Admin buyer columns */
+.td-buyer      { white-space: nowrap; font-size: 0.82rem; }
+.td-buyer-info { white-space: nowrap; font-size: 0.78rem; color: var(--mid); }
 
 /* Pickup time cell */
 .td-pickup { white-space: nowrap; }

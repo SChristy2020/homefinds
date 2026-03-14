@@ -46,6 +46,10 @@ class OrderOut(BaseModel):
     created_at:  datetime
     updated_at:  datetime
     items:       list[OrderItemOut] = []
+    buyer_first_name: Optional[str] = None
+    buyer_last_name:  Optional[str] = None
+    buyer_email:      Optional[str] = None
+    buyer_phone:      Optional[str] = None
 
     class Config:
         from_attributes = True

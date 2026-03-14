@@ -16,6 +16,12 @@ router = APIRouter()
 def _build_out(order, db):
     items = db.query(OrderItem).filter(OrderItem.order_id == order.id).all()
     out = OrderOut.model_validate(order)
+    user = db.query(User).filter(User.id == order.user_id).first()
+    if user:
+        out.buyer_first_name = user.first_name
+        out.buyer_last_name  = user.last_name
+        out.buyer_email      = user.email
+        out.buyer_phone      = user.phone
     enriched = []
     for item in items:
         position = (
@@ -113,6 +119,11 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     threading.Thread(target=_send_email, daemon=True).start()
     return order_out
 
+@router.get("/all", response_model=list[OrderOut])
+def get_all_orders(db: Session = Depends(get_db)):
+    orders = db.query(Order).order_by(Order.id.desc()).all()
+    return [_build_out(o, db) for o in orders]
+
 @router.get("/user/{user_id}", response_model=list[OrderOut])
 def get_orders_by_user(user_id: int, db: Session = Depends(get_db)):
     orders = db.query(Order).filter(Order.user_id == user_id).all()
@@ -132,6 +143,17 @@ def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
     order.is_paid = 1
     order.paid_at = datetime.now()
+    db.commit()
+    db.refresh(order)
+    return _build_out(order, db)
+
+@router.put("/{order_id}/unpaid", response_model=OrderOut)
+def mark_order_unpaid(order_id: int, db: Session = Depends(get_db)):
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    order.is_paid = 0
+    order.paid_at = None
     db.commit()
     db.refresh(order)
     return _build_out(order, db)

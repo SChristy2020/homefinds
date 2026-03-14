@@ -69,6 +69,22 @@ export const useOrdersStore = defineStore('orders', () => {
     return result
   }
 
+  async function fetchAllOrders() {
+    const result = await api.get('/api/orders/all')
+    orders.value = result
+    sessionStorage.setItem(ORDERS_KEY, JSON.stringify(result))
+    return result
+  }
+
+  async function updatePayStatus(orderId, isPaid) {
+    const endpoint = isPaid ? `/api/orders/${orderId}/paid` : `/api/orders/${orderId}/unpaid`
+    const updated = await api.put(endpoint)
+    const idx = orders.value.findIndex(o => o.id === orderId)
+    if (idx !== -1) orders.value[idx] = updated
+    sessionStorage.setItem(ORDERS_KEY, JSON.stringify(orders.value))
+    return updated
+  }
+
   async function cancelOrderItem(itemId) {
     await api.put(`/api/orders/items/${itemId}/cancel`)
     for (const order of orders.value) {
@@ -97,5 +113,5 @@ export const useOrdersStore = defineStore('orders', () => {
   // 保留介面相容性，waiting list 功能需後端另行實作
   function getWaitingList() { return [] }
 
-  return { orders, createOrder, fetchOrdersByUser, cancelOrderItem, updatePickupTime, clearOrders, getWaitingList }
+  return { orders, createOrder, fetchOrdersByUser, fetchAllOrders, updatePayStatus, cancelOrderItem, updatePickupTime, clearOrders, getWaitingList }
 })
