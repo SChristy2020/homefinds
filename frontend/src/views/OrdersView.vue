@@ -112,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ArrowLeft, Pencil } from 'lucide-vue-next'
 import { useOrdersStore } from '@/stores/orders'
 import { useUserStore } from '@/stores/user'
@@ -131,6 +131,17 @@ const form = ref({ name: '', email: '', phone: '' })
 const errors = ref({ name: '', email: '', phone: '' })
 
 const expandedOrderId = ref(null)
+
+onMounted(async () => {
+  if (userStore.currentUser && ordersStore.orders.length === 0) {
+    await ordersStore.fetchOrdersByUser(userStore.currentUser.id)
+    if (ordersStore.orders.length > 0) {
+      expandedOrderId.value = ordersStore.orders[ordersStore.orders.length - 1].id
+    }
+  } else if (ordersStore.orders.length > 0) {
+    expandedOrderId.value = ordersStore.orders[ordersStore.orders.length - 1].id
+  }
+})
 const editingOrderId = ref(null)
 const editPickupValue = ref('')
 
@@ -196,7 +207,7 @@ async function handleCancel(itemId) {
 }
 
 function reset() {
-  ordersStore.orders = []
+  ordersStore.clearOrders()
   expandedOrderId.value = null
   editingOrderId.value = null
   userStore.logout()

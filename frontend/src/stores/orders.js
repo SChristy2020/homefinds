@@ -4,8 +4,10 @@ import { ref } from 'vue'
 import { api } from '@/utils/api'
 import { useI18nStore } from '@/stores/i18n'
 
+const ORDERS_KEY = 'homefinds_orders'
+
 export const useOrdersStore = defineStore('orders', () => {
-  const orders = ref([])
+  const orders = ref(JSON.parse(sessionStorage.getItem(ORDERS_KEY)) || [])
 
   async function createOrder(formData, cartItems) {
     // 1. 查找現有 user，若無則建立
@@ -63,6 +65,7 @@ export const useOrdersStore = defineStore('orders', () => {
   async function fetchOrdersByUser(userId) {
     const result = await api.get(`/api/orders/user/${userId}`)
     orders.value = result
+    sessionStorage.setItem(ORDERS_KEY, JSON.stringify(result))
     return result
   }
 
@@ -75,17 +78,24 @@ export const useOrdersStore = defineStore('orders', () => {
         break
       }
     }
+    sessionStorage.setItem(ORDERS_KEY, JSON.stringify(orders.value))
   }
 
   async function updatePickupTime(orderId, isoTimeStr) {
     const updated = await api.put(`/api/orders/${orderId}/pickup_time`, { pickup_time: isoTimeStr })
     const idx = orders.value.findIndex(o => o.id === orderId)
     if (idx !== -1) orders.value[idx] = updated
+    sessionStorage.setItem(ORDERS_KEY, JSON.stringify(orders.value))
     return updated
+  }
+
+  function clearOrders() {
+    orders.value = []
+    sessionStorage.removeItem(ORDERS_KEY)
   }
 
   // 保留介面相容性，waiting list 功能需後端另行實作
   function getWaitingList() { return [] }
 
-  return { orders, createOrder, fetchOrdersByUser, cancelOrderItem, updatePickupTime, getWaitingList }
+  return { orders, createOrder, fetchOrdersByUser, cancelOrderItem, updatePickupTime, clearOrders, getWaitingList }
 })
