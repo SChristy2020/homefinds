@@ -248,11 +248,6 @@ const SortIcon = {
 onMounted(async () => {
   if (userStore.currentUser && ordersStore.orders.length === 0) {
     await ordersStore.fetchOrdersByUser(userStore.currentUser.id)
-    if (ordersStore.orders.length > 0) {
-      expandedOrderId.value = ordersStore.orders[ordersStore.orders.length - 1].id
-    }
-  } else if (ordersStore.orders.length > 0) {
-    expandedOrderId.value = ordersStore.orders[ordersStore.orders.length - 1].id
   }
 })
 const editingOrderId = ref(null)
@@ -284,9 +279,6 @@ async function handleLookup() {
   const user = await userStore.lookup(form.value.name, form.value.email, form.value.phone)
   if (user) {
     await ordersStore.fetchOrdersByUser(user.id)
-    if (ordersStore.orders.length > 0) {
-      expandedOrderId.value = ordersStore.orders[ordersStore.orders.length - 1].id
-    }
   }
 }
 
