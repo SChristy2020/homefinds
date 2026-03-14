@@ -72,7 +72,7 @@ export default {
   },
   orderSuccess: {
     title: 'Booking Confirmed!',
-    greeting: 'Thank you for your order!',
+    greeting: 'Thanks for your booking!',
     pickupInfo: 'We look forward to seeing you on {date} for pickup.',
     pickupChangeablePrefix: '(Pickup time can be updated in "',
     pickupChangeableLink: 'My Orders',

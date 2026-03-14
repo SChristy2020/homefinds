@@ -11,7 +11,7 @@ EMAIL_TRANSLATIONS = {
         "html_lang": "zh-TW",
         "subject": "預訂成功！訂單編號 {order_number} - HomeFinds",
         "header": "Christy's HomeFinds 預訂成功!",
-        "greeting": "Hi {last_name} {salutation}, 感謝您的預訂！",
+        "greeting": "Hi {first_name} 感謝您的預訂!",
         "pickup_info": "期待於 {date} 與您見面領取物品。",
         "pickup_editable": "（領取時間可至「{link}」進行變更）",
         "my_orders_link_text": "我的訂單",
@@ -72,7 +72,7 @@ EMAIL_TRANSLATIONS = {
         "html_lang": "zh-CN",
         "subject": "预定成功！订单编号 {order_number} - HomeFinds",
         "header": "Christy's HomeFinds 预定成功!",
-        "greeting": "Hi {last_name} {salutation}, 感谢您的预定！",
+        "greeting": "Hi {first_name} 感谢您的预定！",
         "pickup_info": "期待于 {date} 与您见面领取物品。",
         "pickup_editable": "（领取时间可至\"{link}\"进行变更）",
         "my_orders_link_text": "我的订单",
@@ -133,7 +133,7 @@ EMAIL_TRANSLATIONS = {
         "html_lang": "en",
         "subject": "Booking Confirmed! Order #{order_number} - HomeFinds",
         "header": "Christy's HomeFinds Booking Confirmed!",
-        "greeting": "Hi {salutation} {last_name}, Thank you for your order!",
+        "greeting": "Hi {first_name}, thanks for your booking!",
         "pickup_info": "We look forward to seeing you on {date} for pickup.",
         "pickup_editable": "(Pickup time can be updated in \"{link}\")",
         "my_orders_link_text": "My Orders",
@@ -371,6 +371,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
     # ── Greeting ──────────────────────────────────────────────────────────────
     greeting = (
         tr["greeting"]
+        .replace("{first_name}", user.first_name)
         .replace("{last_name}", user.last_name)
         .replace("{salutation}", salutation)
     )
@@ -475,6 +476,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
               </p>
               {pickup_line}
               <ul style="margin:0 0 16px;padding-left:20px;font-size:13px;list-style:disc;">
+                <li style="margin-bottom:3px;">Name: <strong>{user.first_name} {user.last_name}</strong></li>
                 <li style="margin-bottom:3px;">Email: <strong>{user.email}</strong></li>
                 <li style="margin-bottom:3px;">Phone: <strong>{user.phone}</strong></li>
               </ul>

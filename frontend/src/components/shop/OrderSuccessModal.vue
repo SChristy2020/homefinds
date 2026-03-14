@@ -8,13 +8,14 @@
       <!-- Greeting & Pickup Info -->
       <div class="greeting-block">
         <p class="greeting-line">
-          <strong>Hi {{ order.salutation }} {{ order.firstName }}, {{ i18n.t('orderSuccess.greeting') }}</strong>
+          <strong>Hi {{ order.firstName }}, {{ i18n.t('orderSuccess.greeting') }}</strong>
         </p>
         <p class="pickup-line">
           {{ i18n.t('orderSuccess.pickupInfo', { date: formattedPickup }) }}
           <em>{{ i18n.t('orderSuccess.pickupChangeablePrefix') }}<RouterLink class="orders-link" to="/orders">{{ i18n.t('orderSuccess.pickupChangeableLink') }}</RouterLink>{{ i18n.t('orderSuccess.pickupChangeableSuffix') }}</em>
         </p>
         <ul class="contact-list">
+          <li>Name: <strong>{{ order.firstName }} {{ order.lastName }}</strong></li>
           <li>Email: <strong>{{ order.email }}</strong></li>
           <li>Phone: <strong>{{ order.phone }}</strong></li>
         </ul>
