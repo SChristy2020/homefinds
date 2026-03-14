@@ -335,7 +335,11 @@ async function handleLookup() {
   if (!validate()) return
   const user = await userStore.lookup(form.value.name, form.value.email, form.value.phone)
   if (user) {
-    await ordersStore.fetchOrdersByUser(user.id)
+    if (user.is_admin === 1) {
+      await ordersStore.fetchAllOrders()
+    } else {
+      await ordersStore.fetchOrdersByUser(user.id)
+    }
   }
 }
 
