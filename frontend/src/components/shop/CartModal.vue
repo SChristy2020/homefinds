@@ -174,7 +174,10 @@ const isValid = computed(() => {
 function formatPickupDate(pickupTime) {
   if (!pickupTime) return i18n.t('cart.anytime')
   const _d = new Date(pickupTime)
-  return `${String(_d.getMonth() + 1).padStart(2, '0')}/${String(_d.getDate()).padStart(2, '0')}/${_d.getFullYear()}`
+  const h = _d.getHours()
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  return `${String(_d.getMonth() + 1).padStart(2, '0')}/${String(_d.getDate()).padStart(2, '0')}/${_d.getFullYear()} ${h12}:${String(_d.getMinutes()).padStart(2, '0')} ${ampm}`
 }
 
 function getItemName(item) {

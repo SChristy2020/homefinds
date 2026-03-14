@@ -116,7 +116,7 @@
               </td>
               <td class="td-pickup">
                 <template v-if="editingOrderId !== order.id">
-                  <span>{{ formatDate(order.pickup_time) }}</span>
+                  <span>{{ formatDateTime(order.pickup_time) }}</span>
                   <button class="btn-edit-icon" @click.stop="startEditPickup(order)" title="編輯">
                     <Pencil :size="12" />
                   </button>
@@ -427,17 +427,14 @@ function hasNotFirstPosition(order) {
   return order.items.some(i => i.status !== 'cancelled' && i.waiting_position > 1)
 }
 
-function formatDate(isoStr) {
-  if (!isoStr) return '—'
-  const d = new Date(isoStr)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
-}
-
 function formatDateTime(isoStr) {
   if (!isoStr) return '—'
   const d = new Date(isoStr)
   const date = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
-  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  const h = d.getHours()
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  const time = `${h12}:${String(d.getMinutes()).padStart(2, '0')} ${ampm}`
   return `${date} ${time}`
 }
 

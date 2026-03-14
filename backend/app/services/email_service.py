@@ -215,6 +215,14 @@ def _format_price(value):
     return str(int(rounded)) if rounded == int(rounded) else f"{rounded:.2f}"
 
 
+def _format_datetime_12h(dt):
+    """Format datetime as MM/DD/YYYY H:MM AM/PM"""
+    h = dt.hour
+    ampm = "PM" if h >= 12 else "AM"
+    h12 = h % 12 or 12
+    return f"{dt.strftime('%m/%d/%Y')} {h12}:{dt.strftime('%M')} {ampm}"
+
+
 def send_order_confirmation(user, order_out, db, locale="zh-TW"):
     resend_api_key = os.getenv("RESEND_API_KEY", "")
     from_email = os.getenv("RESEND_FROM", "")
@@ -267,7 +275,7 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
         )
         pickup_time = product.pickup_available_time if product else None
         pickup_str = (
-            pickup_time.strftime("%m/%d/%Y") if pickup_time else tr["anytime"]
+            _format_datetime_12h(pickup_time) if pickup_time else tr["anytime"]
         )
 
         total_price += price
@@ -291,7 +299,7 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
 
     # ── Pickup date ───────────────────────────────────────────────────────────
     pickup_display = (
-        order_out.pickup_time.strftime("%m/%d/%Y")
+        _format_datetime_12h(order_out.pickup_time)
         if order_out.pickup_time
         else ""
     )
@@ -385,7 +393,7 @@ def _build_html(user, salutation, pickup_display, items_data, order_number,
     pickup_editable = tr["pickup_editable"].replace("{link}", orders_link)
     pickup_line = (
         f'<p style="color:#666;font-size:13px;margin:4px 0 8px;">'
-        f'{tr["pickup_info"].replace("{date}", pickup_display)}'
+        f'{tr["pickup_info"].replace("{date}", f"<strong>{pickup_display}</strong>")}'
         f'<em>{pickup_editable}</em></p>'
         if pickup_display
         else ""

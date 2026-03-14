@@ -11,7 +11,7 @@
           <strong>Hi {{ order.firstName }}, {{ i18n.t('orderSuccess.greeting') }}</strong>
         </p>
         <p class="pickup-line">
-          {{ i18n.t('orderSuccess.pickupInfo', { date: formattedPickup }) }}
+          <span v-html="i18n.t('orderSuccess.pickupInfo', { date: '<strong>' + formattedPickup + '</strong>' })"></span>
           <em>{{ i18n.t('orderSuccess.pickupChangeablePrefix') }}<RouterLink class="orders-link" to="/orders">{{ i18n.t('orderSuccess.pickupChangeableLink') }}</RouterLink>{{ i18n.t('orderSuccess.pickupChangeableSuffix') }}</em>
         </p>
         <ul class="contact-list">
@@ -131,18 +131,25 @@ function getItemName(item) {
 function formatPickupDate(pickupTime) {
   if (!pickupTime) return i18n.t('cart.anytime')
   const d = new Date(pickupTime)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
+  const h = d.getHours()
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()} ${h12}:${String(d.getMinutes()).padStart(2, '0')} ${ampm}`
 }
 
 const formattedPickup = computed(() => {
   if (!props.order?.estimatedPickup) return ''
   const ep = props.order.estimatedPickup
-  const parts = ep.match(/(\d+)\/(\d+)\/(\d+)/)
+  const parts = ep.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/)
   if (!parts) return ep
   const m = String(parts[1]).padStart(2, '0')
   const d = String(parts[2]).padStart(2, '0')
   const y = parts[3]
-  return `${m}/${d}/${y}`
+  const h = parseInt(parts[4])
+  const min = parts[5]
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  return `${m}/${d}/${y} ${h12}:${min} ${ampm}`
 })
 
 const totalPrice = computed(() =>
