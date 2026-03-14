@@ -122,7 +122,7 @@ const pickupWarningDate = computed(() => {
   selected.setHours(0, 0, 0, 0)
   const minDay = new Date(min); minDay.setHours(0, 0, 0, 0)
   if (selected >= minDay) return ''
-  return `${minDay.getFullYear()}/${String(minDay.getMonth() + 1).padStart(2, '0')}/${String(minDay.getDate()).padStart(2, '0')}`
+  return `${String(minDay.getMonth() + 1).padStart(2, '0')}/${String(minDay.getDate()).padStart(2, '0')}/${minDay.getFullYear()}`
 })
 
 const NAME_RE  = /^[a-zA-Z\u4e00-\u9fff\u3400-\u4dbf\s-]+$/
@@ -139,7 +139,8 @@ const isValid = computed(() => {
 
 function formatPickupDate(pickupTime) {
   if (!pickupTime) return i18n.t('cart.anytime')
-  return new Date(pickupTime).toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' })
+  const _d = new Date(pickupTime)
+  return `${String(_d.getMonth() + 1).padStart(2, '0')}/${String(_d.getDate()).padStart(2, '0')}/${_d.getFullYear()}`
 }
 
 function getItemName(item) {

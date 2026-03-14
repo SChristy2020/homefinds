@@ -130,7 +130,7 @@ function getItemName(item) {
 function formatPickupDate(pickupTime) {
   if (!pickupTime) return i18n.t('cart.anytime')
   const d = new Date(pickupTime)
-  return d.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' })
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
 }
 
 const formattedPickup = computed(() => {
@@ -141,7 +141,7 @@ const formattedPickup = computed(() => {
   const m = String(parts[1]).padStart(2, '0')
   const d = String(parts[2]).padStart(2, '0')
   const y = parts[3]
-  return `${y}/${m}/${d}`
+  return `${m}/${d}/${y}`
 })
 
 const totalPrice = computed(() =>

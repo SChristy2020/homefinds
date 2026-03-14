@@ -132,7 +132,7 @@ function handleAddToCart() {
 function formatPickupTime(dt) {
   if (!dt) return ''
   const d = new Date(dt)
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
 }
 
 function maskPhone(phone) {

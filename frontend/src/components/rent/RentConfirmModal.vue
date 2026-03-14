@@ -49,7 +49,7 @@ const isValid = computed(() =>
 
 function fmt(d) {
   if (!d) return ''
-  return `${d.getMonth()+1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}`
+  return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`
 }
 
 function handleConfirm() {

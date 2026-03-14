@@ -266,7 +266,7 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
         )
         pickup_time = product.pickup_available_time if product else None
         pickup_str = (
-            pickup_time.strftime("%Y/%m/%d") if pickup_time else tr["anytime"]
+            pickup_time.strftime("%m/%d/%Y") if pickup_time else tr["anytime"]
         )
 
         total_price += price
@@ -290,7 +290,7 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
 
     # ── Pickup date ───────────────────────────────────────────────────────────
     pickup_display = (
-        order_out.pickup_time.strftime("%Y/%m/%d")
+        order_out.pickup_time.strftime("%m/%d/%Y")
         if order_out.pickup_time
         else ""
     )

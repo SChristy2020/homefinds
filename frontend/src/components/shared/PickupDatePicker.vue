@@ -109,7 +109,7 @@ const confirmLabel = computed(() => isEn.value ? 'OK' : '確認')
 const displayValue = computed(() => {
   if (!selectedDate.value) return ''
   const d = selectedDate.value
-  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()} ${hourValue.value}:${minuteValue.value}`
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()} ${hourValue.value}:${minuteValue.value}`
 })
 
 // Offset: Sun-first (en) vs Mon-first (zh)
