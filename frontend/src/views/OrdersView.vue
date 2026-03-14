@@ -35,6 +35,9 @@
 
       <!-- Orders table -->
       <div v-else class="orders-table-wrap">
+        <p class="orders-greeting">
+          {{ i18n.t('orders.greeting', { name: userStore.currentUser.first_name }) }}
+        </p>
         <table class="orders-table">
           <thead>
             <tr>
@@ -296,6 +299,13 @@ function fromPickerFormat(str) {
   text-align: center; padding: 60px 20px; color: var(--mid);
 }
 .greeting { font-size: 1rem; }
+
+/* ── Orders greeting ─────────────────────────────────────────────────────── */
+.orders-greeting {
+  font-size: 1rem; font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 16px;
+}
 
 /* ── Orders table ────────────────────────────────────────────────────────── */
 .orders-table-wrap {

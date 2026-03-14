@@ -71,8 +71,8 @@ export default {
     alreadyReservedBtn: '*You have already reserved an item. Please remove it to continue.',
   },
   orderSuccess: {
-    title: 'Booking Confirmed!',
-    greeting: 'Thanks for your booking!',
+    title: 'Order Confirmed!',
+    greeting: 'Thanks for your order!',
     pickupInfo: 'We look forward to seeing you on {date} for pickup.',
     pickupChangeablePrefix: '(Pickup time can be updated in "',
     pickupChangeableLink: 'My Orders',
@@ -118,6 +118,7 @@ export default {
     savePickup: 'Save',
     savePickupToast: 'Pickup time updated',
     cancelPickupEdit: 'Cancel',
+    greeting: 'Hi {name}, thanks for your order!',
   },
   rent: {
     available: 'Available: Apr 25 \u2013 Jun 29, 2026',

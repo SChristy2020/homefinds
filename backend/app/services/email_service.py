@@ -9,7 +9,7 @@ OWNER_EMAIL = "qsa8647332@gmail.com"
 EMAIL_TRANSLATIONS = {
     "zh-TW": {
         "html_lang": "zh-TW",
-        "subject": "預訂成功！訂單編號 {order_number} - HomeFinds",
+        "subject": "預訂成功！訂單編號 {order_number} - Christy's HomeFinds",
         "header": "Christy's HomeFinds 預訂成功!",
         "greeting": "Hi {first_name} 感謝您的預訂!",
         "pickup_info": "期待於 {date} 與您見面領取物品。",
@@ -70,7 +70,7 @@ EMAIL_TRANSLATIONS = {
     },
     "zh-CN": {
         "html_lang": "zh-CN",
-        "subject": "预定成功！订单编号 {order_number} - HomeFinds",
+        "subject": "预定成功！订单编号 {order_number} - Christy's HomeFinds",
         "header": "Christy's HomeFinds 预定成功!",
         "greeting": "Hi {first_name} 感谢您的预定！",
         "pickup_info": "期待于 {date} 与您见面领取物品。",
@@ -131,9 +131,9 @@ EMAIL_TRANSLATIONS = {
     },
     "en": {
         "html_lang": "en",
-        "subject": "Booking Confirmed! Order #{order_number} - HomeFinds",
-        "header": "Christy's HomeFinds Booking Confirmed!",
-        "greeting": "Hi {first_name}, thanks for your booking!",
+        "subject": "Order Confirmed! Order #{order_number} - Christy's HomeFinds",
+        "header": "Christy's HomeFinds Order Confirmed!",
+        "greeting": "Hi {first_name}, thanks for your order!",
         "pickup_info": "We look forward to seeing you on {date} for pickup.",
         "pickup_editable": "(Pickup time can be updated in \"{link}\")",
         "my_orders_link_text": "My Orders",

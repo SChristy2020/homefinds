@@ -118,6 +118,7 @@ export default {
     savePickup: '儲存',
     savePickupToast: '取貨時間已更新',
     cancelPickupEdit: '取消',
+    greeting: 'Hi {name}，感謝您的預訂！',
   },
   rent: {
     available: '開放日期: 4/25 \u2013 6/29, 2026',
