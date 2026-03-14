@@ -99,7 +99,7 @@ CREATE TABLE orders (
   id           INT        NOT NULL AUTO_INCREMENT,
   order_number VARCHAR(20) NULL,
   user_id      INT        NOT NULL,
-  is_paid      TINYINT(1) NOT NULL DEFAULT 0,
+  order_status ENUM('pending_payment','paid','cancelled') NOT NULL DEFAULT 'pending_payment',
   paid_at      DATETIME   NULL,
   pickup_time  DATETIME   NULL,
   created_at   DATETIME   NOT NULL DEFAULT NOW(),

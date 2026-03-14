@@ -86,14 +86,14 @@
               <td class="td-order-no">{{ order.order_number }}</td>
               <td>{{ activeItemCount(order) }}</td>
               <td>{{ orderTotal(order) }}</td>
-              <td :class="order.is_paid ? 'status-paid' : 'status-unpaid'">
+              <td :class="statusClass(order)">
                 <template v-if="isAdmin">
-                  <button class="btn-pay-toggle" :class="order.is_paid ? 'btn-pay-paid' : 'btn-pay-unpaid'" @click.stop="togglePayStatus(order)">
-                    {{ order.is_paid ? i18n.t('orders.paid') : i18n.t('orders.unpaid') }}
+                  <button class="btn-pay-toggle" :class="order.order_status === 'paid' ? 'btn-pay-paid' : 'btn-pay-unpaid'" @click.stop="togglePayStatus(order)">
+                    {{ statusLabel(order) }}
                   </button>
                 </template>
                 <template v-else>
-                  {{ order.is_paid ? i18n.t('orders.paid') : i18n.t('orders.unpaid') }}
+                  {{ statusLabel(order) }}
                 </template>
               </td>
               <td class="td-pickup">
@@ -211,7 +211,7 @@ const filteredOrders = computed(() => {
     const q = searchQuery.value.toLowerCase()
     orders = orders.filter(o =>
       (o.order_number || '').toLowerCase().includes(q) ||
-      (o.is_paid ? i18n.t('orders.paid') : i18n.t('orders.unpaid')).toLowerCase().includes(q)
+      statusLabel(o).toLowerCase().includes(q)
     )
   }
   return [...orders].sort((a, b) => {
@@ -219,7 +219,7 @@ const filteredOrders = computed(() => {
     if (sortColumn.value === 'id')     { aVal = a.id; bVal = b.id }
     else if (sortColumn.value === 'items')  { aVal = activeItemCount(a); bVal = activeItemCount(b) }
     else if (sortColumn.value === 'total')  { aVal = parseFloat(orderTotal(a)); bVal = parseFloat(orderTotal(b)) }
-    else if (sortColumn.value === 'paid')   { aVal = a.is_paid ? 1 : 0; bVal = b.is_paid ? 1 : 0 }
+    else if (sortColumn.value === 'paid')   { const rank = { paid: 2, pending_payment: 1, cancelled: 0 }; aVal = rank[a.order_status] ?? 0; bVal = rank[b.order_status] ?? 0 }
     else if (sortColumn.value === 'pickup') { aVal = a.pickup_time || ''; bVal = b.pickup_time || '' }
     else if (sortColumn.value === 'created') { aVal = a.created_at || ''; bVal = b.created_at || '' }
     else if (sortColumn.value === 'updated') { aVal = a.updated_at || ''; bVal = b.updated_at || '' }
@@ -338,7 +338,7 @@ async function savePickupTime(order) {
 }
 
 async function togglePayStatus(order) {
-  await ordersStore.updatePayStatus(order.id, !order.is_paid)
+  await ordersStore.updatePayStatus(order.id, order.order_status !== 'paid')
   toast.show(i18n.t('orders.payStatusToast'))
 }
 
@@ -357,6 +357,16 @@ function reset() {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+function statusLabel(order) {
+  const map = { paid: i18n.t('orders.paid'), pending_payment: i18n.t('orders.pending_payment'), cancelled: i18n.t('orders.cancelled') }
+  return map[order.order_status] || order.order_status
+}
+
+function statusClass(order) {
+  if (order.order_status === 'paid') return 'status-paid'
+  if (order.order_status === 'cancelled') return 'status-cancelled'
+  return 'status-unpaid'
+}
 
 function activeItemCount(order) {
   return order.items.filter(i => i.status !== 'cancelled').length
@@ -482,8 +492,9 @@ function fromPickerFormat(str) {
 .td-order-no { font-weight: 600; color: var(--charcoal); }
 
 /* Payment status */
-.status-paid   { color: #2e7d32; font-weight: 600; }
-.status-unpaid { color: var(--mid); }
+.status-paid      { color: #2e7d32; font-weight: 600; }
+.status-unpaid    { color: var(--mid); }
+.status-cancelled { color: var(--red, #c0392b); }
 
 /* Admin pay toggle button */
 .btn-pay-toggle {

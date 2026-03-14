@@ -41,7 +41,7 @@ class OrderOut(BaseModel):
     id:           int
     order_number: Optional[str]
     user_id:      int
-    is_paid:      int
+    order_status: str
     paid_at:     Optional[datetime]
     pickup_time: Optional[datetime]
     created_at:  datetime

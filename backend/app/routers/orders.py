@@ -146,7 +146,7 @@ def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    order.is_paid = 1
+    order.order_status = "paid"
     order.paid_at = datetime.now()
     db.commit()
     db.refresh(order)
@@ -157,7 +157,7 @@ def mark_order_unpaid(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    order.is_paid = 0
+    order.order_status = "pending_payment"
     order.paid_at = None
     db.commit()
     db.refresh(order)
