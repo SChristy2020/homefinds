@@ -1,10 +1,17 @@
 // stores/cart.js
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+
+const CART_KEY = 'homefinds_cart'
 
 export const useCartStore = defineStore('cart', () => {
-  const items = ref([])
+  const saved = localStorage.getItem(CART_KEY)
+  const items = ref(saved ? JSON.parse(saved) : [])
   const showModal = ref(false)
+
+  watch(items, (val) => {
+    localStorage.setItem(CART_KEY, JSON.stringify(val))
+  }, { deep: true })
 
   const total = computed(() => items.value.reduce((s, i) => s + i.price, 0))
   const count = computed(() => items.value.length)
