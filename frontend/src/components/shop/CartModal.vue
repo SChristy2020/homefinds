@@ -100,7 +100,7 @@ watch(() => [form.value.lastName, form.value.email, form.value.phone], () => {
 })
 
 const totalOriginal = computed(() =>
-  cart.items.reduce((s, i) => s + (i.originalPrice ?? i.price), 0)
+  parseFloat(cart.items.reduce((s, i) => s + (i.originalPrice ?? i.price), 0).toFixed(2))
 )
 
 const latestPickupTime = computed(() => {
