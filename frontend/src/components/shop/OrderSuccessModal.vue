@@ -161,7 +161,7 @@ const orderNumber = computed(() => {
   const shortId = String(props.order.id).slice(-6)
   const total = totalPrice.value
   const count = String(props.order.items.length).padStart(2, '0')
-  return `${shortId}${total}${count}`
+  return `S${shortId}${Math.floor(total)}${count}`
 })
 </script>
 

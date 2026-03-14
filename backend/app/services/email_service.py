@@ -286,7 +286,7 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
     # ── Order number (matches frontend logic) ─────────────────────────────────
     short_id = str(order_out.id)[-6:]
     count = str(len(items_data)).zfill(2)
-    order_number = f"{short_id}{_format_price(total_price)}{count}"
+    order_number = f"S{short_id}{int(total_price)}{count}"
 
     # ── Pickup date ───────────────────────────────────────────────────────────
     pickup_display = (
