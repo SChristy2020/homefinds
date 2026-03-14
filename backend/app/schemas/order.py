@@ -38,9 +38,10 @@ class OrderCreate(BaseModel):
     locale:      str = "zh-TW"
 
 class OrderOut(BaseModel):
-    id:          int
-    user_id:     int
-    is_paid:     int
+    id:           int
+    order_number: Optional[str]
+    user_id:      int
+    is_paid:      int
     paid_at:     Optional[datetime]
     pickup_time: Optional[datetime]
     created_at:  datetime

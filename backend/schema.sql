@@ -96,14 +96,16 @@ CREATE TABLE product_images (
 
 -- ─── 7. orders ───────────────────────────────
 CREATE TABLE orders (
-  id          INT       NOT NULL AUTO_INCREMENT,
-  user_id     INT       NOT NULL,
-  is_paid     TINYINT(1) NOT NULL DEFAULT 0,
-  paid_at     DATETIME  NULL,
-  pickup_time DATETIME  NULL,
-  created_at  DATETIME  NOT NULL DEFAULT NOW(),
-  updated_at  DATETIME  NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+  id           INT        NOT NULL AUTO_INCREMENT,
+  order_number VARCHAR(20) NULL,
+  user_id      INT        NOT NULL,
+  is_paid      TINYINT(1) NOT NULL DEFAULT 0,
+  paid_at      DATETIME   NULL,
+  pickup_time  DATETIME   NULL,
+  created_at   DATETIME   NOT NULL DEFAULT NOW(),
+  updated_at   DATETIME   NOT NULL DEFAULT NOW() ON UPDATE NOW(),
   PRIMARY KEY (id),
+  UNIQUE KEY uq_orders_order_number (order_number),
   CONSTRAINT fk_orders_user FOREIGN KEY (user_id)
     REFERENCES users(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

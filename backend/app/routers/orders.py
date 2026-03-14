@@ -102,6 +102,11 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     for item in body.items:
         _refresh_summary(item.product_id, db)
 
+    short_id = str(order.id)[-6:]
+    total    = int(sum(item.price for item in body.items))
+    count    = str(len(body.items)).zfill(2)
+    order.order_number = f'S{short_id}{total}{count}'
+
     user.has_reservation = 1
     db.commit()
     db.refresh(order)

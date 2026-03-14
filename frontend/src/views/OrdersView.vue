@@ -83,7 +83,7 @@
           <tbody v-for="order in paginatedOrders" :key="order.id">
             <!-- Order summary row -->
             <tr class="order-row" :class="{ expanded: expandedOrderId === order.id }" @click="toggleExpand(order.id)">
-              <td class="td-order-no">{{ formatOrderId(order.id) }}</td>
+              <td class="td-order-no">{{ order.order_number }}</td>
               <td>{{ activeItemCount(order) }}</td>
               <td>{{ orderTotal(order) }}</td>
               <td :class="order.is_paid ? 'status-paid' : 'status-unpaid'">
@@ -210,7 +210,7 @@ const filteredOrders = computed(() => {
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     orders = orders.filter(o =>
-      formatOrderId(o.id).toLowerCase().includes(q) ||
+      (o.order_number || '').toLowerCase().includes(q) ||
       (o.is_paid ? i18n.t('orders.paid') : i18n.t('orders.unpaid')).toLowerCase().includes(q)
     )
   }
@@ -273,10 +273,10 @@ const SortIcon = {
 }
 
 onMounted(async () => {
-  if (userStore.currentUser && ordersStore.orders.length === 0) {
+  if (userStore.currentUser) {
     if (userStore.currentUser.is_admin === 1) {
       await ordersStore.fetchAllOrders()
-    } else {
+    } else if (ordersStore.orders.length === 0) {
       await ordersStore.fetchOrdersByUser(userStore.currentUser.id)
     }
   }
@@ -357,9 +357,6 @@ function reset() {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatOrderId(id) {
-  return 'S' + String(id).padStart(6, '0')
-}
 
 function activeItemCount(order) {
   return order.items.filter(i => i.status !== 'cancelled').length
