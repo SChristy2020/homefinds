@@ -65,6 +65,9 @@
               <th class="sortable" @click="toggleSort('pickup')">
                 {{ i18n.t('orders.pickupTimeLabel') }}<SortIcon col="pickup" :active="sortColumn" :dir="sortDirection" />
               </th>
+              <th class="sortable" @click="toggleSort('created')">
+                {{ i18n.t('orders.createdAt') }}<SortIcon col="created" :active="sortColumn" :dir="sortDirection" />
+              </th>
             </tr>
           </thead>
           <tbody v-for="order in paginatedOrders" :key="order.id">
@@ -93,11 +96,12 @@
                   </div>
                 </template>
               </td>
+              <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
             </tr>
 
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
-              <td colspan="5">
+              <td colspan="6">
                 <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" @cancel="handleCancel" />
 
                 <!-- Total summary -->
@@ -192,6 +196,7 @@ const filteredOrders = computed(() => {
     else if (sortColumn.value === 'total')  { aVal = parseFloat(orderTotal(a)); bVal = parseFloat(orderTotal(b)) }
     else if (sortColumn.value === 'paid')   { aVal = a.is_paid ? 1 : 0; bVal = b.is_paid ? 1 : 0 }
     else if (sortColumn.value === 'pickup') { aVal = a.pickup_time || ''; bVal = b.pickup_time || '' }
+    else if (sortColumn.value === 'created') { aVal = a.created_at || ''; bVal = b.created_at || '' }
     else { aVal = a.id; bVal = b.id }
     if (aVal < bVal) return sortDirection.value === 'asc' ? -1 : 1
     if (aVal > bVal) return sortDirection.value === 'asc' ? 1 : -1
@@ -362,6 +367,14 @@ function formatDate(isoStr) {
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
 }
 
+function formatDateTime(isoStr) {
+  if (!isoStr) return '—'
+  const d = new Date(isoStr)
+  const date = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
+  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  return `${date} ${time}`
+}
+
 function toPickerFormat(isoStr) {
   if (!isoStr) return ''
   const d = new Date(isoStr)
@@ -433,7 +446,11 @@ function fromPickerFormat(str) {
   transition: background 0.15s;
 }
 .order-row:hover { background: var(--warm-white); }
-.order-row.expanded { background: var(--warm-white); }
+.order-row.expanded {
+  background: #edf4f4;
+  border-bottom: none;
+  font-weight: 600;
+}
 .orders-table td {
   padding: 10px 12px; vertical-align: middle;
 }
@@ -445,6 +462,7 @@ function fromPickerFormat(str) {
 
 /* Pickup time cell */
 .td-pickup { white-space: nowrap; }
+.td-created { white-space: nowrap; color: var(--mid); font-size: 0.82rem; }
 .btn-edit-icon {
   background: none; border: none; cursor: pointer;
   color: var(--accent); padding: 2px 4px; margin-left: 4px;
@@ -475,8 +493,11 @@ function fromPickerFormat(str) {
 
 /* ── Expand row ──────────────────────────────────────────────────────────── */
 .expand-row > td {
-  padding: 0 0 0 0;
-  border-bottom: 2px solid var(--border);
+  padding: 0;
+  background: #fff;
+  border-top: 1px solid var(--border);    
+  border-top: 1.5px solid #858585;
+  border-bottom: 1.5px solid #858585;
 }
 
 /* ── Order summary ───────────────────────────────────────────────────────── */

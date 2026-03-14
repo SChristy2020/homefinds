@@ -119,6 +119,7 @@ export default {
     savePickupToast: '取货时间已更新',
     cancelPickupEdit: '取消',
     greeting: 'Hi {name}，感谢您的预订！',
+    createdAt: '订单成立时间',
     dtSearch: '搜索订单…',
     dtShowing: '显示第 {from}–{to} 条，共 {total} 条',
   },

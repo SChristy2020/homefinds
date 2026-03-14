@@ -77,7 +77,7 @@ function formatPosition(n) {
   text-align: left; padding: 8px 12px;
   font-size: 0.78rem; font-weight: 600; color: var(--mid);
   border-bottom: 1px solid var(--border); white-space: nowrap;
-  background: #faf9f7;
+  background: #ffffff;
 }
 .item-row { border-bottom: 1px solid var(--border); }
 .item-row:last-child { border-bottom: none; }

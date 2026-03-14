@@ -119,6 +119,7 @@ export default {
     savePickupToast: 'Pickup time updated',
     cancelPickupEdit: 'Cancel',
     greeting: 'Hi {name}, thanks for your order!',
+    createdAt: 'Order Date',
     dtSearch: 'Search orders…',
     dtShowing: 'Showing {from}–{to} of {total} entries',
   },
