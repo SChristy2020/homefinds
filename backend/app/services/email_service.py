@@ -210,8 +210,9 @@ def _position_label(pos, tr):
 
 
 def _format_price(value):
-    """Return integer string if whole number, else float string."""
-    return str(int(value)) if value == int(value) else str(value)
+    """Format price: integer if whole number, else 2 decimal places."""
+    rounded = round(value, 2)
+    return str(int(rounded)) if rounded == int(rounded) else f"{rounded:.2f}"
 
 
 def send_order_confirmation(user, order_out, db, locale="zh-TW"):

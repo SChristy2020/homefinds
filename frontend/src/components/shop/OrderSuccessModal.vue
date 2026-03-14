@@ -84,8 +84,8 @@
       <div class="total-summary">
         <span>{{ i18n.t('cart.itemCountPrefix') }}{{ order.items.length }}{{ i18n.t('cart.itemCountSuffix') }}</span>
         <span class="total-amount">
-          <span v-if="totalOriginal > totalPrice" class="strikethrough">${{ totalOriginal }}</span>
-          ${{ totalPrice }}
+          <span v-if="totalOriginal > totalPrice" class="strikethrough">${{ formatPrice(totalOriginal) }}</span>
+          ${{ formatPrice(totalPrice) }}
         </span>
       </div>
 
@@ -146,12 +146,17 @@ const formattedPickup = computed(() => {
 })
 
 const totalPrice = computed(() =>
-  props.order?.items.reduce((s, i) => s + i.price, 0) ?? 0
+  Math.round((props.order?.items.reduce((s, i) => s + i.price, 0) ?? 0) * 100) / 100
 )
 
 const totalOriginal = computed(() =>
-  props.order?.items.reduce((s, i) => s + (i.originalPrice ?? i.price), 0) ?? 0
+  Math.round((props.order?.items.reduce((s, i) => s + (i.originalPrice ?? i.price), 0) ?? 0) * 100) / 100
 )
+
+function formatPrice(value) {
+  const rounded = Math.round(value * 100) / 100
+  return rounded % 1 === 0 ? String(Math.floor(rounded)) : rounded.toFixed(2)
+}
 
 const hasNotFirst = computed(() =>
   props.order?.items.some(i => i.waitingPosition > 1) ?? false
