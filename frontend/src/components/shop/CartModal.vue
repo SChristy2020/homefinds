@@ -81,18 +81,52 @@ import UserInfoForm from '@/components/shared/UserInfoForm.vue'
 import ShoppingGuideContent from '@/components/shared/ShoppingGuideContent.vue'
 import { useCartStore } from '@/stores/cart'
 import { useOrdersStore } from '@/stores/orders'
+import { useUserStore } from '@/stores/user'
 import { useI18nStore } from '@/stores/i18n'
 
-defineProps({ modelValue: Boolean })
+const FORM_USER_KEY = 'homefinds_form_user'
+
+function loadSavedUser() {
+  try { return JSON.parse(localStorage.getItem(FORM_USER_KEY)) || {} } catch { return {} }
+}
+
+const props = defineProps({ modelValue: Boolean })
 const emit = defineEmits(['update:modelValue'])
 
 const cart = useCartStore()
 const ordersStore = useOrdersStore()
+const userStore = useUserStore()
 const onOrderSuccess = inject('onOrderSuccess')
 const i18n = useI18nStore()
 
-const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', estimatedPickup: '', zelleRefund: 'phone', zelleRefundOther: '' })
+const saved = loadSavedUser()
+const cu = userStore.currentUser
+const form = ref({
+  firstName:        cu?.first_name   || saved.firstName   || '',
+  lastName:         cu?.last_name    || saved.lastName    || '',
+  salutation:       cu?.salutation   || saved.salutation  || 'Mr.',
+  email:            cu?.email        || saved.email       || '',
+  phone:            cu?.phone        || saved.phone       || '',
+  estimatedPickup:  '',
+  zelleRefund:      cu?.zelle_refund || saved.zelleRefund || 'phone',
+  zelleRefundOther: saved.zelleRefundOther || '',
+})
 const duplicateProductIds = ref([])
+
+// 當 modal 開啟時，從 localStorage / userStore 補填空白欄位
+watch(() => props.modelValue, (open) => {
+  if (!open) return
+  const s = loadSavedUser()
+  const cu = userStore.currentUser
+  const f = form.value
+  if (!f.firstName)        f.firstName        = cu?.first_name   || s.firstName   || ''
+  if (!f.lastName)         f.lastName         = cu?.last_name    || s.lastName    || ''
+  if (f.salutation === 'Mr.' && (cu?.salutation || s.salutation))
+                           f.salutation       = cu?.salutation   || s.salutation
+  if (!f.email)            f.email            = cu?.email        || s.email       || ''
+  if (!f.phone)            f.phone            = cu?.phone        || s.phone       || ''
+  if (!f.zelleRefundOther) f.zelleRefundOther = s.zelleRefundOther || ''
+})
 
 // 當 user 身份欄位變動時清除重複錯誤
 watch(() => [form.value.lastName, form.value.email, form.value.phone], () => {
@@ -191,6 +225,16 @@ async function handleConfirm() {
       }
     }),
   }
+
+  localStorage.setItem(FORM_USER_KEY, JSON.stringify({
+    firstName:        formSnapshot.firstName,
+    lastName:         formSnapshot.lastName,
+    salutation:       formSnapshot.salutation,
+    email:            formSnapshot.email,
+    phone:            formSnapshot.phone,
+    zelleRefund:      formSnapshot.zelleRefund,
+    zelleRefundOther: formSnapshot.zelleRefundOther,
+  }))
 
   cart.clear()
   emit('update:modelValue', false)
