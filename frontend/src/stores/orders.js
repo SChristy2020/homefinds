@@ -77,8 +77,15 @@ export const useOrdersStore = defineStore('orders', () => {
     }
   }
 
+  async function updatePickupTime(orderId, isoTimeStr) {
+    const updated = await api.put(`/api/orders/${orderId}/pickup_time`, { pickup_time: isoTimeStr })
+    const idx = orders.value.findIndex(o => o.id === orderId)
+    if (idx !== -1) orders.value[idx] = updated
+    return updated
+  }
+
   // 保留介面相容性，waiting list 功能需後端另行實作
   function getWaitingList() { return [] }
 
-  return { orders, createOrder, fetchOrdersByUser, cancelOrderItem, getWaitingList }
+  return { orders, createOrder, fetchOrdersByUser, cancelOrderItem, updatePickupTime, getWaitingList }
 })

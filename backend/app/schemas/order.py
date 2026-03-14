@@ -20,9 +20,16 @@ class OrderItemOut(BaseModel):
     cancelled_at:     Optional[datetime]
     updated_at:       datetime
     waiting_position: Optional[int] = None
+    product_name:     Optional[str] = None
+    original_price:   Optional[float] = None
+    image_url:        Optional[str] = None
+    available_time:   Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
+class OrderPickupTimeUpdate(BaseModel):
+    pickup_time: Optional[datetime] = None
 
 class OrderCreate(BaseModel):
     user_id:     int

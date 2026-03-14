@@ -26,15 +26,82 @@
 
     <!-- Logged in -->
     <div v-else>
-      <template v-if="foundOrder && !foundOrder._noOrders">
-        <OrderPickupBanner :order="foundOrder" @notify="handleNotify" />
-        <OrderItemList :order="foundOrder" @cancel="handleCancel" />
-      </template>
-
-      <div v-else class="no-orders-state">
+      <!-- No orders -->
+      <div v-if="ordersStore.orders.length === 0" class="no-orders-state">
         <p class="greeting">
           {{ userStore.currentUser.salutation }} {{ userStore.currentUser.last_name }}，{{ i18n.t('orders.noOrders') }}
         </p>
+      </div>
+
+      <!-- Orders table -->
+      <div v-else class="orders-table-wrap">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>{{ i18n.t('orders.orderNo') }}</th>
+              <th>{{ i18n.t('orders.itemCount') }}</th>
+              <th>{{ i18n.t('orders.orderTotal') }}</th>
+              <th>{{ i18n.t('orders.payStatus') }}</th>
+              <th>{{ i18n.t('orders.pickupTimeLabel') }}</th>
+            </tr>
+          </thead>
+          <tbody v-for="order in ordersStore.orders" :key="order.id">
+            <!-- Order summary row -->
+            <tr class="order-row" :class="{ expanded: expandedOrderId === order.id }" @click="toggleExpand(order.id)">
+              <td class="td-order-no">{{ formatOrderId(order.id) }}</td>
+              <td>{{ activeItemCount(order) }}</td>
+              <td>{{ orderTotal(order) }}</td>
+              <td :class="order.is_paid ? 'status-paid' : 'status-unpaid'">
+                {{ order.is_paid ? i18n.t('orders.paid') : i18n.t('orders.unpaid') }}
+              </td>
+              <td class="td-pickup">
+                <template v-if="editingOrderId !== order.id">
+                  <span>{{ formatDate(order.pickup_time) }}</span>
+                  <button class="btn-edit-icon" @click.stop="startEditPickup(order)" title="編輯">
+                    <Pencil :size="12" />
+                  </button>
+                </template>
+                <template v-else>
+                  <div class="pickup-edit-wrap" @click.stop>
+                    <PickupDatePicker v-model="editPickupValue" />
+                    <div class="pickup-edit-actions">
+                      <button class="btn-save-pickup" @click.stop="savePickupTime(order)">{{ i18n.t('orders.savePickup') }}</button>
+                      <button class="btn-cancel-pickup" @click.stop="cancelEditPickup">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                    </div>
+                  </div>
+                </template>
+              </td>
+            </tr>
+
+            <!-- Expanded items row -->
+            <tr v-if="expandedOrderId === order.id" class="expand-row">
+              <td colspan="5">
+                <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" @cancel="handleCancel" />
+
+                <!-- Total summary -->
+                <div class="order-summary">
+                  <span class="summary-label">
+                    {{ i18n.t('cart.itemCountPrefix') }} {{ activeItemCount(order) }} {{ i18n.t('cart.itemCountSuffix') }}
+                  </span>
+                  <span class="summary-price">
+                    <span v-if="hasDiscount(order)" class="strikethrough">${{ orderOriginalTotal(order) }}</span>
+                    ${{ orderTotal(order) }}
+                  </span>
+                </div>
+
+                <!-- Not-first warning -->
+                <p v-if="hasNotFirstPosition(order)" class="not-first-warning">
+                  {{ i18n.t('orderSuccess.notFirstWarning') }}
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 購物須知 -->
+      <div class="shopping-guide-wrap">
+        <ShoppingGuideContent />
       </div>
 
       <button class="btn-outline mt-16 back-btn" @click="reset">
@@ -46,13 +113,14 @@
 
 <script setup>
 import { ref } from 'vue'
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, Pencil } from 'lucide-vue-next'
 import { useOrdersStore } from '@/stores/orders'
 import { useUserStore } from '@/stores/user'
 import { useToastStore } from '@/stores/toast'
 import { useI18nStore } from '@/stores/i18n'
-import OrderPickupBanner from '@/components/orders/OrderPickupBanner.vue'
 import OrderItemList from '@/components/orders/OrderItemList.vue'
+import ShoppingGuideContent from '@/components/shared/ShoppingGuideContent.vue'
+import PickupDatePicker from '@/components/shared/PickupDatePicker.vue'
 
 const ordersStore = useOrdersStore()
 const userStore = useUserStore()
@@ -61,7 +129,10 @@ const i18n = useI18nStore()
 
 const form = ref({ name: '', email: '', phone: '' })
 const errors = ref({ name: '', email: '', phone: '' })
-const foundOrder = ref(null)
+
+const expandedOrderId = ref(null)
+const editingOrderId = ref(null)
+const editPickupValue = ref('')
 
 function onNameInput() {
   form.value.name = form.value.name.replace(/[^a-zA-Z\u4e00-\u9fff\u3400-\u4dbf\s'-]/g, '')
@@ -88,29 +159,111 @@ async function handleLookup() {
   if (!validate()) return
   const user = await userStore.lookup(form.value.name, form.value.email, form.value.phone)
   if (user) {
-    const result = await ordersStore.fetchOrdersByUser(user.id)
-    foundOrder.value = result.length > 0 ? result[result.length - 1] : { _noOrders: true }
+    await ordersStore.fetchOrdersByUser(user.id)
+    if (ordersStore.orders.length > 0) {
+      expandedOrderId.value = ordersStore.orders[ordersStore.orders.length - 1].id
+    }
   }
+}
+
+function toggleExpand(orderId) {
+  expandedOrderId.value = expandedOrderId.value === orderId ? null : orderId
+  if (editingOrderId.value && editingOrderId.value !== orderId) {
+    editingOrderId.value = null
+  }
+}
+
+function startEditPickup(order) {
+  editingOrderId.value = order.id
+  editPickupValue.value = toPickerFormat(order.pickup_time)
+}
+
+function cancelEditPickup() {
+  editingOrderId.value = null
+  editPickupValue.value = ''
+}
+
+async function savePickupTime(order) {
+  const isoStr = fromPickerFormat(editPickupValue.value)
+  await ordersStore.updatePickupTime(order.id, isoStr)
+  toast.show(i18n.t('orders.savePickupToast'))
+  editingOrderId.value = null
 }
 
 async function handleCancel(itemId) {
   await ordersStore.cancelOrderItem(itemId)
   toast.show(i18n.t('orders.cancelToast'))
-  foundOrder.value = ordersStore.orders.find(o => o.id === foundOrder.value.id) || null
-}
-
-function handleNotify() {
-  toast.show(i18n.t('orders.notifyToast'))
 }
 
 function reset() {
-  foundOrder.value = null
+  ordersStore.orders = []
+  expandedOrderId.value = null
+  editingOrderId.value = null
   userStore.logout()
   form.value = { name: '', email: '', phone: '' }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatOrderId(id) {
+  return 'S' + String(id).padStart(6, '0')
+}
+
+function activeItemCount(order) {
+  return order.items.filter(i => i.status !== 'cancelled').length
+}
+
+function orderTotal(order) {
+  return order.items
+    .filter(i => i.status !== 'cancelled')
+    .reduce((s, i) => s + i.price, 0)
+    .toFixed(2)
+    .replace(/\.00$/, '')
+}
+
+function orderOriginalTotal(order) {
+  return order.items
+    .filter(i => i.status !== 'cancelled')
+    .reduce((s, i) => s + (i.original_price || i.price), 0)
+    .toFixed(2)
+    .replace(/\.00$/, '')
+}
+
+function hasDiscount(order) {
+  return order.items.some(i => i.status !== 'cancelled' && i.original_price && i.original_price > i.price)
+}
+
+function hasNotFirstPosition(order) {
+  return order.items.some(i => i.status !== 'cancelled' && i.waiting_position > 1)
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return '—'
+  const d = new Date(isoStr)
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
+}
+
+function toPickerFormat(isoStr) {
+  if (!isoStr) return ''
+  const d = new Date(isoStr)
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const year = d.getFullYear()
+  const hour = String(d.getHours()).padStart(2, '0')
+  const min = String(d.getMinutes()).padStart(2, '0')
+  return `${month}/${day}/${year} ${hour}:${min}`
+}
+
+function fromPickerFormat(str) {
+  if (!str) return null
+  const parts = str.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/)
+  if (!parts) return null
+  return new Date(+parts[3], +parts[1] - 1, +parts[2], +parts[4], +parts[5]).toISOString()
 }
 </script>
 
 <style scoped>
+/* ── Lookup form ─────────────────────────────────────────────────────────── */
 .orders-lookup {
   max-width: 380px; margin: 40px auto; text-align: center;
 }
@@ -125,12 +278,104 @@ function reset() {
 .field-error {
   margin-top: 4px; font-size: 0.75rem; color: var(--red); text-align: left;
 }
-.input-error {
-  border-color: var(--red) !important;
-}
-.back-btn { display: inline-flex; align-items: center; gap: 5px; }
+.input-error { border-color: var(--red) !important; }
+
+/* ── No orders ───────────────────────────────────────────────────────────── */
 .no-orders-state {
   text-align: center; padding: 60px 20px; color: var(--mid);
 }
 .greeting { font-size: 1rem; }
+
+/* ── Orders table ────────────────────────────────────────────────────────── */
+.orders-table-wrap {
+  width: 100%; overflow-x: auto;
+}
+.orders-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.orders-table thead tr {
+  border-bottom: 2px solid var(--border);
+}
+.orders-table th {
+  text-align: left; padding: 8px 12px;
+  font-size: 0.82rem; font-weight: 600; color: var(--mid);
+  white-space: nowrap;
+}
+.order-row {
+  cursor: pointer; border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.order-row:hover { background: var(--warm-white); }
+.order-row.expanded { background: var(--warm-white); }
+.orders-table td {
+  padding: 10px 12px; vertical-align: middle;
+}
+.td-order-no { font-weight: 600; color: var(--charcoal); }
+
+/* Payment status */
+.status-paid   { color: #2e7d32; font-weight: 600; }
+.status-unpaid { color: var(--mid); }
+
+/* Pickup time cell */
+.td-pickup { white-space: nowrap; }
+.btn-edit-icon {
+  background: none; border: none; cursor: pointer;
+  color: var(--accent); padding: 2px 4px; margin-left: 4px;
+  border-radius: 3px; vertical-align: middle;
+  transition: opacity 0.15s;
+}
+.btn-edit-icon:hover { opacity: 0.7; }
+
+/* Inline pickup edit */
+.pickup-edit-wrap {
+  display: flex; flex-direction: column; gap: 6px; min-width: 220px;
+}
+.pickup-edit-actions {
+  display: flex; gap: 6px;
+}
+.btn-save-pickup {
+  padding: 4px 12px; background: var(--charcoal); color: #fff;
+  border: none; border-radius: var(--radius); font-size: 0.78rem;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.btn-save-pickup:hover { opacity: 0.8; }
+.btn-cancel-pickup {
+  padding: 4px 10px; background: none; color: var(--mid);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 0.78rem; cursor: pointer;
+}
+.btn-cancel-pickup:hover { border-color: var(--charcoal); color: var(--charcoal); }
+
+/* ── Expand row ──────────────────────────────────────────────────────────── */
+.expand-row > td {
+  padding: 0 0 0 0;
+  border-bottom: 2px solid var(--border);
+}
+
+/* ── Order summary ───────────────────────────────────────────────────────── */
+.order-summary {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  font-size: 0.88rem; font-weight: 600;
+}
+.summary-price { display: flex; align-items: center; gap: 6px; }
+.strikethrough {
+  text-decoration: line-through; color: var(--mid); font-weight: 400;
+  font-size: 0.82rem;
+}
+.not-first-warning {
+  margin: 0; padding: 8px 16px 12px;
+  color: var(--red, #c0392b); font-size: 0.8rem; font-weight: 600;
+}
+
+/* ── Shopping guide ──────────────────────────────────────────────────────── */
+.shopping-guide-wrap {
+  width: 100%; margin-top: 24px;
+  border-top: 1.5px solid var(--border); padding-top: 20px;
+}
+
+/* ── Back button ─────────────────────────────────────────────────────────── */
+.back-btn { display: inline-flex; align-items: center; gap: 5px; }
+.mt-16 { margin-top: 16px; }
 </style>

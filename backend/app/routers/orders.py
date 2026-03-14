@@ -4,9 +4,10 @@ from datetime import datetime
 import threading
 from app.database import get_db, SessionLocal
 from app.models.order import Order, OrderItem
+from app.models.product import Product, ProductTranslation, ProductImage
 from app.models.user import User
 from app.models.waiting_list import WaitingList
-from app.schemas.order import OrderCreate, OrderOut, OrderItemOut
+from app.schemas.order import OrderCreate, OrderOut, OrderItemOut, OrderPickupTimeUpdate
 from app.routers.waiting_list import _refresh_summary
 from app.services.email_service import send_order_confirmation
 
@@ -29,6 +30,23 @@ def _build_out(order, db):
         )
         item_out = OrderItemOut.model_validate(item)
         item_out.waiting_position = position
+
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if product:
+            item_out.original_price = float(product.original_price) if product.original_price else None
+            item_out.available_time = product.pickup_available_time
+            translation = db.query(ProductTranslation).filter(
+                ProductTranslation.product_id == item.product_id,
+                ProductTranslation.locale == "zh-TW",
+            ).first()
+            if translation:
+                item_out.product_name = translation.name
+            image = db.query(ProductImage).filter(
+                ProductImage.product_id == item.product_id,
+            ).order_by(ProductImage.sort_order).first()
+            if image:
+                item_out.image_url = image.url
+
         enriched.append(item_out)
     out.items = enriched
     return out
@@ -114,6 +132,16 @@ def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
     order.is_paid = 1
     order.paid_at = datetime.now()
+    db.commit()
+    db.refresh(order)
+    return _build_out(order, db)
+
+@router.put("/{order_id}/pickup_time", response_model=OrderOut)
+def update_pickup_time(order_id: int, body: OrderPickupTimeUpdate, db: Session = Depends(get_db)):
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    order.pickup_time = body.pickup_time
     db.commit()
     db.refresh(order)
     return _build_out(order, db)
