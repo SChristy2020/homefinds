@@ -7,6 +7,7 @@ class ItemStatus(str, Enum):
     reserved  = "reserved"
     cancelled = "cancelled"
     paid      = "paid"
+    sold      = "sold"
 
 class OrderItemCreate(BaseModel):
     product_id: int
@@ -18,6 +19,7 @@ class OrderItemOut(BaseModel):
     price:            float
     status:           str
     cancelled_at:     Optional[datetime]
+    sold_at:          Optional[datetime]
     updated_at:       datetime
     waiting_position: Optional[int] = None
     product_name:     Optional[str] = None

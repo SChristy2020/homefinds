@@ -148,6 +148,47 @@ def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
     order.order_status = "paid"
     order.paid_at = datetime.now()
+
+    sold_at = datetime.now()
+
+    # Mark each reserved item in this order as paid and cascade sold status
+    paid_items = db.query(OrderItem).filter(
+        OrderItem.order_id == order_id,
+        OrderItem.status == "reserved",
+    ).all()
+
+    affected_order_ids = set()
+
+    for item in paid_items:
+        item.status = "paid"
+
+        # Mark the product as sold
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if product:
+            product.status = "sold"
+
+        # Mark all other reserved order items for this product as sold
+        other_items = db.query(OrderItem).filter(
+            OrderItem.product_id == item.product_id,
+            OrderItem.order_id != order_id,
+            OrderItem.status == "reserved",
+        ).all()
+        for other_item in other_items:
+            other_item.status = "sold"
+            other_item.sold_at = sold_at
+            affected_order_ids.add(other_item.order_id)
+
+    db.flush()
+
+    # Auto-cancel orders where all items are now sold or cancelled
+    for affected_id in affected_order_ids:
+        affected_order = db.query(Order).filter(Order.id == affected_id).first()
+        if not affected_order or affected_order.order_status != "pending_payment":
+            continue
+        all_items = db.query(OrderItem).filter(OrderItem.order_id == affected_id).all()
+        if all_items and all(i.status in ("sold", "cancelled") for i in all_items):
+            affected_order.order_status = "cancelled"
+
     db.commit()
     db.refresh(order)
     return _build_out(order, db)

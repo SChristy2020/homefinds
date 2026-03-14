@@ -130,6 +130,10 @@ export default {
     payStatusToast: '付款狀態已更新',
     dtSearch: '搜尋訂單…',
     dtShowing: '顯示第 {from}–{to} 筆，共 {total} 筆',
+    soldAt: '已售出',
+    noPickup: '無法取貨',
+    allSoldNote: '*商品皆售出，無法付款',
+    purchaseSuccess: '🎉 搶購成功',
   },
   rent: {
     available: '開放日期: 4/25 \u2013 6/29, 2026',

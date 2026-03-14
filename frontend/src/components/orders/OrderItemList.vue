@@ -11,8 +11,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in items" :key="item.id" class="item-row">
-          <!-- 編圖：序號 + 縮圖 -->
+        <tr v-for="(item, index) in items" :key="item.id" class="item-row" :class="{ 'item-row-sold': item.status === 'sold' }">
+          <!-- 縮圖：序號 + 縮圖 -->
           <td class="td-thumb">
             <div class="thumb-wrap">
               <span class="item-index">{{ index + 1 }}</span>
@@ -35,7 +35,16 @@
 
           <!-- 目前順位 -->
           <td class="td-position">
-            <span class="position-badge">{{ formatPosition(item.waiting_position) }}</span>
+            <template v-if="item.status === 'sold'">
+              <span class="position-sold">{{ i18n.t('orders.soldAt') }}</span>
+              <span class="position-sold-date">{{ formatSoldAt(item.sold_at) }}</span>
+            </template>
+            <template v-else-if="item.status === 'paid' && orderStatus === 'paid'">
+              <span class="position-purchased">{{ i18n.t('orders.purchaseSuccess') }}</span>
+            </template>
+            <template v-else>
+              <span class="position-badge">{{ formatPosition(item.waiting_position) }}</span>
+            </template>
           </td>
         </tr>
       </tbody>
@@ -46,7 +55,7 @@
 <script setup>
 import { useI18nStore } from '@/stores/i18n'
 
-const props = defineProps({ items: Array })
+const props = defineProps({ items: Array, orderStatus: String })
 defineEmits(['cancel'])
 const i18n = useI18nStore()
 
@@ -65,6 +74,12 @@ function formatPosition(n) {
   if (!n) return '—'
   return i18n.t('orderSuccess.positionFallback', { n })
 }
+
+function formatSoldAt(isoStr) {
+  if (!isoStr) return ''
+  const d = new Date(isoStr)
+  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`
+}
 </script>
 
 <style scoped>
@@ -82,6 +97,9 @@ function formatPosition(n) {
 .item-row { border-bottom: 1px solid var(--border); }
 .item-row:last-child { border-bottom: none; }
 .item-table td { padding: 10px 12px; vertical-align: middle; }
+
+/* 售出 row */
+.item-row-sold { background: #f0f0f0; opacity: 0.75; }
 
 /* 縮圖欄 */
 .th-no { width: 80px; }
@@ -111,4 +129,7 @@ function formatPosition(n) {
 /* 目前順位 */
 .td-position { white-space: nowrap; }
 .position-badge { color: var(--accent); font-weight: 700; font-size: 0.82rem; }
+.position-sold { color: var(--red, #c0392b); font-weight: 700; font-size: 0.82rem; display: block; }
+.position-sold-date { color: var(--red, #c0392b); font-size: 0.75rem; }
+.position-purchased { color: var(--accent); font-weight: 700; font-size: 0.82rem; }
 </style>

@@ -130,6 +130,10 @@ export default {
     payStatusToast: 'Payment status updated',
     dtSearch: 'Search orders…',
     dtShowing: 'Showing {from}–{to} of {total} entries',
+    soldAt: 'Sold',
+    noPickup: 'Pickup Unavailable',
+    allSoldNote: '*All items sold out. Payment disabled.',
+    purchaseSuccess: '🎉 Purchased!',
   },
   rent: {
     available: 'Available: Apr 25 \u2013 Jun 29, 2026',

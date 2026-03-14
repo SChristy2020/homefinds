@@ -82,7 +82,7 @@
           </thead>
           <tbody v-for="order in paginatedOrders" :key="order.id">
             <!-- Order summary row -->
-            <tr class="order-row" :class="{ expanded: expandedOrderId === order.id }" @click="toggleExpand(order.id)">
+            <tr class="order-row" :class="{ expanded: expandedOrderId === order.id, 'order-row-dimmed': isAllSoldCancelled(order) }" @click="toggleExpand(order.id)">
               <td class="td-order-no">{{ order.order_number }}</td>
               <td>{{ activeItemCount(order) }}</td>
               <td>{{ orderTotal(order) }}</td>
@@ -115,7 +115,10 @@
                 </template>
               </td>
               <td class="td-pickup">
-                <template v-if="editingOrderId !== order.id">
+                <template v-if="order.order_status === 'cancelled'">
+                  <span class="no-pickup-text">{{ i18n.t('orders.noPickup') }}</span>
+                </template>
+                <template v-else-if="editingOrderId !== order.id">
                   <span>{{ formatDateTime(order.pickup_time) }}</span>
                   <button class="btn-edit-icon" @click.stop="startEditPickup(order)" title="編輯">
                     <Pencil :size="12" />
@@ -143,7 +146,7 @@
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
               <td :colspan="isAdmin ? 10 : 6">
-                <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" @cancel="handleCancel" />
+                <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" :orderStatus="order.order_status" @cancel="handleCancel" />
 
                 <!-- Total summary -->
                 <div class="order-summary">
@@ -153,6 +156,7 @@
                   <span class="summary-price">
                     <span v-if="hasDiscount(order)" class="strikethrough">${{ orderOriginalTotal(order) }}</span>
                     ${{ orderTotal(order) }}
+                    <span v-if="isAllSoldCancelled(order)" class="all-sold-note">{{ i18n.t('orders.allSoldNote') }}</span>
                   </span>
                 </div>
 
@@ -402,12 +406,12 @@ function statusClass(order) {
 }
 
 function activeItemCount(order) {
-  return order.items.filter(i => i.status !== 'cancelled').length
+  return order.items.filter(i => i.status !== 'cancelled' && i.status !== 'sold').length
 }
 
 function orderTotal(order) {
   return order.items
-    .filter(i => i.status !== 'cancelled')
+    .filter(i => i.status !== 'cancelled' && i.status !== 'sold')
     .reduce((s, i) => s + i.price, 0)
     .toFixed(2)
     .replace(/\.00$/, '')
@@ -415,18 +419,22 @@ function orderTotal(order) {
 
 function orderOriginalTotal(order) {
   return order.items
-    .filter(i => i.status !== 'cancelled')
+    .filter(i => i.status !== 'cancelled' && i.status !== 'sold')
     .reduce((s, i) => s + (i.original_price || i.price), 0)
     .toFixed(2)
     .replace(/\.00$/, '')
 }
 
 function hasDiscount(order) {
-  return order.items.some(i => i.status !== 'cancelled' && i.original_price && i.original_price > i.price)
+  return order.items.some(i => i.status !== 'cancelled' && i.status !== 'sold' && i.original_price && i.original_price > i.price)
 }
 
 function hasNotFirstPosition(order) {
-  return order.items.some(i => i.status !== 'cancelled' && i.waiting_position > 1)
+  return order.items.some(i => i.status === 'reserved' && i.waiting_position > 1)
+}
+
+function isAllSoldCancelled(order) {
+  return order.order_status === 'cancelled' && order.items.some(i => i.status === 'sold')
 }
 
 function formatDateTime(isoStr) {
@@ -510,7 +518,7 @@ function fromPickerFormat(str) {
   cursor: pointer; border-bottom: 1px solid var(--border);
   transition: background 0.15s;
 }
-.order-row:hover { background: var(--warm-white); }
+.order-row:hover { background: #edf4f4; }
 .order-row.expanded {
   background: #edf4f4;
   border-bottom: none;
@@ -525,6 +533,16 @@ function fromPickerFormat(str) {
 .status-paid      { color: #2e7d32; font-weight: 600; }
 .status-unpaid    { color: var(--mid); }
 .status-cancelled { color: var(--red, #c0392b); }
+
+/* All-sold cancelled order row */
+.order-row-dimmed { background: #d9d9d9 !important; color: var(--mid); }
+.order-row-dimmed:hover { background: #edf4f4 !important; }
+
+/* No pickup available */
+.no-pickup-text { color: var(--mid); font-style: italic; }
+
+/* All sold out note */
+.all-sold-note { color: var(--red, #c0392b); font-size: 0.78rem; font-weight: 600; margin-left: 6px; }
 
 /* Admin buyer columns */
 .td-buyer      { white-space: nowrap; font-size: 0.82rem; }

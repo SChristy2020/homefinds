@@ -21,6 +21,7 @@ class OrderItem(Base):
     order_id     = Column(Integer, ForeignKey("orders.id",    ondelete="CASCADE"),  nullable=False)
     product_id   = Column(Integer, ForeignKey("products.id",  ondelete="RESTRICT"), nullable=False)
     price        = Column(Numeric(10, 2), nullable=False)
-    status       = Column(Enum("reserved", "cancelled", "paid"), nullable=False, default="reserved")
+    status       = Column(Enum("reserved", "cancelled", "paid", "sold"), nullable=False, default="reserved")
     cancelled_at = Column(DateTime, nullable=True)
+    sold_at      = Column(DateTime, nullable=True)
     updated_at   = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
