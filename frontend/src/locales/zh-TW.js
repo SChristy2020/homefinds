@@ -8,6 +8,7 @@ export default {
   shop: {
     all: '全部',
     searchPlaceholder: '搜尋商品...',
+    itemCount: '共有 {count} 件寶物',
     soldOut: '已售出',
     categories: {
       Bedroom: '臥室',

@@ -34,6 +34,9 @@
       </div>
     </Transition>
 
+    <!-- Item count -->
+    <div class="item-count">{{ i18n.t('shop.itemCount', { count: filteredProducts.length }) }}</div>
+
     <!-- Grid -->
     <ProductGrid :products="filteredProducts" @select="openProduct" />
 
@@ -156,6 +159,10 @@ function toggleSort() {
 }
 .search-bar input::placeholder { color: var(--light); }
 .search-icon { color: var(--mid); flex-shrink: 0; }
+.item-count {
+  font-size: 0.82rem; color: var(--mid);
+  margin-bottom: 14px;
+}
 .slide-down-enter-active, .slide-down-leave-active { transition: all 0.2s ease; }
 .slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-8px); }
 </style>

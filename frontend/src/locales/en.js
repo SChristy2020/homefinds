@@ -8,6 +8,7 @@ export default {
   shop: {
     all: 'All',
     searchPlaceholder: 'Search items...',
+    itemCount: '{count} treasures total',
     soldOut: 'Sold Out',
     categories: {
       Bedroom: 'Bedroom',
