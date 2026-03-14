@@ -105,6 +105,9 @@ export default {
     cancelItem: 'Cancel',
     cancelToast: 'Order item cancelled',
     notifyToast: 'Christy has been notified!',
+    invalidName: 'Please enter a valid name (letters only, no special characters)',
+    invalidEmail: 'Please enter a valid email address',
+    invalidPhone: 'Please enter a valid phone number (e.g. (xxx)xxx-xxxx)',
   },
   rent: {
     available: 'Available: Apr 25 \u2013 Jun 29, 2026',

@@ -105,6 +105,9 @@ export default {
     cancelItem: '取消',
     cancelToast: '已取消订单',
     notifyToast: '已通知 Christy!',
+    invalidName: '姓氏只能包含文字，不可输入特殊符号',
+    invalidEmail: '请输入有效的电子邮件地址',
+    invalidPhone: '请输入有效的电话号码（如 (xxx)xxx-xxxx）',
   },
   rent: {
     available: '开放日期: 4/25 \u2013 6/29, 2026',
