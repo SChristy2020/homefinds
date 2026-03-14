@@ -19,7 +19,8 @@ export default {
   productDetail: {
     title: '物品資訊',
     availableFrom: '可取貨時間: ',
-    availableAnytime: '隨時可取貨',
+    availableStarting: '',
+    availableAnytime: '隨時',
     listedOn: '上架時間: ',
     addCart: '加入購物車',
     added: '已加入',

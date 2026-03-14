@@ -17,7 +17,7 @@
         <span v-if="product.originalPrice" class="price-original">${{ product.originalPrice }}</span>
         <span class="price-current">${{ product.price }}</span>
       </div>
-      <div class="product-date">{{ i18n.t('productDetail.availableFrom') }}{{ formattedDate }}</div>
+      <div class="product-date">{{ i18n.t('productDetail.availableFrom') }}{{ formattedDate ? i18n.t('productDetail.availableStarting') : '' }}{{ formattedDate || i18n.t('productDetail.availableAnytime') }}</div>
       <span v-if="product.soldOut" class="sold-badge">{{ i18n.t('shop.soldOut') }}</span>
     </div>
   </div>
@@ -36,11 +36,11 @@ const images = computed(() => props.product.images || [])
 const current = ref(0)
 
 const formattedDate = computed(() => {
-  const d = props.product.date
+  const d = props.product.pickup_available_time
   if (!d) return ''
   const [y, m, day] = d.split('-')
   if (!y || !m || !day) return d
-  return `${m}/${day}/${y}`
+  return `${m}/${day.split('T')[0]}/${y}`
 })
 
 function prev() {

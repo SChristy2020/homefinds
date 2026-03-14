@@ -39,7 +39,7 @@
       <span class="status-dot" :class="`dot-${product.status}`" />
       <span class="status-label">{{ i18n.t(`productDetail.status_${product.status}`) }}</span>
       <span class="pickup-time">
-        <template v-if="product.pickupTime">{{ i18n.t('productDetail.availableFrom') }}{{ formatPickupTime(product.pickupTime) }}</template>
+        <template v-if="product.pickupTime">{{ i18n.t('productDetail.availableFrom') }}{{ i18n.t('productDetail.availableStarting') }}{{ formatPickupTime(product.pickupTime) }}</template>
         <template v-else>{{ i18n.t('productDetail.availableFrom') }}{{ i18n.t('productDetail.availableAnytime') }}</template>
       </span>
     </div>
