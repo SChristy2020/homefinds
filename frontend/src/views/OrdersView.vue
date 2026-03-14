@@ -186,9 +186,11 @@
         <ShoppingGuideContent />
       </div>
 
-      <button class="btn-outline mt-16 back-btn" @click="reset">
-        <ArrowLeft :size="14" />{{ i18n.t('orders.back') }}
-      </button>
+      <div class="back-btn-wrap">
+        <button class="btn-outline back-btn" @click="reset">
+          <ArrowLeft :size="14" />{{ i18n.t('orders.back') }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -608,8 +610,8 @@ function fromPickerFormat(str) {
 }
 
 /* ── Back button ─────────────────────────────────────────────────────────── */
+.back-btn-wrap { display: flex; justify-content: center; margin-top: 16px; }
 .back-btn { display: inline-flex; align-items: center; gap: 5px; }
-.mt-16 { margin-top: 16px; }
 
 /* ── DataTable toolbar ───────────────────────────────────────────────────── */
 .dt-toolbar {

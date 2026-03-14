@@ -96,7 +96,7 @@ export default {
     namePlaceholder: 'Last Name',
     sent: 'Search',
     error: 'No orders found. Please double-check your info.',
-    back: 'Back',
+    back: 'Back to Search',
     pickupTime: 'Estimated Pickup: ',
     notifyChristy: 'Notify Christy',
     pickupNote: 'Christy will have everything ready before you arrive! Thank you!',
