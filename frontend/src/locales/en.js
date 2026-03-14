@@ -119,6 +119,8 @@ export default {
     savePickupToast: 'Pickup time updated',
     cancelPickupEdit: 'Cancel',
     greeting: 'Hi {name}, thanks for your order!',
+    dtSearch: 'Search orders…',
+    dtShowing: 'Showing {from}–{to} of {total} entries',
   },
   rent: {
     available: 'Available: Apr 25 \u2013 Jun 29, 2026',

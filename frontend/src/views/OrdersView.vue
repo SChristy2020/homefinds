@@ -38,17 +38,36 @@
         <p class="orders-greeting">
           {{ i18n.t('orders.greeting', { name: userStore.currentUser.first_name }) }}
         </p>
+
+        <!-- DataTable toolbar -->
+        <div class="dt-toolbar">
+          <div class="dt-info">
+            {{ i18n.t('orders.dtShowing', { from: dtFrom, to: dtTo, total: filteredOrders.length }) }}
+          </div>
+          <input v-model="searchQuery" class="dt-search" :placeholder="i18n.t('orders.dtSearch')" />
+        </div>
+
         <table class="orders-table">
           <thead>
             <tr>
-              <th>{{ i18n.t('orders.orderNo') }}</th>
-              <th>{{ i18n.t('orders.itemCount') }}</th>
-              <th>{{ i18n.t('orders.orderTotal') }}</th>
-              <th>{{ i18n.t('orders.payStatus') }}</th>
-              <th>{{ i18n.t('orders.pickupTimeLabel') }}</th>
+              <th class="sortable" @click="toggleSort('id')">
+                {{ i18n.t('orders.orderNo') }}<SortIcon col="id" :active="sortColumn" :dir="sortDirection" />
+              </th>
+              <th class="sortable" @click="toggleSort('items')">
+                {{ i18n.t('orders.itemCount') }}<SortIcon col="items" :active="sortColumn" :dir="sortDirection" />
+              </th>
+              <th class="sortable" @click="toggleSort('total')">
+                {{ i18n.t('orders.orderTotal') }}<SortIcon col="total" :active="sortColumn" :dir="sortDirection" />
+              </th>
+              <th class="sortable" @click="toggleSort('paid')">
+                {{ i18n.t('orders.payStatus') }}<SortIcon col="paid" :active="sortColumn" :dir="sortDirection" />
+              </th>
+              <th class="sortable" @click="toggleSort('pickup')">
+                {{ i18n.t('orders.pickupTimeLabel') }}<SortIcon col="pickup" :active="sortColumn" :dir="sortDirection" />
+              </th>
             </tr>
           </thead>
-          <tbody v-for="order in ordersStore.orders" :key="order.id">
+          <tbody v-for="order in paginatedOrders" :key="order.id">
             <!-- Order summary row -->
             <tr class="order-row" :class="{ expanded: expandedOrderId === order.id }" @click="toggleExpand(order.id)">
               <td class="td-order-no">{{ formatOrderId(order.id) }}</td>
@@ -100,6 +119,21 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="dt-pagination">
+          <button class="dt-page-btn" :disabled="currentPage === 1" @click="currentPage = 1">«</button>
+          <button class="dt-page-btn" :disabled="currentPage === 1" @click="currentPage--">‹</button>
+          <button
+            v-for="p in pageNumbers"
+            :key="p"
+            class="dt-page-btn"
+            :class="{ active: p === currentPage }"
+            @click="currentPage = p"
+          >{{ p }}</button>
+          <button class="dt-page-btn" :disabled="currentPage === totalPages" @click="currentPage++">›</button>
+          <button class="dt-page-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages">»</button>
+        </div>
       </div>
 
       <!-- 購物須知 -->
@@ -115,8 +149,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { ArrowLeft, Pencil } from 'lucide-vue-next'
+import { ref, computed, watch, onMounted } from 'vue'
+import { ArrowLeft, Pencil, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-vue-next'
 import { useOrdersStore } from '@/stores/orders'
 import { useUserStore } from '@/stores/user'
 import { useToastStore } from '@/stores/toast'
@@ -134,6 +168,77 @@ const form = ref({ name: '', email: '', phone: '' })
 const errors = ref({ name: '', email: '', phone: '' })
 
 const expandedOrderId = ref(null)
+
+// ── DataTable state ───────────────────────────────────────────────────────────
+const searchQuery = ref('')
+const currentPage = ref(1)
+const pageSize = 10
+const sortColumn = ref('id')
+const sortDirection = ref('desc')
+
+const filteredOrders = computed(() => {
+  let orders = ordersStore.orders
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    orders = orders.filter(o =>
+      formatOrderId(o.id).toLowerCase().includes(q) ||
+      (o.is_paid ? i18n.t('orders.paid') : i18n.t('orders.unpaid')).toLowerCase().includes(q)
+    )
+  }
+  return [...orders].sort((a, b) => {
+    let aVal, bVal
+    if (sortColumn.value === 'id')     { aVal = a.id; bVal = b.id }
+    else if (sortColumn.value === 'items')  { aVal = activeItemCount(a); bVal = activeItemCount(b) }
+    else if (sortColumn.value === 'total')  { aVal = parseFloat(orderTotal(a)); bVal = parseFloat(orderTotal(b)) }
+    else if (sortColumn.value === 'paid')   { aVal = a.is_paid ? 1 : 0; bVal = b.is_paid ? 1 : 0 }
+    else if (sortColumn.value === 'pickup') { aVal = a.pickup_time || ''; bVal = b.pickup_time || '' }
+    else { aVal = a.id; bVal = b.id }
+    if (aVal < bVal) return sortDirection.value === 'asc' ? -1 : 1
+    if (aVal > bVal) return sortDirection.value === 'asc' ? 1 : -1
+    return 0
+  })
+})
+
+const totalPages = computed(() => Math.ceil(filteredOrders.value.length / pageSize))
+const paginatedOrders = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return filteredOrders.value.slice(start, start + pageSize)
+})
+const dtFrom = computed(() => filteredOrders.value.length === 0 ? 0 : (currentPage.value - 1) * pageSize + 1)
+const dtTo = computed(() => Math.min(currentPage.value * pageSize, filteredOrders.value.length))
+const pageNumbers = computed(() => {
+  const total = totalPages.value
+  const cur = currentPage.value
+  const delta = 2
+  const range = []
+  for (let i = Math.max(1, cur - delta); i <= Math.min(total, cur + delta); i++) range.push(i)
+  return range
+})
+
+watch(searchQuery, () => { currentPage.value = 1 })
+
+function toggleSort(col) {
+  if (sortColumn.value === col) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortColumn.value = col
+    sortDirection.value = 'asc'
+  }
+  currentPage.value = 1
+}
+
+// Sort icon inline component
+const SortIcon = {
+  props: ['col', 'active', 'dir'],
+  components: { ChevronUp, ChevronDown, ChevronsUpDown },
+  template: `
+    <span class="sort-icon">
+      <ChevronUp v-if="active === col && dir === 'asc'" :size="12" />
+      <ChevronDown v-else-if="active === col && dir === 'desc'" :size="12" />
+      <ChevronsUpDown v-else :size="12" />
+    </span>
+  `
+}
 
 onMounted(async () => {
   if (userStore.currentUser && ordersStore.orders.length === 0) {
@@ -399,4 +504,46 @@ function fromPickerFormat(str) {
 /* ── Back button ─────────────────────────────────────────────────────────── */
 .back-btn { display: inline-flex; align-items: center; gap: 5px; }
 .mt-16 { margin-top: 16px; }
+
+/* ── DataTable toolbar ───────────────────────────────────────────────────── */
+.dt-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; gap: 12px; flex-wrap: wrap;
+}
+.dt-info {
+  font-size: 0.78rem; color: var(--mid);
+}
+.dt-search {
+  padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 0.82rem; color: var(--charcoal); background: #fff;
+  outline: none; min-width: 180px;
+}
+.dt-search:focus { border-color: var(--charcoal); }
+
+/* ── Sortable headers ────────────────────────────────────────────────────── */
+.orders-table th.sortable {
+  cursor: pointer; user-select: none;
+}
+.orders-table th.sortable:hover { color: var(--charcoal); }
+.sort-icon {
+  display: inline-flex; vertical-align: middle;
+  margin-left: 3px; opacity: 0.6;
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.dt-pagination {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 4px; margin-top: 12px; flex-wrap: wrap;
+}
+.dt-page-btn {
+  padding: 4px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: #fff; font-size: 0.8rem; color: var(--charcoal);
+  cursor: pointer; transition: background 0.12s, border-color 0.12s;
+  min-width: 32px; text-align: center;
+}
+.dt-page-btn:hover:not(:disabled):not(.active) { border-color: var(--charcoal); }
+.dt-page-btn.active {
+  background: var(--charcoal); color: #fff; border-color: var(--charcoal);
+}
+.dt-page-btn:disabled { opacity: 0.35; cursor: default; }
 </style>
