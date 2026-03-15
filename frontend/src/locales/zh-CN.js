@@ -130,6 +130,10 @@ export default {
     payStatusToast: '付款状态已更新',
     dtSearch: '搜索订单…',
     dtShowing: '显示第 {from}–{to} 条，共 {total} 条',
+    soldAt: '已售出',
+    noPickup: '无法取货',
+    allSoldNote: '*商品皆售出，无法付款',
+    purchaseSuccess: '🎉 抢购成功',
   },
   rent: {
     title: '🌟 北卡 UNC/Duke 优质短租 🌟',

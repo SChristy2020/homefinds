@@ -84,6 +84,10 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
         setattr(product, field, value)
     new_status = product.status
 
+    # 商品從 available/reserved 改成 sold：連鎖更新未付款訂單
+    if old_status in ("available", "reserved") and new_status == "sold":
+        _handle_product_sold(product_id, db)
+
     # 商品從 sold 改回 available/reserved：連鎖更新相關訂單
     trigger_restore_email = False
     if old_status == "sold" and new_status in ("available", "reserved"):
@@ -117,6 +121,41 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
         threading.Thread(target=_send_restore_emails, daemon=True).start()
 
     return _build_out(product, db)
+
+
+def _handle_product_sold(product_id: int, db: Session):
+    """Admin 直接將商品設為 sold 時，連鎖更新所有未付款訂單中的該商品項目。"""
+    from datetime import datetime
+    sold_at = datetime.now()
+
+    # 找出所有「未付款」訂單中狀態為 reserved 的該商品項目
+    pending_items = (
+        db.query(OrderItem)
+        .join(Order, OrderItem.order_id == Order.id)
+        .filter(
+            OrderItem.product_id == product_id,
+            OrderItem.status == "reserved",
+            Order.order_status == "pending_payment",
+        )
+        .all()
+    )
+
+    affected_order_ids = set()
+    for item in pending_items:
+        item.status = "sold"
+        item.sold_at = sold_at
+        affected_order_ids.add(item.order_id)
+
+    db.flush()
+
+    # 若某訂單所有商品都已售出或取消 → 自動取消該訂單
+    for order_id in affected_order_ids:
+        order = db.query(Order).filter(Order.id == order_id).first()
+        if not order or order.order_status != "pending_payment":
+            continue
+        all_items = db.query(OrderItem).filter(OrderItem.order_id == order_id).all()
+        if all_items and all(i.status in ("sold", "cancelled") for i in all_items):
+            order.order_status = "cancelled"
 
 
 def _handle_product_unsold(product_id: int, db: Session):
