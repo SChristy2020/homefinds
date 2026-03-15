@@ -55,7 +55,7 @@ import RentSuccessModal from '@/components/rent/RentSuccessModal.vue'
 
 const i18n = useI18nStore()
 const RATE_PER_NIGHT = 222
-const selection = ref({ start: null, end: null })
+const selection = ref({ start: new Date(2026, 3, 25), end: new Date(2026, 5, 29) })
 const showConfirm = ref(false)
 const showSuccess = ref(false)
 const lastReservation = ref(null)
