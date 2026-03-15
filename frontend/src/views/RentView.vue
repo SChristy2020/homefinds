@@ -1,4 +1,6 @@
 <template>
+  <div class="rent-page">
+  <h1 class="rent-title">{{ i18n.t('rent.title') }}</h1>
   <div class="room-layout">
     <!-- Gallery -->
     <RoomGallery />
@@ -22,6 +24,7 @@
       </div>
       <p v-else class="mt-16 text-sm text-muted">{{ i18n.t('rent.selectDates') }}</p>
     </div>
+  </div>
   </div>
 
   <!-- Modals -->
@@ -76,6 +79,8 @@ function onConfirmed(formData) {
 </script>
 
 <style scoped>
+.rent-page { display: flex; flex-direction: column; gap: 16px; }
+.rent-title { font-size: 1.3rem; font-weight: 700; text-align: center; color: var(--charcoal); margin: 0 0 4px; }
 .room-layout { display: flex; gap: 28px; flex-wrap: wrap; }
 .booking-panel { flex: 1; min-width: 280px; }
 .avail-note { font-size: 0.82rem; color: var(--mid); margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
