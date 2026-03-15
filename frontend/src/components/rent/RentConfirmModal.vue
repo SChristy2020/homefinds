@@ -9,7 +9,8 @@
 
     <UserInfoForm v-model="form" class="mt-16" />
 
-    <div class="policy">
+    <div v-if="bookingDescription" class="policy" v-html="bookingDescription"></div>
+    <div v-else class="policy">
       <p v-html="i18n.t('rentConfirm.depositNote')"></p>
       <p>{{ i18n.t('rentConfirm.cancelNote') }}</p>
       <p class="mt-8"><strong>{{ i18n.t('rentConfirm.refundPolicy') }}</strong></p>
@@ -36,6 +37,7 @@ const props = defineProps({
   selection: Object,
   nights: Number,
   totalPrice: Number,
+  bookingDescription: { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue', 'confirmed'])
 

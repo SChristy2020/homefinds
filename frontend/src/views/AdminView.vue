@@ -169,15 +169,15 @@
           <p class="hint">可拖移圖片改變順序</p>
         </div>
 
-        <!-- Descriptions per locale -->
+        <!-- Descriptions per locale (HTML editors) -->
         <div class="desc-grid">
           <div v-for="locale in ['zh-TW', 'zh-CN', 'en']" :key="locale" class="form-group">
             <label class="form-label">{{ localeLabel(locale) }}描述</label>
-            <textarea v-model="roomTranslations[locale].description" rows="3" class="form-textarea" />
+            <HtmlEditor v-model="roomTranslations[locale].description" :room-id="roomId" />
           </div>
           <div v-for="locale in ['zh-TW', 'zh-CN', 'en']" :key="'bd_' + locale" class="form-group">
-            <label class="form-label">{{ localeLabel(locale) }}付款描述</label>
-            <textarea v-model="roomTranslations[locale].booking_description" rows="3" class="form-textarea" />
+            <label class="form-label">{{ localeLabel(locale) }}房間預訂​流程​說明</label>
+            <HtmlEditor v-model="roomTranslations[locale].booking_description" :room-id="roomId" />
           </div>
         </div>
 
@@ -330,6 +330,7 @@ import { Search, ArrowUpDown, Pencil, Trash2, PlusCircle } from 'lucide-vue-next
 import { api } from '@/utils/api'
 import { useToastStore } from '@/stores/toast'
 import BaseModal from '@/components/shared/BaseModal.vue'
+import HtmlEditor from '@/components/shared/HtmlEditor.vue'
 
 const toast = useToastStore()
 
