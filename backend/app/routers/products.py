@@ -2,10 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from pydantic import BaseModel as PydanticModel
-from app.database import get_db
+import threading
+from app.database import get_db, SessionLocal
 from app.models.product import Product, ProductTranslation, ProductImage
 from app.models.category import Category, CategoryTranslation
+from app.models.order import Order, OrderItem
+from app.models.user import User
 from app.schemas.product import ProductCreate, ProductUpdate, ProductOut, ImageOut, TranslationCreate, TranslationOut
+from app.services.email_service import send_product_restored_notification
 
 class SortItem(PydanticModel):
     id: int
@@ -75,11 +79,104 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
             new_cat = db.query(Category).filter(Category.id == new_cat_trans.category_id).first()
             if new_cat:
                 new_cat.product_count += 1
+    old_status = product.status
     for field, value in body.model_dump(exclude_none=True).items():
         setattr(product, field, value)
+    new_status = product.status
+
+    # 商品從 sold 改回 available/reserved：連鎖更新相關訂單
+    trigger_restore_email = False
+    if old_status == "sold" and new_status in ("available", "reserved"):
+        _handle_product_unsold(product_id, db)
+        trigger_restore_email = True
+
     db.commit()
     db.refresh(product)
+
+    if trigger_restore_email:
+        _pid = product_id
+        def _send_restore_emails():
+            new_db = SessionLocal()
+            try:
+                sent_user_ids = set()
+                # 通知任何狀態且含該商品的訂單購買者
+                all_items = new_db.query(OrderItem).filter(
+                    OrderItem.product_id == _pid,
+                ).all()
+                for oi in all_items:
+                    order = new_db.query(Order).filter(Order.id == oi.order_id).first()
+                    if not order:
+                        continue
+                    user = new_db.query(User).filter(User.id == order.user_id).first()
+                    if not user or user.id in sent_user_ids:
+                        continue
+                    sent_user_ids.add(user.id)
+                    send_product_restored_notification(user, [_pid], new_db)
+            finally:
+                new_db.close()
+        threading.Thread(target=_send_restore_emails, daemon=True).start()
+
     return _build_out(product, db)
+
+
+def _handle_product_unsold(product_id: int, db: Session):
+    """商品從 sold 改回 available/reserved 時，處理相關訂單的連鎖更新。"""
+
+    # 1. 已付款訂單：item.status="paid"（搶購成功）→ 改回 "reserved"（原本順位）
+    #    不更新訂單物品數量和訂單總額，該商品 row 保留灰色背景
+    paid_items = (
+        db.query(OrderItem)
+        .join(Order, OrderItem.order_id == Order.id)
+        .filter(
+            OrderItem.product_id == product_id,
+            OrderItem.status == "paid",
+            Order.order_status == "paid",
+        )
+        .all()
+    )
+    for item in paid_items:
+        item.status = "reserved"
+        item.sold_at = None
+
+    # 2. 未付款訂單：item.status="sold" → "reserved"
+    #    取消灰色背景，改回目前順位，刪除出售日期
+    pending_items = (
+        db.query(OrderItem)
+        .join(Order, OrderItem.order_id == Order.id)
+        .filter(
+            OrderItem.product_id == product_id,
+            OrderItem.status == "sold",
+            Order.order_status == "pending_payment",
+        )
+        .all()
+    )
+    for item in pending_items:
+        item.status = "reserved"
+        item.sold_at = None
+
+    # 3. 已取消訂單：item.status="sold" → "reserved"
+    #    取消灰色背景，改回目前順位，刪除出售日期
+    #    訂單 row 取消灰色背景，訂單狀態改成 pending_payment
+    cancelled_items = (
+        db.query(OrderItem)
+        .join(Order, OrderItem.order_id == Order.id)
+        .filter(
+            OrderItem.product_id == product_id,
+            OrderItem.status == "sold",
+            Order.order_status == "cancelled",
+        )
+        .all()
+    )
+    restored_order_ids = set()
+    for item in cancelled_items:
+        item.status = "reserved"
+        item.sold_at = None
+        restored_order_ids.add(item.order_id)
+
+    for oid in restored_order_ids:
+        order = db.query(Order).filter(Order.id == oid).first()
+        if order:
+            order.order_status = "pending_payment"
 
 @router.delete("/{product_id}", status_code=204)
 def delete_product(product_id: int, db: Session = Depends(get_db)):
