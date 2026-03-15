@@ -40,8 +40,7 @@ const year  = ref(2026)
 const month = ref(3) // April (0-indexed)
 
 const title = computed(() => {
-  const fmt = i18n.t('calendar.titleFormat')
-  return fmt.replace('{year}', year.value).replace('{month}', months.value[month.value])
+  return i18n.t('calendar.titleFormat', { year: year.value, month: months.value[month.value] })
 })
 
 function prevMonth() {
@@ -56,8 +55,7 @@ function nextMonth() {
 const days = computed(() => {
   const first = new Date(year.value, month.value, 1)
   const last  = new Date(year.value, month.value + 1, 0)
-  let dow = first.getDay()
-  dow = dow === 0 ? 6 : dow - 1
+  const dow = first.getDay() // 0=Sun, already correct for Sunday-first layout
   const list = Array(dow).fill(null)
   for (let d = 1; d <= last.getDate(); d++) {
     list.push({ date: d, full: new Date(year.value, month.value, d) })

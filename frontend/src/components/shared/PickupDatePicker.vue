@@ -91,17 +91,12 @@ const minutes = ['00', '15', '30', '45']
 
 const isEn = computed(() => i18n.locale === 'en')
 
-// Weekday headers — Sun-first for English, Mon-first for Chinese
-const EN_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const weekdayHeaders = computed(() =>
-  isEn.value ? EN_WEEKDAYS : i18n.t('calendar.weekdays')
-)
+const weekdayHeaders = computed(() => i18n.t('calendar.weekdays'))
 
 const months = computed(() => i18n.t('calendar.months'))
 
 const monthLabel = computed(() => {
-  const fmt = i18n.t('calendar.titleFormat')
-  return fmt.replace('{year}', viewYear.value).replace('{month}', months.value[viewMonth.value])
+  return i18n.t('calendar.titleFormat', { year: viewYear.value, month: months.value[viewMonth.value] })
 })
 const timeLabel    = computed(() => isEn.value ? 'Time' : '時間')
 const confirmLabel = computed(() => isEn.value ? 'OK' : '確認')
@@ -112,10 +107,8 @@ const displayValue = computed(() => {
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()} ${hourValue.value}:${minuteValue.value}`
 })
 
-// Offset: Sun-first (en) vs Mon-first (zh)
 function startOffset(firstDayOfMonth) {
-  const dow = firstDayOfMonth.getDay() // 0=Sun
-  return isEn.value ? dow : (dow === 0 ? 6 : dow - 1)
+  return firstDayOfMonth.getDay() // 0=Sun, always Sun-first
 }
 
 const days = computed(() => {
