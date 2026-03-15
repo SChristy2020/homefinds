@@ -7,9 +7,9 @@ from app.models.order import Order, OrderItem
 from app.models.product import Product, ProductTranslation, ProductImage
 from app.models.user import User
 from app.models.waiting_list import WaitingList
-from app.schemas.order import OrderCreate, OrderOut, OrderItemOut, OrderPickupTimeUpdate
+from app.schemas.order import OrderCreate, OrderOut, OrderItemOut, OrderPickupTimeUpdate, RevertPaidBody
 from app.routers.waiting_list import _refresh_summary
-from app.services.email_service import send_order_confirmation
+from app.services.email_service import send_order_confirmation, send_product_restored_notification
 
 router = APIRouter()
 
@@ -191,6 +191,88 @@ def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
 
     db.commit()
     db.refresh(order)
+    return _build_out(order, db)
+
+@router.put("/{order_id}/revert-paid", response_model=OrderOut)
+def revert_paid_order(order_id: int, body: RevertPaidBody, db: Session = Depends(get_db)):
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order.order_status != "paid":
+        raise HTTPException(status_code=400, detail="Order is not paid")
+
+    # 1. 找出此訂單中狀態為 "paid" 的物品（搶購成功的商品）
+    paid_items = db.query(OrderItem).filter(
+        OrderItem.order_id == order_id,
+        OrderItem.status == "paid",
+    ).all()
+    affected_product_ids = [item.product_id for item in paid_items]
+
+    # 2. 將此訂單的 paid 物品改回 reserved，商品狀態改回 available
+    for item in paid_items:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if product:
+            product.status = "available"
+        item.status = "reserved"
+        item.sold_at = None
+
+    db.flush()
+
+    # 3. 找出其他訂單中因此付款而被標記為 sold 的物品，改回 reserved
+    cancelled_order_ids = set()
+    for product_id in affected_product_ids:
+        other_sold_items = db.query(OrderItem).filter(
+            OrderItem.product_id == product_id,
+            OrderItem.order_id != order_id,
+            OrderItem.status == "sold",
+        ).all()
+        for other_item in other_sold_items:
+            other_item.status = "reserved"
+            other_item.sold_at = None
+            other_order = db.query(Order).filter(Order.id == other_item.order_id).first()
+            if other_order and other_order.order_status == "cancelled":
+                cancelled_order_ids.add(other_item.order_id)
+
+    db.flush()
+
+    # 4. 將因自動取消而變成 cancelled 的訂單改回 pending_payment
+    for affected_id in cancelled_order_ids:
+        affected_order = db.query(Order).filter(Order.id == affected_id).first()
+        if affected_order:
+            affected_order.order_status = "pending_payment"
+
+    # 5. 更新此訂單狀態
+    order.order_status = body.target_status
+    order.paid_at = None
+
+    db.commit()
+    db.refresh(order)
+
+    # 6. 寄信通知所有含此商品的訂單購買者（非 cancelled 物品）
+    _product_ids = affected_product_ids[:]
+
+    def _send_restore_emails():
+        new_db = SessionLocal()
+        try:
+            sent_user_ids = set()
+            items_for_products = new_db.query(OrderItem).filter(
+                OrderItem.product_id.in_(_product_ids),
+                OrderItem.status != "cancelled",
+            ).all()
+            for oi in items_for_products:
+                ao = new_db.query(Order).filter(Order.id == oi.order_id).first()
+                if not ao:
+                    continue
+                user = new_db.query(User).filter(User.id == ao.user_id).first()
+                if not user or user.id in sent_user_ids:
+                    continue
+                sent_user_ids.add(user.id)
+                send_product_restored_notification(user, _product_ids, new_db)
+        finally:
+            new_db.close()
+
+    threading.Thread(target=_send_restore_emails, daemon=True).start()
+
     return _build_out(order, db)
 
 @router.put("/{order_id}/unpaid", response_model=OrderOut)

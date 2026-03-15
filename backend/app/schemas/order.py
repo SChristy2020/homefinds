@@ -33,6 +33,9 @@ class OrderItemOut(BaseModel):
 class OrderPickupTimeUpdate(BaseModel):
     pickup_time: Optional[datetime] = None
 
+class RevertPaidBody(BaseModel):
+    target_status: str  # "pending_payment" or "cancelled"
+
 class OrderCreate(BaseModel):
     user_id:     int
     pickup_time: Optional[datetime] = None

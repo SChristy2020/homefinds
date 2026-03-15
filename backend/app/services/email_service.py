@@ -192,6 +192,58 @@ EMAIL_TRANSLATIONS = {
     },
 }
 
+# ── Restore notification translations ─────────────────────────────────────────
+RESTORE_EMAIL_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "【好消息】您訂單中的商品恢復販售了！- Christy's HomeFinds",
+        "header": "商品恢復販售通知",
+        "greeting": "Hi {first_name}，好消息！",
+        "body": "您訂單中，原本已出售的商品現已恢復販售。本場採用「先付款先得」制，請把握機會完成付款！",
+        "col_name": "物品名稱",
+        "col_price": "價錢",
+        "zelle_title": "💰 Zelle 匯款資訊：",
+        "zelle_account": "帳號: (984)373-9392",
+        "zelle_name": "戶名: SHU CHING LI",
+        "zelle_note": "備註: 請務必註明您的「訂單編號」",
+        "orders_link_text": "前往查看我的訂單",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+        "anytime": "隨時",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "【好消息】您订单中的商品恢复销售了！- Christy's HomeFinds",
+        "header": "商品恢复销售通知",
+        "greeting": "Hi {first_name}，好消息！",
+        "body": "您订单中，原本已售出的商品现已恢复销售。本场采用「先付款先得」制，请把握机会完成付款！",
+        "col_name": "物品名称",
+        "col_price": "价格",
+        "zelle_title": "💰 Zelle 汇款信息：",
+        "zelle_account": "帐号: (984)373-9392",
+        "zelle_name": "户名: SHU CHING LI",
+        "zelle_note": "备注: 请务必注明您的「订单编号」",
+        "orders_link_text": "前往查看我的订单",
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+        "anytime": "随时",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "Great News! An item in your order is back for sale! - Christy's HomeFinds",
+        "header": "Items Back on Sale",
+        "greeting": "Hi {first_name}, Good news!",
+        "body": "An item in your order that was previously sold out is now available again. Please note that we operate on a \"first-pay, first-served\" basis. Don’t miss this chance to complete your purchase!",
+        "col_name": "Item Name",
+        "col_price": "Price",
+        "zelle_title": "💰 Zelle Payment Information:",
+        "zelle_account": "Account: (984)373-9392",
+        "zelle_name": "Account Name: SHU CHING LI",
+        "zelle_note": "Note: Please include your \"Order Number\" in the memo.",
+        "orders_link_text": "Go to My Order",
+        "footer": "💡 Have questions? Feel free to contact Christy at:",
+        "anytime": "Anytime",
+    },
+}
+
 # Map frontend locale codes to DB ProductTranslation locale codes
 _LOCALE_TO_DB = {
     "zh-TW": "zh-TW",
@@ -221,6 +273,168 @@ def _format_datetime_12h(dt):
     ampm = "PM" if h >= 12 else "AM"
     h12 = h % 12 or 12
     return f"{dt.strftime('%m/%d/%Y')} {h12}:{dt.strftime('%M')} {ampm}"
+
+
+def send_product_restored_notification(user, restored_product_ids, db, locale="zh-TW"):
+    """通知買家：訂單中原本已出售的商品恢復販售了。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    tr = RESTORE_EMAIL_TRANSLATIONS.get(locale, RESTORE_EMAIL_TRANSLATIONS["zh-TW"])
+    db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
+
+    products_data = []
+    for pid in restored_product_ids:
+        product = db.query(Product).filter(Product.id == pid).first()
+        if not product:
+            continue
+        translation = db.query(ProductTranslation).filter(
+            ProductTranslation.product_id == pid,
+            ProductTranslation.locale == db_locale,
+        ).first()
+        if not translation and db_locale != "zh-TW":
+            translation = db.query(ProductTranslation).filter(
+                ProductTranslation.product_id == pid,
+                ProductTranslation.locale == "zh-TW",
+            ).first()
+        image = (
+            db.query(ProductImage)
+            .filter(ProductImage.product_id == pid)
+            .order_by(ProductImage.sort_order)
+            .first()
+        )
+        name = translation.name if translation else (product.code if product else str(pid))
+        img_url = image.url if image else ""
+        price = float(product.price)
+        original_price = float(product.original_price) if product.original_price else None
+        products_data.append({
+            "name": name,
+            "img_url": img_url,
+            "price": price,
+            "original_price": original_price,
+        })
+
+    if not products_data:
+        return
+
+    greeting = tr["greeting"].replace("{first_name}", user.first_name)
+
+    # Build product rows
+    item_rows = ""
+    for item in products_data:
+        original_td = (
+            f'<span style="text-decoration:line-through;color:#aaa;margin-right:4px;">'
+            f'${_format_price(item["original_price"])}</span>'
+            if item["original_price"] is not None else ""
+        )
+        thumb_cell = (
+            f'<img src="{item["img_url"]}" width="40" height="40" '
+            f'style="border-radius:4px;object-fit:cover;display:block;" />'
+            if item["img_url"]
+            else '<div style="width:40px;height:40px;background:#eee;border-radius:4px;"></div>'
+        )
+        item_rows += f"""
+        <tr>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;">{thumb_cell}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;">{item["name"]}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:600;text-align:right;white-space:nowrap;">
+            {original_td}${_format_price(item["price"])}
+          </td>
+        </tr>"""
+
+    orders_link = (
+        f'<a href="https://schristy2020.github.io/homefinds/#/orders" '
+        f'style="color:#c9a96e;text-decoration:underline;">{tr["orders_link_text"]}</a>'
+    )
+
+    html = f"""<!DOCTYPE html>
+<html lang="{tr["html_lang"]}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{tr["header"]}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Noto Sans TC',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);max-width:600px;">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
+              <div style="font-size:36px;margin-bottom:8px;">🎉</div>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">
+                <a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
+                — {tr["header"]}
+              </h1>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:24px 28px;">
+              <p style="font-size:15px;font-weight:700;margin:0 0 8px;">{greeting}</p>
+              <p style="font-size:13px;color:#444;margin:0 0 16px;">{tr["body"]}</p>
+
+              <!-- Product table -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                     style="border-collapse:collapse;margin-bottom:16px;font-size:13px;">
+                <thead>
+                  <tr style="border-bottom:1.5px solid #e0e0e0;">
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;width:50px;"></th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">{tr["col_name"]}</th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:right;">{tr["col_price"]}</th>
+                  </tr>
+                </thead>
+                <tbody>{item_rows}
+                </tbody>
+              </table>
+
+              <!-- Zelle info -->
+              <div style="margin-bottom:16px;font-size:13px;">
+                <p style="font-weight:700;margin:0 0 6px;">{tr["zelle_title"]}</p>
+                <ul style="margin:0;padding-left:20px;list-style:disc;">
+                  <li style="margin-bottom:3px;">{tr["zelle_account"]}</li>
+                  <li style="margin-bottom:3px;">{tr["zelle_name"]}</li>
+                  <li>{tr["zelle_note"]}</li>
+                </ul>
+              </div>
+
+              <p style="font-size:13px;color:#444;margin:0;">{orders_link}</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 28px 28px;border-top:1px solid #f0f0f0;font-size:12px;color:#888;text-align:center;">
+              {tr["footer"]}
+              <a href="mailto:qsa8647332@gmail.com" style="color:#c9a96e;text-decoration:none;">qsa8647332@gmail.com</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    subject = tr["subject"]
+    resend_domain_verified = os.getenv("RESEND_DOMAIN_VERIFIED", "false").lower() == "true"
+    recipients = list({user.email, OWNER_EMAIL}) if resend_domain_verified else [OWNER_EMAIL]
+
+    try:
+        resend.api_key = resend_api_key
+        resend.Emails.send({
+            "from": from_email,
+            "to": recipients,
+            "subject": subject,
+            "html": html,
+        })
+        print(f"Restore notification sent to {recipients}")
+    except Exception as e:
+        print(f"Email sending failed: {e}")
 
 
 def send_order_confirmation(user, order_out, db, locale="zh-TW"):

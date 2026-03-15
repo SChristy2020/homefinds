@@ -94,6 +94,14 @@ export const useOrdersStore = defineStore('orders', () => {
     return updated
   }
 
+  async function revertPaidOrder(orderId, targetStatus) {
+    await api.put(`/api/orders/${orderId}/revert-paid`, { target_status: targetStatus })
+    // 多筆訂單受影響，重新取得全部訂單
+    const result = await api.get('/api/orders/all')
+    orders.value = result
+    sessionStorage.setItem(ORDERS_KEY, JSON.stringify(result))
+  }
+
   async function cancelOrderItem(itemId) {
     await api.put(`/api/orders/items/${itemId}/cancel`)
     for (const order of orders.value) {
@@ -122,5 +130,5 @@ export const useOrdersStore = defineStore('orders', () => {
   // 保留介面相容性，waiting list 功能需後端另行實作
   function getWaitingList() { return [] }
 
-  return { orders, createOrder, fetchOrdersByUser, fetchAllOrders, updatePayStatus, updateOrderStatus, cancelOrderItem, updatePickupTime, clearOrders, getWaitingList }
+  return { orders, createOrder, fetchOrdersByUser, fetchAllOrders, updatePayStatus, updateOrderStatus, revertPaidOrder, cancelOrderItem, updatePickupTime, clearOrders, getWaitingList }
 })

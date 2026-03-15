@@ -378,7 +378,11 @@ function cancelEditStatus() {
 }
 
 async function saveStatus(order) {
-  await ordersStore.updateOrderStatus(order.id, editingStatusValue.value)
+  if (order.order_status === 'paid' && editingStatusValue.value !== 'paid') {
+    await ordersStore.revertPaidOrder(order.id, editingStatusValue.value)
+  } else {
+    await ordersStore.updateOrderStatus(order.id, editingStatusValue.value)
+  }
   toast.show(i18n.t('orders.payStatusToast'))
   editingStatusOrderId.value = null
 }
