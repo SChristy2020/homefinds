@@ -244,6 +244,153 @@ RESTORE_EMAIL_TRANSLATIONS = {
     },
 }
 
+# ── Payment success email translations ────────────────────────────────────────
+PAYMENT_SUCCESS_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "✅ 付款成功！訂單 {order_number} - Christy's HomeFinds",
+        "header": "付款成功通知",
+        "emoji": "✅",
+        "greeting": "Hi {first_name}，付款成功！",
+        "body": "感謝您的付款！期待於 {pickup_time} 與您見面領取物品。",
+        "order_number_label": "訂單編號：",
+        "col_name": "物品名稱",
+        "col_price": "價錢",
+        "orders_link_text": "查看我的訂單",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+        "anytime": "隨時",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "✅ 付款成功！订单 {order_number} - Christy's HomeFinds",
+        "header": "付款成功通知",
+        "emoji": "✅",
+        "greeting": "Hi {first_name}，付款成功！",
+        "body": "感谢您的付款！期待于 {pickup_time} 与您见面领取物品。",
+        "order_number_label": "订单编号：",
+        "col_name": "物品名称",
+        "col_price": "价格",
+        "orders_link_text": "查看我的订单",
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+        "anytime": "随时",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "✅ Payment Confirmed! Order {order_number} - Christy's HomeFinds",
+        "header": "Payment Confirmed",
+        "emoji": "✅",
+        "greeting": "Hi {first_name}, payment confirmed!",
+        "body": "Thank you for your payment! We look forward to seeing you on {pickup_time} for pickup.",
+        "order_number_label": "Order ID:",
+        "col_name": "Item",
+        "col_price": "Price",
+        "orders_link_text": "View My Orders",
+        "footer": "💡 Questions? Feel free to contact Christy:",
+        "anytime": "Anytime",
+    },
+}
+
+# ── Item snatched (order still active) email translations ─────────────────────
+ITEM_SNATCHED_PENDING_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "⚠️ 訂單中有商品已被搶購 - Christy's HomeFinds",
+        "header": "商品已被搶先付款",
+        "emoji": "⚠️",
+        "greeting": "Hi {first_name}，",
+        "body": "訂單中，有商品被人搶先付款了！提醒為了能確保其他商品，請盡速付款。",
+        "col_name": "物品名稱",
+        "col_price": "價錢",
+        "zelle_title": "💰 Zelle 匯款資訊：",
+        "zelle_account": "帳號: (984)373-9392",
+        "zelle_name": "戶名: SHU CHING LI",
+        "zelle_note": "備註: 請務必註明您的「訂單編號」",
+        "orders_link_text": "立即前往付款",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+        "anytime": "隨時",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "⚠️ 订单中有商品已被抢购 - Christy's HomeFinds",
+        "header": "商品已被抢先付款",
+        "emoji": "⚠️",
+        "greeting": "Hi {first_name}，",
+        "body": "订单中，有商品被人抢先付款了！提醒为了能确保其他商品，请尽速付款。",
+        "col_name": "物品名称",
+        "col_price": "价格",
+        "zelle_title": "💰 Zelle 汇款信息：",
+        "zelle_account": "帐号: (984)373-9392",
+        "zelle_name": "户名: SHU CHING LI",
+        "zelle_note": "备注: 请务必注明您的「订单编号」",
+        "orders_link_text": "立即前往付款",
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+        "anytime": "随时",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "⚠️ An item in your order was just purchased - Christy's HomeFinds",
+        "header": "Item Purchased by Someone Else",
+        "emoji": "⚠️",
+        "greeting": "Hi {first_name},",
+        "body": "Someone beat you to the payment for an item in your order! To secure your remaining items, please complete your payment as soon as possible.",
+        "col_name": "Item",
+        "col_price": "Price",
+        "zelle_title": "💰 Zelle Payment Details:",
+        "zelle_account": "Account: (984)373-9392",
+        "zelle_name": "Name: SHU CHING LI",
+        "zelle_note": "Note: Please include your \"Order ID\" in the memo.",
+        "orders_link_text": "Pay Now",
+        "footer": "💡 Questions? Feel free to contact Christy:",
+        "anytime": "Anytime",
+    },
+}
+
+# ── Order auto-cancelled email translations ────────────────────────────────────
+ORDER_AUTO_CANCELLED_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "❌ 您的訂單已被取消 - Christy's HomeFinds",
+        "header": "訂單已自動取消",
+        "emoji": "❌",
+        "greeting": "Hi {first_name}，",
+        "body": "您的訂單中，有商品被人搶先付款了！因此您的訂單已被自動取消。",
+        "order_number_label": "訂單編號：",
+        "col_name": "物品名稱",
+        "col_price": "價錢",
+        "orders_link_text": "查看我的訂單",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+        "anytime": "隨時",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "❌ 您的订单已被取消 - Christy's HomeFinds",
+        "header": "订单已自动取消",
+        "emoji": "❌",
+        "greeting": "Hi {first_name}，",
+        "body": "您的订单中，有商品被人抢先付款了！因此您的订单已被自动取消。",
+        "order_number_label": "订单编号：",
+        "col_name": "物品名称",
+        "col_price": "价格",
+        "orders_link_text": "查看我的订单",
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+        "anytime": "随时",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "❌ Your order has been cancelled - Christy's HomeFinds",
+        "header": "Order Automatically Cancelled",
+        "emoji": "❌",
+        "greeting": "Hi {first_name},",
+        "body": "All items in your order have been purchased by someone else. As a result, your order has been automatically cancelled.",
+        "order_number_label": "Order ID:",
+        "col_name": "Item",
+        "col_price": "Price",
+        "orders_link_text": "View My Orders",
+        "footer": "💡 Questions? Feel free to contact Christy:",
+        "anytime": "Anytime",
+    },
+}
+
 # Map frontend locale codes to DB ProductTranslation locale codes
 _LOCALE_TO_DB = {
     "zh-TW": "zh-TW",
@@ -435,6 +582,243 @@ def send_product_restored_notification(user, restored_product_ids, db, locale="z
         print(f"Restore notification sent to {recipients}")
     except Exception as e:
         print(f"Email sending failed: {e}")
+
+
+def _build_simple_product_rows(product_ids, db, db_locale):
+    """Shared helper: build (products_data, item_rows_html) for a list of product IDs."""
+    products_data = []
+    for pid in product_ids:
+        product = db.query(Product).filter(Product.id == pid).first()
+        if not product:
+            continue
+        translation = db.query(ProductTranslation).filter(
+            ProductTranslation.product_id == pid,
+            ProductTranslation.locale == db_locale,
+        ).first()
+        if not translation and db_locale != "zh-TW":
+            translation = db.query(ProductTranslation).filter(
+                ProductTranslation.product_id == pid,
+                ProductTranslation.locale == "zh-TW",
+            ).first()
+        image = (
+            db.query(ProductImage)
+            .filter(ProductImage.product_id == pid)
+            .order_by(ProductImage.sort_order)
+            .first()
+        )
+        name = translation.name if translation else (product.code if product else str(pid))
+        img_url = image.url if image else ""
+        price = float(product.price)
+        original_price = float(product.original_price) if product.original_price else None
+        products_data.append({"name": name, "img_url": img_url, "price": price, "original_price": original_price})
+
+    item_rows = ""
+    for item in products_data:
+        original_td = (
+            f'<span style="text-decoration:line-through;color:#aaa;margin-right:4px;">'
+            f'${_format_price(item["original_price"])}</span>'
+            if item["original_price"] is not None else ""
+        )
+        thumb_cell = (
+            f'<img src="{item["img_url"]}" width="40" height="40" '
+            f'style="border-radius:4px;object-fit:cover;display:block;" />'
+            if item["img_url"]
+            else '<div style="width:40px;height:40px;background:#eee;border-radius:4px;"></div>'
+        )
+        item_rows += f"""
+        <tr>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;">{thumb_cell}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;">{item["name"]}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:600;text-align:right;white-space:nowrap;">
+            {original_td}${_format_price(item["price"])}
+          </td>
+        </tr>"""
+    return products_data, item_rows
+
+
+def _build_simple_email_html(tr, greeting, body_text, product_ids, db, db_locale,
+                              order_number=None, extra_section_html=""):
+    """Build a simple email HTML with optional product table."""
+    _, item_rows = _build_simple_product_rows(product_ids, db, db_locale)
+
+    orders_link = (
+        f'<a href="https://schristy2020.github.io/homefinds/#/orders" '
+        f'style="color:#c9a96e;text-decoration:underline;">{tr["orders_link_text"]}</a>'
+    )
+
+    order_number_html = ""
+    if order_number:
+        order_number_html = f"""
+              <p style="font-size:14px;font-weight:700;margin:0 0 16px;">
+                {tr["order_number_label"]}
+                <span style="font-family:monospace;background:#f4f4f4;border-radius:4px;padding:3px 10px;letter-spacing:0.05em;margin-left:4px;">
+                  {order_number}
+                </span>
+              </p>"""
+
+    product_table_html = ""
+    if item_rows:
+        product_table_html = f"""
+              <table width="100%" cellpadding="0" cellspacing="0"
+                     style="border-collapse:collapse;margin-bottom:16px;font-size:13px;">
+                <thead>
+                  <tr style="border-bottom:1.5px solid #e0e0e0;">
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;width:50px;"></th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">{tr["col_name"]}</th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:right;">{tr["col_price"]}</th>
+                  </tr>
+                </thead>
+                <tbody>{item_rows}
+                </tbody>
+              </table>"""
+
+    return f"""<!DOCTYPE html>
+<html lang="{tr["html_lang"]}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{tr["header"]}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Noto Sans TC',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);max-width:600px;">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
+              <div style="font-size:36px;margin-bottom:8px;">{tr["emoji"]}</div>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">
+                <a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
+                — {tr["header"]}
+              </h1>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:24px 28px;">
+              <p style="font-size:15px;font-weight:700;margin:0 0 8px;">{greeting}</p>
+              <p style="font-size:13px;color:#444;margin:0 0 16px;">{body_text}</p>
+              {order_number_html}
+              {product_table_html}
+              {extra_section_html}
+              <p style="font-size:13px;color:#444;margin:0;">{orders_link}</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 28px 28px;border-top:1px solid #f0f0f0;font-size:12px;color:#888;text-align:center;">
+              {tr["footer"]}
+              <a href="mailto:qsa8647332@gmail.com" style="color:#c9a96e;text-decoration:none;">qsa8647332@gmail.com</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+
+def _send_simple_email(user, subject, html, resend_api_key, from_email):
+    resend_domain_verified = os.getenv("RESEND_DOMAIN_VERIFIED", "false").lower() == "true"
+    recipients = list({user.email, OWNER_EMAIL}) if resend_domain_verified else [OWNER_EMAIL]
+    try:
+        resend.api_key = resend_api_key
+        resend.Emails.send({"from": from_email, "to": recipients, "subject": subject, "html": html})
+        print(f"Email sent to {recipients}: {subject[:50]}")
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+
+
+def send_payment_success_notification(user, order_number, pickup_time, paid_product_ids, db, locale="zh-TW"):
+    """付款成功通知 — 寄給付款訂單的 user。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    tr = PAYMENT_SUCCESS_TRANSLATIONS.get(locale, PAYMENT_SUCCESS_TRANSLATIONS["zh-TW"])
+    db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
+
+    pickup_str = _format_datetime_12h(pickup_time) if pickup_time else tr["anytime"]
+    greeting = tr["greeting"].replace("{first_name}", user.first_name)
+    body_text = tr["body"].replace("{pickup_time}", f"<strong>{pickup_str}</strong>")
+
+    html = _build_simple_email_html(
+        tr=tr,
+        greeting=greeting,
+        body_text=body_text,
+        product_ids=paid_product_ids,
+        db=db,
+        db_locale=db_locale,
+        order_number=order_number,
+    )
+    subject = tr["subject"].replace("{order_number}", order_number)
+    _send_simple_email(user, subject, html, resend_api_key, from_email)
+
+
+def send_item_snatched_pending_notification(user, snatched_product_ids, db, locale="zh-TW"):
+    """有商品被搶先付款，但訂單中還有未售出商品 — 提醒盡速付款。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    tr = ITEM_SNATCHED_PENDING_TRANSLATIONS.get(locale, ITEM_SNATCHED_PENDING_TRANSLATIONS["zh-TW"])
+    db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
+
+    greeting = tr["greeting"].replace("{first_name}", user.first_name)
+
+    zelle_section = f"""
+              <div style="margin-bottom:16px;font-size:13px;">
+                <p style="font-weight:700;margin:0 0 6px;">{tr["zelle_title"]}</p>
+                <ul style="margin:0;padding-left:20px;list-style:disc;">
+                  <li style="margin-bottom:3px;">{tr["zelle_account"]}</li>
+                  <li style="margin-bottom:3px;">{tr["zelle_name"]}</li>
+                  <li>{tr["zelle_note"]}</li>
+                </ul>
+              </div>"""
+
+    html = _build_simple_email_html(
+        tr=tr,
+        greeting=greeting,
+        body_text=tr["body"],
+        product_ids=snatched_product_ids,
+        db=db,
+        db_locale=db_locale,
+        extra_section_html=zelle_section,
+    )
+    _send_simple_email(user, tr["subject"], html, resend_api_key, from_email)
+
+
+def send_order_auto_cancelled_notification(user, order_number, snatched_product_ids, db, locale="zh-TW"):
+    """訂單中所有商品皆被搶購，訂單已自動取消 — 通知 user。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    tr = ORDER_AUTO_CANCELLED_TRANSLATIONS.get(locale, ORDER_AUTO_CANCELLED_TRANSLATIONS["zh-TW"])
+    db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
+
+    greeting = tr["greeting"].replace("{first_name}", user.first_name)
+
+    html = _build_simple_email_html(
+        tr=tr,
+        greeting=greeting,
+        body_text=tr["body"],
+        product_ids=snatched_product_ids,
+        db=db,
+        db_locale=db_locale,
+        order_number=order_number,
+    )
+    subject = tr["subject"]
+    _send_simple_email(user, subject, html, resend_api_key, from_email)
 
 
 def send_order_confirmation(user, order_out, db, locale="zh-TW"):

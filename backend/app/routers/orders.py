@@ -9,7 +9,13 @@ from app.models.user import User
 from app.models.waiting_list import WaitingList
 from app.schemas.order import OrderCreate, OrderOut, OrderItemOut, OrderPickupTimeUpdate, RevertPaidBody
 from app.routers.waiting_list import _refresh_summary
-from app.services.email_service import send_order_confirmation, send_product_restored_notification
+from app.services.email_service import (
+    send_order_confirmation,
+    send_product_restored_notification,
+    send_payment_success_notification,
+    send_item_snatched_pending_notification,
+    send_order_auto_cancelled_notification,
+)
 
 router = APIRouter()
 
@@ -157,7 +163,10 @@ def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
         OrderItem.status == "reserved",
     ).all()
 
-    affected_order_ids = set()
+    paid_product_ids = [item.product_id for item in paid_items]
+
+    # Track which product_ids were snatched from each affected order
+    snatched_by_order: dict[int, list[int]] = {}
 
     for item in paid_items:
         item.status = "paid"
@@ -176,21 +185,71 @@ def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
         for other_item in other_items:
             other_item.status = "sold"
             other_item.sold_at = sold_at
-            affected_order_ids.add(other_item.order_id)
+            snatched_by_order.setdefault(other_item.order_id, []).append(item.product_id)
 
     db.flush()
 
     # Auto-cancel orders where all items are now sold or cancelled
-    for affected_id in affected_order_ids:
+    cancelled_order_ids: set[int] = set()
+    for affected_id in snatched_by_order:
         affected_order = db.query(Order).filter(Order.id == affected_id).first()
         if not affected_order or affected_order.order_status != "pending_payment":
             continue
         all_items = db.query(OrderItem).filter(OrderItem.order_id == affected_id).all()
         if all_items and all(i.status in ("sold", "cancelled") for i in all_items):
             affected_order.order_status = "cancelled"
+            cancelled_order_ids.add(affected_id)
 
     db.commit()
     db.refresh(order)
+
+    # Send emails asynchronously
+    _paid_order_number = order.order_number
+    _paid_pickup_time = order.pickup_time
+    _paid_user_id = order.user_id
+    _snatched_by_order = {oid: list(pids) for oid, pids in snatched_by_order.items()}
+    _cancelled_order_ids = set(cancelled_order_ids)
+    _paid_product_ids = list(paid_product_ids)
+
+    def _send_paid_emails():
+        new_db = SessionLocal()
+        try:
+            # 1. 寄信給付款成功的 user
+            try:
+                paid_user = new_db.query(User).filter(User.id == _paid_user_id).first()
+                if paid_user:
+                    send_payment_success_notification(
+                        paid_user, _paid_order_number, _paid_pickup_time, _paid_product_ids, new_db
+                    )
+            except Exception as e:
+                print(f"[mark_order_paid] payment success email failed: {e}")
+
+            # 2 & 3. 寄信給受影響的訂單 user
+            for affected_order_id, snatched_pids in _snatched_by_order.items():
+                try:
+                    affected_order = new_db.query(Order).filter(Order.id == affected_order_id).first()
+                    if not affected_order:
+                        continue
+                    affected_user = new_db.query(User).filter(User.id == affected_order.user_id).first()
+                    if not affected_user:
+                        continue
+                    if affected_order_id in _cancelled_order_ids:
+                        # 訂單中所有商品皆被售出 → 訂單已自動取消
+                        send_order_auto_cancelled_notification(
+                            affected_user, affected_order.order_number, snatched_pids, new_db
+                        )
+                    else:
+                        # 訂單中還有未售出商品 → 提醒盡速付款
+                        send_item_snatched_pending_notification(
+                            affected_user, snatched_pids, new_db
+                        )
+                except Exception as e:
+                    print(f"[mark_order_paid] affected order {affected_order_id} email failed: {e}")
+        finally:
+            new_db.close()
+
+    threading.Thread(target=_send_paid_emails, daemon=True).start()
+
     return _build_out(order, db)
 
 @router.put("/{order_id}/revert-paid", response_model=OrderOut)
