@@ -16,6 +16,7 @@ class UserCreate(BaseModel):
     phone:              str
     zelle_refund:       ZelleRefund = ZelleRefund.phone
     zelle_refund_other: Optional[str] = None
+    locale:             str = "zh-TW"
 
 class UserOut(UserCreate):
     id:              int

@@ -13,6 +13,7 @@ class User(Base):
     phone              = Column(String(20),  nullable=False)
     zelle_refund       = Column(Enum("phone", "email", "other"), nullable=False, default="phone")
     zelle_refund_other = Column(String(100), nullable=True)
+    locale             = Column(String(10),  nullable=False, default="zh-TW")
     has_purchase       = Column(TINYINT(1), nullable=False, default=0)
     has_reservation    = Column(TINYINT(1), nullable=False, default=0)
     is_admin           = Column(TINYINT(1), nullable=False, default=0)

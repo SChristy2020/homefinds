@@ -10,6 +10,8 @@ export const useOrdersStore = defineStore('orders', () => {
   const orders = ref(JSON.parse(sessionStorage.getItem(ORDERS_KEY)) || [])
 
   async function createOrder(formData, cartItems) {
+    const i18n = useI18nStore()
+
     // 1. 查找現有 user，若無則建立
     let user
     try {
@@ -28,6 +30,7 @@ export const useOrdersStore = defineStore('orders', () => {
         phone: formData.phone,
         zelle_refund: formData.zelleRefund,
         zelle_refund_other: formData.zelleRefundOther || null,
+        locale: i18n.locale,
       })
     }
 
@@ -41,7 +44,6 @@ export const useOrdersStore = defineStore('orders', () => {
     }
 
     // 3. 建立訂單
-    const i18n = useI18nStore()
     let order
     try {
       order = await api.post('/api/orders', {
