@@ -1,7 +1,7 @@
 <template>
   <div class="guide-bubble-wrapper">
     <div class="guide-bubble" @click="open = true" :title="i18n.t('guide.title')">
-      <BookOpen :size="20" />
+      <HelpCircle :size="22" />
     </div>
 
     <Teleport to="body">
@@ -14,8 +14,27 @@
                 <X :size="20" />
               </button>
             </div>
+
+            <!-- Tabs -->
+            <div class="guide-tabs">
+              <button
+                class="guide-tab"
+                :class="{ active: activeTab === 'shopping' }"
+                @click="activeTab = 'shopping'"
+              >{{ i18n.t('guide.sectionTitle') }}</button>
+              <button
+                class="guide-tab"
+                :class="{ active: activeTab === 'rent' }"
+                @click="activeTab = 'rent'"
+              >{{ i18n.t('guide.rentSectionTitle') }}</button>
+            </div>
+
             <div class="guide-body">
-              <ShoppingGuideContent />
+              <ShoppingGuideContent v-if="activeTab === 'shopping'" />
+              <template v-else>
+                <div v-if="roomBookingDescription" class="rent-guide-content" v-html="roomBookingDescription"></div>
+                <p v-else class="rent-guide-empty">{{ i18n.t('guide.rentGuideEmpty') }}</p>
+              </template>
             </div>
           </div>
         </div>
@@ -25,13 +44,32 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { BookOpen, X } from 'lucide-vue-next'
+import { ref, computed, onMounted } from 'vue'
+import { HelpCircle, X } from 'lucide-vue-next'
 import ShoppingGuideContent from '@/components/shared/ShoppingGuideContent.vue'
 import { useI18nStore } from '@/stores/i18n'
+import { api } from '@/utils/api'
 
 const i18n = useI18nStore()
 const open = ref(false)
+const activeTab = ref('shopping')
+const roomBookingMap = ref({})
+const roomBookingDescription = computed(() =>
+  roomBookingMap.value[i18n.locale.value] || roomBookingMap.value['zh-TW'] || ''
+)
+
+onMounted(async () => {
+  try {
+    const rooms = await api.get('/api/room')
+    if (rooms.length) {
+      const map = {}
+      for (const t of (rooms[0].translations || [])) {
+        map[t.locale] = t.booking_description || ''
+      }
+      roomBookingMap.value = map
+    }
+  } catch {}
+})
 </script>
 
 <style scoped>
@@ -114,10 +152,40 @@ const open = ref(false)
 }
 .guide-close:hover { background: #ebe8e2; }
 
+/* Tabs */
+.guide-tabs {
+  display: flex;
+  border-bottom: 1.5px solid #f0ede8;
+  flex-shrink: 0;
+  padding: 0 24px;
+  gap: 4px;
+}
+.guide-tab {
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1.5px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--mid);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.guide-tab:hover { color: var(--charcoal); }
+.guide-tab.active {
+  color: var(--charcoal);
+  border-bottom-color: var(--accent, #c9a96e);
+}
+
 .guide-body {
   overflow-y: auto;
   padding: 20px 24px 24px;
 }
+
+.rent-guide-content { font-size: 0.83rem; color: #444; line-height: 1.6; }
+.rent-guide-empty { font-size: 0.82rem; color: var(--mid); font-style: italic; }
 
 /* Modal transition */
 .modal-fade-enter-active,
