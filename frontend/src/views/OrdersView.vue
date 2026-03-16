@@ -832,6 +832,12 @@ function fromPickerFormat(str) {
 }
 .guide-collapse-body { margin-top: 12px; }
 .rent-guide-content { font-size: 0.83rem; color: #444; line-height: 1.6; }
+.rent-guide-content :deep(ul), .rent-guide-content :deep(ol) { padding-left: 1.5em; }
+.rent-guide-content :deep(ul) { list-style-type: disc; }
+.rent-guide-content :deep(ol) { list-style-type: decimal; }
+.rent-guide-content :deep(ul ul) { list-style-type: circle; }
+.rent-guide-content :deep(ul ul ul) { list-style-type: square; }
+.rent-guide-content :deep(blockquote) { margin-left: 1.5em; padding-left: 0.75em; border-left: 3px solid var(--border); }
 .rent-guide-empty { font-size: 0.82rem; color: var(--mid); font-style: italic; }
 
 /* ── Back button ─────────────────────────────────────────────────────────── */

@@ -153,8 +153,14 @@ async function onImageFile(e) {
   color: var(--charcoal, #333);
 }
 .editor-body:focus { background: #fffffe; }
-.editor-body :deep(img) { max-width: 100%; height: auto; border-radius: 4px; display: block; margin: 4px 0; }
+.editor-body :deep(img) { max-width: 100%; height: auto; border-radius: 4px; display: block; margin: 4px 0; cursor: pointer; }
 .editor-body :deep(a) { color: var(--accent, #b5935a); text-decoration: underline; }
+.editor-body :deep(ul), .editor-body :deep(ol) { padding-left: 1.5em; }
+.editor-body :deep(ul) { list-style-type: disc; }
+.editor-body :deep(ol) { list-style-type: decimal; }
+.editor-body :deep(ul ul) { list-style-type: circle; }
+.editor-body :deep(ul ul ul) { list-style-type: square; }
+.editor-body :deep(blockquote) { margin-left: 1.5em; padding-left: 0.75em; border-left: 3px solid var(--border); }
 .editor-uploading {
   padding: 4px 12px;
   font-size: 0.78rem;

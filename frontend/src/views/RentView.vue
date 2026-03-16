@@ -110,4 +110,10 @@ onMounted(async () => {
 .price-big { font-size: 1.4rem; font-weight: 700; color: var(--charcoal); }
 .date-range { font-size: 0.8rem; color: var(--mid); margin: 4px 0 12px; }
 .room-description { font-size: 0.88rem; color: var(--charcoal); line-height: 1.7; }
+.room-description :deep(ul), .room-description :deep(ol) { padding-left: 1.5em; }
+.room-description :deep(ul) { list-style-type: disc; }
+.room-description :deep(ol) { list-style-type: decimal; }
+.room-description :deep(ul ul) { list-style-type: circle; }
+.room-description :deep(ul ul ul) { list-style-type: square; }
+.room-description :deep(blockquote) { margin-left: 1.5em; padding-left: 0.75em; border-left: 3px solid var(--border); }
 </style>
