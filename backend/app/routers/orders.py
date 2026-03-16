@@ -7,7 +7,7 @@ from app.models.order import Order, OrderItem
 from app.models.product import Product, ProductTranslation, ProductImage
 from app.models.user import User
 from app.models.waiting_list import WaitingList
-from app.schemas.order import OrderCreate, OrderOut, OrderItemOut, OrderPickupTimeUpdate, RevertPaidBody
+from app.schemas.order import OrderCreate, OrderOut, OrderItemOut, OrderPickupTimeUpdate, RevertPaidBody, AdminNotesUpdate
 from app.routers.waiting_list import _refresh_summary
 from app.services.email_service import (
     send_order_confirmation,
@@ -376,6 +376,19 @@ def update_pickup_time(order_id: int, body: OrderPickupTimeUpdate, db: Session =
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     order.pickup_time = body.pickup_time
+    db.commit()
+    db.refresh(order)
+    return _build_out(order, db)
+
+@router.put("/{order_id}/admin-notes", response_model=OrderOut)
+def update_admin_notes(order_id: int, body: AdminNotesUpdate, admin_id: int, db: Session = Depends(get_db)):
+    admin = db.query(User).filter(User.id == admin_id, User.is_admin == 1).first()
+    if not admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    order.admin_notes = body.admin_notes
     db.commit()
     db.refresh(order)
     return _build_out(order, db)

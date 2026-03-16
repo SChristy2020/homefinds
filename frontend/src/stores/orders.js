@@ -124,6 +124,14 @@ export const useOrdersStore = defineStore('orders', () => {
     return updated
   }
 
+  async function updateAdminNotes(orderId, adminId, notes) {
+    const updated = await api.put(`/api/orders/${orderId}/admin-notes?admin_id=${adminId}`, { admin_notes: notes })
+    const idx = orders.value.findIndex(o => o.id === orderId)
+    if (idx !== -1) orders.value[idx] = updated
+    sessionStorage.setItem(ORDERS_KEY, JSON.stringify(orders.value))
+    return updated
+  }
+
   function clearOrders() {
     orders.value = []
     sessionStorage.removeItem(ORDERS_KEY)
@@ -132,5 +140,5 @@ export const useOrdersStore = defineStore('orders', () => {
   // 保留介面相容性，waiting list 功能需後端另行實作
   function getWaitingList() { return [] }
 
-  return { orders, createOrder, fetchOrdersByUser, fetchAllOrders, updatePayStatus, updateOrderStatus, revertPaidOrder, cancelOrderItem, updatePickupTime, clearOrders, getWaitingList }
+  return { orders, createOrder, fetchOrdersByUser, fetchAllOrders, updatePayStatus, updateOrderStatus, revertPaidOrder, cancelOrderItem, updatePickupTime, updateAdminNotes, clearOrders, getWaitingList }
 })

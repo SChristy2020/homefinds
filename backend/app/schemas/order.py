@@ -42,6 +42,9 @@ class OrderCreate(BaseModel):
     items:       list[OrderItemCreate]
     locale:      str = "zh-TW"
 
+class AdminNotesUpdate(BaseModel):
+    admin_notes: Optional[str] = None
+
 class OrderOut(BaseModel):
     id:           int
     order_number: Optional[str]
@@ -56,6 +59,7 @@ class OrderOut(BaseModel):
     buyer_last_name:  Optional[str] = None
     buyer_email:      Optional[str] = None
     buyer_phone:      Optional[str] = None
+    admin_notes:      Optional[str] = None
 
     class Config:
         from_attributes = True

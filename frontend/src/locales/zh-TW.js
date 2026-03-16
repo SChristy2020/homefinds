@@ -125,6 +125,8 @@ export default {
     buyer: '購買人',
     buyerEmail: 'Email',
     buyerPhone: '電話',
+    adminNotes: '備註',
+    saveNotesToast: '備註已更新',
     markPaid: '標記已付款',
     markUnpaid: '標記未付款',
     payStatusToast: '付款狀態已更新',

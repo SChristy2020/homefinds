@@ -125,6 +125,8 @@ export default {
     buyer: 'Buyer',
     buyerEmail: 'Email',
     buyerPhone: 'Phone',
+    adminNotes: 'Notes',
+    saveNotesToast: 'Notes updated',
     markPaid: 'Mark Paid',
     markUnpaid: 'Mark Unpaid',
     payStatusToast: 'Payment status updated',

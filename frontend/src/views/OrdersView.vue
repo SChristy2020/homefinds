@@ -71,6 +71,7 @@
                 </th>
                 <th>{{ i18n.t('orders.buyerEmail') }}</th>
                 <th>{{ i18n.t('orders.buyerPhone') }}</th>
+                <th>{{ i18n.t('orders.adminNotes') }}</th>
               </template>
               <th class="sortable" @click="toggleSort('created')">
                 {{ i18n.t('orders.createdAt') }}<SortIcon col="created" :active="sortColumn" :dir="sortDirection" />
@@ -138,6 +139,25 @@
                 <td class="td-buyer">{{ order.buyer_last_name }} {{ order.buyer_first_name }}</td>
                 <td class="td-buyer-info">{{ order.buyer_email }}</td>
                 <td class="td-buyer-info">{{ order.buyer_phone }}</td>
+                <td class="td-admin-notes" @click.stop>
+                  <template v-if="editingNotesOrderId !== order.id">
+                    <span class="notes-display">
+                      <span class="notes-text">{{ order.admin_notes || '—' }}</span>
+                      <button class="btn-edit-icon" @click.stop="startEditNotes(order)" title="編輯">
+                        <Pencil :size="12" />
+                      </button>
+                    </span>
+                  </template>
+                  <template v-else>
+                    <div class="notes-edit-wrap">
+                      <textarea v-model="editingNotesValue" class="notes-textarea" rows="2" @click.stop />
+                      <div class="pickup-edit-actions">
+                        <button class="btn-save-pickup" @click.stop="saveAdminNotes(order)">{{ i18n.t('orders.savePickup') }}</button>
+                        <button class="btn-cancel-pickup" @click.stop="cancelEditNotes">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                      </div>
+                    </div>
+                  </template>
+                </td>
               </template>
               <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
               <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
@@ -145,7 +165,7 @@
 
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
-              <td :colspan="isAdmin ? 10 : 6">
+              <td :colspan="isAdmin ? 11 : 6">
                 <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" :orderStatus="order.order_status" @cancel="handleCancel" />
 
                 <!-- Total summary -->
@@ -309,6 +329,8 @@ const editingOrderId = ref(null)
 const editPickupValue = ref('')
 const editingStatusOrderId = ref(null)
 const editingStatusValue = ref('')
+const editingNotesOrderId = ref(null)
+const editingNotesValue = ref('')
 
 function onNameInput() {
   form.value.name = form.value.name.replace(/[^a-zA-Z\u4e00-\u9fff\u3400-\u4dbf\s'-]/g, '')
@@ -385,6 +407,22 @@ async function saveStatus(order) {
   }
   toast.show(i18n.t('orders.payStatusToast'))
   editingStatusOrderId.value = null
+}
+
+function startEditNotes(order) {
+  editingNotesOrderId.value = order.id
+  editingNotesValue.value = order.admin_notes || ''
+}
+
+function cancelEditNotes() {
+  editingNotesOrderId.value = null
+  editingNotesValue.value = ''
+}
+
+async function saveAdminNotes(order) {
+  await ordersStore.updateAdminNotes(order.id, userStore.currentUser.id, editingNotesValue.value || null)
+  toast.show(i18n.t('orders.saveNotesToast'))
+  editingNotesOrderId.value = null
 }
 
 async function handleCancel(itemId) {
@@ -555,6 +593,19 @@ function fromPickerFormat(str) {
 /* Admin buyer columns */
 .td-buyer      { white-space: nowrap; font-size: 0.82rem; }
 .td-buyer-info { white-space: nowrap; font-size: 0.78rem; color: var(--mid); }
+
+/* Admin notes column */
+.td-admin-notes { min-width: 140px; max-width: 240px; font-size: 0.78rem; color: var(--mid); }
+.notes-display  { display: inline-flex; align-items: center; gap: 4px; }
+.notes-text     { white-space: pre-wrap; word-break: break-word; }
+.notes-edit-wrap { display: flex; flex-direction: column; gap: 6px; }
+.notes-textarea {
+  width: 100%; min-width: 160px; font-family: var(--font-body); font-size: 0.8rem;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 4px 8px; color: var(--charcoal); background: #fff;
+  outline: none; resize: vertical;
+}
+.notes-textarea:focus { border-color: var(--charcoal); }
 
 /* Pickup time cell */
 .td-pickup { white-space: nowrap; }
