@@ -120,7 +120,6 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
                         affected_user = new_db.query(User).filter(User.id == affected_order.user_id).first()
                         if not affected_user:
                             continue
-                        time.sleep(0.6)
                         if affected_order_id in _cancelled:
                             send_order_auto_cancelled_notification(
                                 affected_user, affected_order.order_number, [_pid], new_db

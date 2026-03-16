@@ -1,4 +1,5 @@
 import os
+import time
 import resend
 
 from app.models.product import Product, ProductTranslation, ProductImage
@@ -626,6 +627,7 @@ def send_product_restored_notification(user, restored_product_ids, db):
         params["cc"] = cc
 
     try:
+        time.sleep(1)
         resend.api_key = resend_api_key
         resend.Emails.send(params)
         print(f"Restore notification sent to={to} cc={cc}")
@@ -778,6 +780,7 @@ def _send_simple_email(user, subject, html, resend_api_key, from_email):
     if cc:
         params["cc"] = cc
     try:
+        time.sleep(1)
         resend.api_key = resend_api_key
         resend.Emails.send(params)
         print(f"Email sent to={to} cc={cc}: {subject[:50]}")
@@ -1010,6 +1013,7 @@ def send_order_confirmation(user, order_out, db):
         params["cc"] = cc
 
     try:
+        time.sleep(1)
         resend.api_key = resend_api_key
         resend.Emails.send(params)
         print(f"Order confirmation email sent to={to} cc={cc}")
