@@ -391,6 +391,55 @@ ORDER_AUTO_CANCELLED_TRANSLATIONS = {
     },
 }
 
+# ── Order status reverted (paid → pending/cancelled) email translations ─────────
+ORDER_STATUS_REVERTED_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "⚠️ 訂單狀態已變更 - Christy's HomeFinds",
+        "header": "訂單狀態已變更",
+        "emoji": "⚠️",
+        "greeting": "Hi {first_name}，",
+        "body_pending": "您的訂單狀態已由「已付款」更改為「待付款」，請確認訂單詳情，若有任何疑問請聯絡 Christy。",
+        "body_cancelled": "您的訂單狀態已由「已付款」更改為「已取消」，若有任何疑問請聯絡 Christy。",
+        "order_number_label": "訂單編號：",
+        "col_name": "物品名稱",
+        "col_price": "價錢",
+        "orders_link_text": "查看我的訂單",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+        "anytime": "隨時",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "⚠️ 订单状态已变更 - Christy's HomeFinds",
+        "header": "订单状态已变更",
+        "emoji": "⚠️",
+        "greeting": "Hi {first_name}，",
+        "body_pending": "您的订单状态已由「已付款」更改为「待付款」，请确认订单详情，如有疑问请联络 Christy。",
+        "body_cancelled": "您的订单状态已由「已付款」更改为「已取消」，如有疑问请联络 Christy。",
+        "order_number_label": "订单编号：",
+        "col_name": "物品名称",
+        "col_price": "价格",
+        "orders_link_text": "查看我的订单",
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+        "anytime": "随时",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "⚠️ Order Status Updated - Christy's HomeFinds",
+        "header": "Order Status Updated",
+        "emoji": "⚠️",
+        "greeting": "Hi {first_name},",
+        "body_pending": "Your order status has been changed from 'Paid' to 'Pending Payment'. Please review your order details. Contact Christy if you have any questions.",
+        "body_cancelled": "Your order status has been changed from 'Paid' to 'Cancelled'. Please contact Christy if you have any questions.",
+        "order_number_label": "Order ID:",
+        "col_name": "Item",
+        "col_price": "Price",
+        "orders_link_text": "View My Orders",
+        "footer": "💡 Questions? Feel free to contact Christy:",
+        "anytime": "Anytime",
+    },
+}
+
 # Map frontend locale codes to DB ProductTranslation locale codes
 _LOCALE_TO_DB = {
     "zh-TW": "zh-TW",
@@ -820,6 +869,34 @@ def send_order_auto_cancelled_notification(user, order_number, snatched_product_
         greeting=greeting,
         body_text=tr["body"],
         product_ids=snatched_product_ids,
+        db=db,
+        db_locale=db_locale,
+        order_number=order_number,
+    )
+    subject = tr["subject"]
+    _send_simple_email(user, subject, html, resend_api_key, from_email)
+
+
+def send_order_status_reverted_notification(user, order_number, target_status, product_ids, db):
+    """訂單從「已付款」改為「待付款」或「取消」 — 通知 user。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
+    tr = ORDER_STATUS_REVERTED_TRANSLATIONS.get(locale, ORDER_STATUS_REVERTED_TRANSLATIONS["zh-TW"])
+    db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
+
+    greeting = tr["greeting"].replace("{first_name}", user.first_name)
+    body_text = tr["body_pending"] if target_status == "pending_payment" else tr["body_cancelled"]
+
+    html = _build_simple_email_html(
+        tr=tr,
+        greeting=greeting,
+        body_text=body_text,
+        product_ids=product_ids,
         db=db,
         db_locale=db_locale,
         order_number=order_number,

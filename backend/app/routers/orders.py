@@ -15,6 +15,7 @@ from app.services.email_service import (
     send_payment_success_notification,
     send_item_snatched_pending_notification,
     send_order_auto_cancelled_notification,
+    send_order_status_reverted_notification,
 )
 
 router = APIRouter()
@@ -308,10 +309,24 @@ def revert_paid_order(order_id: int, body: RevertPaidBody, db: Session = Depends
 
     # 6. 寄信通知所有含此商品的訂單購買者（非 cancelled 物品）
     _product_ids = affected_product_ids[:]
+    _reverted_order_user_id = order.user_id
+    _reverted_order_number = order.order_number
+    _reverted_target_status = body.target_status
 
     def _send_restore_emails():
         new_db = SessionLocal()
         try:
+            # 6a. 寄信給被 revert 的訂單 user，通知訂單狀態已變更
+            try:
+                reverted_user = new_db.query(User).filter(User.id == _reverted_order_user_id).first()
+                if reverted_user:
+                    send_order_status_reverted_notification(
+                        reverted_user, _reverted_order_number, _reverted_target_status, _product_ids, new_db
+                    )
+            except Exception as e:
+                print(f"[revert_paid_order] status reverted email failed: {e}")
+
+            # 6b. 寄信通知所有含此商品的訂單購買者（非 cancelled 物品）商品已恢復
             sent_user_ids = set()
             items_for_products = new_db.query(OrderItem).filter(
                 OrderItem.product_id.in_(_product_ids),
