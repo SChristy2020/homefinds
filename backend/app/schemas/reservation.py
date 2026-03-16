@@ -24,3 +24,9 @@ class ReservationOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ReservationWithUser(ReservationOut):
+    buyer_first_name: str
+    buyer_last_name:  str
+    buyer_email:      str
+    buyer_phone:      str

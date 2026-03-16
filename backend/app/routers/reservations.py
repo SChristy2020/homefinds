@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.reservation import Reservation
 from app.models.user import User
-from app.schemas.reservation import ReservationCreate, ReservationOut
+from app.schemas.reservation import ReservationCreate, ReservationOut, ReservationWithUser
 
 router = APIRouter()
 
@@ -18,6 +18,20 @@ def create_reservation(body: ReservationCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(reservation)
     return reservation
+
+@router.get("/all", response_model=list[ReservationWithUser])
+def get_all_reservations(db: Session = Depends(get_db)):
+    rows = db.query(Reservation, User).join(User, Reservation.user_id == User.id).order_by(Reservation.id.desc()).all()
+    return [
+        ReservationWithUser(
+            **{c.key: getattr(r, c.key) for c in Reservation.__table__.columns},
+            buyer_first_name=u.first_name,
+            buyer_last_name=u.last_name,
+            buyer_email=u.email,
+            buyer_phone=u.phone,
+        )
+        for r, u in rows
+    ]
 
 @router.get("/user/{user_id}", response_model=list[ReservationOut])
 def get_reservations_by_user(user_id: int, db: Session = Depends(get_db)):

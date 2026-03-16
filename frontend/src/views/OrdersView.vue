@@ -26,15 +26,8 @@
 
     <!-- Logged in -->
     <div v-else>
-      <!-- No orders -->
-      <div v-if="ordersStore.orders.length === 0" class="no-orders-state">
-        <p class="greeting">
-          {{ userStore.currentUser.salutation }} {{ userStore.currentUser.last_name }}，{{ i18n.t('orders.noOrders') }}
-        </p>
-      </div>
-
       <!-- Orders table -->
-      <div v-else class="orders-table-wrap">
+      <div class="orders-table-wrap">
         <p class="orders-greeting">
           {{ i18n.t('orders.greeting', { name: userStore.currentUser.first_name }) }}
         </p>
@@ -82,6 +75,11 @@
               </th>
             </tr>
           </thead>
+          <tbody v-if="filteredOrders.length === 0">
+            <tr>
+              <td :colspan="isAdmin ? 11 : 6" class="td-empty">{{ i18n.t('orders.noOrdersTable') }}</td>
+            </tr>
+          </tbody>
           <tbody v-for="order in paginatedOrders" :key="order.id">
             <!-- Order summary row -->
             <tr class="order-row" :class="{ expanded: expandedOrderId === order.id, 'order-row-dimmed': isAllSoldCancelled(order) }" @click="toggleExpand(order.id)">
@@ -206,6 +204,60 @@
         </div>
       </div>
 
+      <!-- 租屋訂單 -->
+      <div class="reservations-section">
+        <h2 class="orders-section-title reservations-section-title">{{ i18n.t('reservations.sectionTitle') }}</h2>
+        <table class="orders-table reservations-table">
+          <thead>
+            <tr>
+              <th>{{ i18n.t('reservations.resNo') }}</th>
+              <th>{{ i18n.t('reservations.checkIn') }}</th>
+              <th>{{ i18n.t('reservations.checkOut') }}</th>
+              <th>{{ i18n.t('reservations.nights') }}</th>
+              <th>{{ i18n.t('reservations.depositAmount') }}</th>
+              <th>{{ i18n.t('reservations.depositPaid') }}</th>
+              <th>{{ i18n.t('reservations.totalPrice') }}</th>
+              <th>{{ i18n.t('reservations.fullyPaid') }}</th>
+              <template v-if="isAdmin">
+                <th>{{ i18n.t('reservations.buyer') }}</th>
+                <th>{{ i18n.t('reservations.buyerEmail') }}</th>
+                <th>{{ i18n.t('reservations.buyerPhone') }}</th>
+              </template>
+              <th>{{ i18n.t('reservations.createdAt') }}</th>
+              <th v-if="isAdmin">{{ i18n.t('reservations.updatedAt') }}</th>
+            </tr>
+          </thead>
+          <tbody v-if="reservationsStore.reservations.length === 0">
+            <tr>
+              <td :colspan="isAdmin ? 14 : 9" class="td-empty">{{ i18n.t('reservations.noReservations') }}</td>
+            </tr>
+          </tbody>
+          <tbody v-else>
+            <tr v-for="res in reservationsStore.reservations" :key="res.id" class="order-row">
+              <td class="td-order-no">{{ res.id }}</td>
+              <td>{{ formatDate(res.check_in) }}</td>
+              <td>{{ formatDate(res.check_out) }}</td>
+              <td>{{ res.nights }}</td>
+              <td>${{ res.deposit_amount }}</td>
+              <td :class="res.deposit_paid ? 'status-paid' : 'status-unpaid'">
+                {{ res.deposit_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}
+              </td>
+              <td>${{ res.total_price }}</td>
+              <td :class="res.fully_paid ? 'status-paid' : 'status-unpaid'">
+                {{ res.fully_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}
+              </td>
+              <template v-if="isAdmin">
+                <td class="td-buyer">{{ res.buyer_last_name }} {{ res.buyer_first_name }}</td>
+                <td class="td-buyer-info">{{ res.buyer_email }}</td>
+                <td class="td-buyer-info">{{ res.buyer_phone }}</td>
+              </template>
+              <td class="td-created">{{ formatDateTime(res.created_at) }}</td>
+              <td v-if="isAdmin" class="td-created">{{ formatDateTime(res.updated_at) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <!-- 購物須知 -->
       <div class="shopping-guide-wrap">
         <ShoppingGuideContent />
@@ -224,6 +276,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { ArrowLeft, Pencil, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-vue-next'
 import { useOrdersStore } from '@/stores/orders'
+import { useReservationsStore } from '@/stores/reservations'
 import { useUserStore } from '@/stores/user'
 import { useToastStore } from '@/stores/toast'
 import { useI18nStore } from '@/stores/i18n'
@@ -232,6 +285,7 @@ import ShoppingGuideContent from '@/components/shared/ShoppingGuideContent.vue'
 import PickupDatePicker from '@/components/shared/PickupDatePicker.vue'
 
 const ordersStore = useOrdersStore()
+const reservationsStore = useReservationsStore()
 const userStore = useUserStore()
 const toast = useToastStore()
 const i18n = useI18nStore()
@@ -320,9 +374,15 @@ const SortIcon = {
 onMounted(async () => {
   if (userStore.currentUser) {
     if (userStore.currentUser.is_admin === 1) {
-      await ordersStore.fetchAllOrders()
+      await Promise.all([
+        ordersStore.fetchAllOrders(),
+        reservationsStore.fetchAllReservations(),
+      ])
     } else if (ordersStore.orders.length === 0) {
-      await ordersStore.fetchOrdersByUser(userStore.currentUser.id)
+      await Promise.all([
+        ordersStore.fetchOrdersByUser(userStore.currentUser.id),
+        reservationsStore.fetchReservationsByUser(userStore.currentUser.id),
+      ])
     }
   }
 })
@@ -359,9 +419,15 @@ async function handleLookup() {
   const user = await userStore.lookup(form.value.name, form.value.email, form.value.phone)
   if (user) {
     if (user.is_admin === 1) {
-      await ordersStore.fetchAllOrders()
+      await Promise.all([
+        ordersStore.fetchAllOrders(),
+        reservationsStore.fetchAllReservations(),
+      ])
     } else {
-      await ordersStore.fetchOrdersByUser(user.id)
+      await Promise.all([
+        ordersStore.fetchOrdersByUser(user.id),
+        reservationsStore.fetchReservationsByUser(user.id),
+      ])
     }
   }
 }
@@ -433,6 +499,7 @@ async function handleCancel(itemId) {
 
 function reset() {
   ordersStore.clearOrders()
+  reservationsStore.clearReservations()
   expandedOrderId.value = null
   editingOrderId.value = null
   userStore.logout()
@@ -482,6 +549,12 @@ function hasNotFirstPosition(order) {
 
 function isAllSoldCancelled(order) {
   return order.order_status === 'cancelled' && order.items.some(i => i.status === 'sold')
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
 }
 
 function formatDateTime(isoStr) {
@@ -685,6 +758,21 @@ function fromPickerFormat(str) {
   margin: 0; padding: 8px 16px 12px;
   color: var(--red, #c0392b); font-size: 0.8rem; font-weight: 600;
 }
+
+/* ── Empty table state ───────────────────────────────────────────────────── */
+.td-empty {
+  text-align: center; padding: 24px 12px;
+  color: var(--mid); font-size: 0.88rem; font-style: italic;
+}
+
+/* ── Reservations section ────────────────────────────────────────────────── */
+.reservations-section {
+  width: 100%; overflow-x: auto; margin-top: 32px;
+}
+.reservations-section-title {
+  margin-top: 0;
+}
+.reservations-table tbody tr:hover { background: #edf4f4; }
 
 /* ── Shopping guide ──────────────────────────────────────────────────────── */
 .shopping-guide-wrap {
