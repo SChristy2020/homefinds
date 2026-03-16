@@ -178,6 +178,8 @@ export default {
   guide: {
     title: '买家小指南',
     sectionTitle: '🛍️ 购物与取货流程说明',
+    rentSectionTitle: '🏠 房间预订流程说明',
+    rentGuideEmpty: '暂无说明内容。',
     step1Title: 'Step 1. 预定（保留顺位）',
     step1Items: [
       '预定成功：完成后系统会将您排入「预定排序名单」，名单皆以匿名呈现。',

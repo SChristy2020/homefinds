@@ -260,7 +260,27 @@
 
       <!-- 購物須知 -->
       <div class="shopping-guide-wrap">
-        <ShoppingGuideContent />
+        <button class="guide-toggle-btn" @click="shoppingGuideOpen = !shoppingGuideOpen">
+          <span>{{ i18n.t('guide.sectionTitle') }}</span>
+          <ChevronDown v-if="!shoppingGuideOpen" :size="16" />
+          <ChevronUp v-else :size="16" />
+        </button>
+        <div v-if="shoppingGuideOpen" class="guide-collapse-body">
+          <ShoppingGuideContent />
+        </div>
+      </div>
+
+      <!-- 房間預訂流程說明 -->
+      <div class="shopping-guide-wrap">
+        <button class="guide-toggle-btn" @click="rentGuideOpen = !rentGuideOpen">
+          <span>{{ i18n.t('guide.rentSectionTitle') }}</span>
+          <ChevronDown v-if="!rentGuideOpen" :size="16" />
+          <ChevronUp v-else :size="16" />
+        </button>
+        <div v-if="rentGuideOpen" class="guide-collapse-body">
+          <div v-if="roomBookingDescription" class="rent-guide-content" v-html="roomBookingDescription"></div>
+          <p v-else class="rent-guide-empty">{{ i18n.t('guide.rentGuideEmpty') }}</p>
+        </div>
       </div>
 
       <div class="back-btn-wrap">
@@ -283,6 +303,7 @@ import { useI18nStore } from '@/stores/i18n'
 import OrderItemList from '@/components/orders/OrderItemList.vue'
 import ShoppingGuideContent from '@/components/shared/ShoppingGuideContent.vue'
 import PickupDatePicker from '@/components/shared/PickupDatePicker.vue'
+import { api } from '@/utils/api'
 
 const ordersStore = useOrdersStore()
 const reservationsStore = useReservationsStore()
@@ -291,6 +312,13 @@ const toast = useToastStore()
 const i18n = useI18nStore()
 
 const isAdmin = computed(() => userStore.currentUser?.is_admin === 1)
+
+const shoppingGuideOpen = ref(false)
+const rentGuideOpen = ref(false)
+const roomBookingMap = ref({})
+const roomBookingDescription = computed(() =>
+  roomBookingMap.value[i18n.locale.value] || roomBookingMap.value['zh-TW'] || ''
+)
 
 const form = ref({ name: '', email: '', phone: '' })
 const errors = ref({ name: '', email: '', phone: '' })
@@ -372,6 +400,18 @@ const SortIcon = {
 }
 
 onMounted(async () => {
+  try {
+    const rooms = await api.get('/api/room')
+    if (rooms.length) {
+      const room = rooms[0]
+      const map = {}
+      for (const t of (room.translations || [])) {
+        map[t.locale] = t.booking_description || ''
+      }
+      roomBookingMap.value = map
+    }
+  } catch {}
+
   if (userStore.currentUser) {
     if (userStore.currentUser.is_admin === 1) {
       await Promise.all([
@@ -777,8 +817,22 @@ function fromPickerFormat(str) {
 /* ── Shopping guide ──────────────────────────────────────────────────────── */
 .shopping-guide-wrap {
   width: 100%; margin-top: 24px;
-  border-top: 1.5px solid var(--border); padding-top: 20px;
+  border-top: 1.5px solid var(--border); padding-top: 16px;
 }
+.guide-toggle-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; background: none; border: none; cursor: pointer;
+  font-size: 1.2rem; font-weight: 700; color: var(--charcoal);
+  padding: 8px 10px; margin: 0 -10px; width: calc(100% + 20px);
+  text-align: left; border-radius: var(--radius);
+  transition: background 0.15s, color 0.15s;
+}
+.guide-toggle-btn:hover {
+  background: #edf4f4;
+}
+.guide-collapse-body { margin-top: 12px; }
+.rent-guide-content { font-size: 0.83rem; color: #444; line-height: 1.6; }
+.rent-guide-empty { font-size: 0.82rem; color: var(--mid); font-style: italic; }
 
 /* ── Back button ─────────────────────────────────────────────────────────── */
 .back-btn-wrap { display: flex; justify-content: center; margin-top: 16px; }

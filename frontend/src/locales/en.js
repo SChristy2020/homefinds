@@ -178,6 +178,8 @@ export default {
   guide: {
     title: "Buyer's Guide",
     sectionTitle: '🛍️ Shopping & Pickup Guide',
+    rentSectionTitle: '🏠 Room Booking Guide',
+    rentGuideEmpty: 'No content available.',
     step1Title: 'Step 1. Pre-order (Reserve Your Spot)',
     step1Items: [
       'Confirmation: Once reserved, you will be added to the "Pre-order Waitlist" (displayed anonymously).',

@@ -237,6 +237,8 @@ export default {
   guide: {
     title: '買家小指南',
     sectionTitle: '🛍️ 購物與取貨流程說明',
+    rentSectionTitle: '🏠 房間預訂流程說明',
+    rentGuideEmpty: '尚無說明內容。',
     step1Title: 'Step 1. 預定（保留順位）',
     step1Items: [
       '預定成功：完成後系統會將您排入「預定排序名單」，名單皆以匿名呈現。',
