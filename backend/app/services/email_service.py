@@ -422,7 +422,7 @@ def _format_datetime_12h(dt):
     return f"{dt.strftime('%m/%d/%Y')} {h12}:{dt.strftime('%M')} {ampm}"
 
 
-def send_product_restored_notification(user, restored_product_ids, db, locale="zh-TW"):
+def send_product_restored_notification(user, restored_product_ids, db):
     """通知買家：訂單中原本已出售的商品恢復販售了。"""
     resend_api_key = os.getenv("RESEND_API_KEY", "")
     from_email = os.getenv("RESEND_FROM", "")
@@ -430,6 +430,7 @@ def send_product_restored_notification(user, restored_product_ids, db, locale="z
         print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
         return
 
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
     tr = RESTORE_EMAIL_TRANSLATIONS.get(locale, RESTORE_EMAIL_TRANSLATIONS["zh-TW"])
     db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
 
@@ -569,17 +570,16 @@ def send_product_restored_notification(user, restored_product_ids, db, locale="z
 
     subject = tr["subject"]
     resend_domain_verified = os.getenv("RESEND_DOMAIN_VERIFIED", "false").lower() == "true"
-    recipients = list({user.email, OWNER_EMAIL}) if resend_domain_verified else [OWNER_EMAIL]
+    to = [user.email] if resend_domain_verified else [OWNER_EMAIL]
+    cc = [OWNER_EMAIL] if resend_domain_verified else []
+    params = {"from": from_email, "to": to, "subject": subject, "html": html}
+    if cc:
+        params["cc"] = cc
 
     try:
         resend.api_key = resend_api_key
-        resend.Emails.send({
-            "from": from_email,
-            "to": recipients,
-            "subject": subject,
-            "html": html,
-        })
-        print(f"Restore notification sent to {recipients}")
+        resend.Emails.send(params)
+        print(f"Restore notification sent to={to} cc={cc}")
     except Exception as e:
         print(f"Email sending failed: {e}")
 
@@ -723,16 +723,20 @@ def _build_simple_email_html(tr, greeting, body_text, product_ids, db, db_locale
 
 def _send_simple_email(user, subject, html, resend_api_key, from_email):
     resend_domain_verified = os.getenv("RESEND_DOMAIN_VERIFIED", "false").lower() == "true"
-    recipients = list({user.email, OWNER_EMAIL}) if resend_domain_verified else [OWNER_EMAIL]
+    to = [user.email] if resend_domain_verified else [OWNER_EMAIL]
+    cc = [OWNER_EMAIL] if resend_domain_verified else []
+    params = {"from": from_email, "to": to, "subject": subject, "html": html}
+    if cc:
+        params["cc"] = cc
     try:
         resend.api_key = resend_api_key
-        resend.Emails.send({"from": from_email, "to": recipients, "subject": subject, "html": html})
-        print(f"Email sent to {recipients}: {subject[:50]}")
+        resend.Emails.send(params)
+        print(f"Email sent to={to} cc={cc}: {subject[:50]}")
     except Exception as e:
         print(f"Email sending failed: {e}")
 
 
-def send_payment_success_notification(user, order_number, pickup_time, paid_product_ids, db, locale="zh-TW"):
+def send_payment_success_notification(user, order_number, pickup_time, paid_product_ids, db):
     """付款成功通知 — 寄給付款訂單的 user。"""
     resend_api_key = os.getenv("RESEND_API_KEY", "")
     from_email = os.getenv("RESEND_FROM", "")
@@ -740,6 +744,7 @@ def send_payment_success_notification(user, order_number, pickup_time, paid_prod
         print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
         return
 
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
     tr = PAYMENT_SUCCESS_TRANSLATIONS.get(locale, PAYMENT_SUCCESS_TRANSLATIONS["zh-TW"])
     db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
 
@@ -760,7 +765,7 @@ def send_payment_success_notification(user, order_number, pickup_time, paid_prod
     _send_simple_email(user, subject, html, resend_api_key, from_email)
 
 
-def send_item_snatched_pending_notification(user, snatched_product_ids, db, locale="zh-TW"):
+def send_item_snatched_pending_notification(user, snatched_product_ids, db):
     """有商品被搶先付款，但訂單中還有未售出商品 — 提醒盡速付款。"""
     resend_api_key = os.getenv("RESEND_API_KEY", "")
     from_email = os.getenv("RESEND_FROM", "")
@@ -768,6 +773,7 @@ def send_item_snatched_pending_notification(user, snatched_product_ids, db, loca
         print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
         return
 
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
     tr = ITEM_SNATCHED_PENDING_TRANSLATIONS.get(locale, ITEM_SNATCHED_PENDING_TRANSLATIONS["zh-TW"])
     db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
 
@@ -795,7 +801,7 @@ def send_item_snatched_pending_notification(user, snatched_product_ids, db, loca
     _send_simple_email(user, tr["subject"], html, resend_api_key, from_email)
 
 
-def send_order_auto_cancelled_notification(user, order_number, snatched_product_ids, db, locale="zh-TW"):
+def send_order_auto_cancelled_notification(user, order_number, snatched_product_ids, db):
     """訂單中所有商品皆被搶購，訂單已自動取消 — 通知 user。"""
     resend_api_key = os.getenv("RESEND_API_KEY", "")
     from_email = os.getenv("RESEND_FROM", "")
@@ -803,6 +809,7 @@ def send_order_auto_cancelled_notification(user, order_number, snatched_product_
         print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
         return
 
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
     tr = ORDER_AUTO_CANCELLED_TRANSLATIONS.get(locale, ORDER_AUTO_CANCELLED_TRANSLATIONS["zh-TW"])
     db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
 
@@ -821,7 +828,7 @@ def send_order_auto_cancelled_notification(user, order_number, snatched_product_
     _send_simple_email(user, subject, html, resend_api_key, from_email)
 
 
-def send_order_confirmation(user, order_out, db, locale="zh-TW"):
+def send_order_confirmation(user, order_out, db):
     resend_api_key = os.getenv("RESEND_API_KEY", "")
     from_email = os.getenv("RESEND_FROM", "")
 
@@ -829,6 +836,7 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
         print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
         return
 
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
     tr = EMAIL_TRANSLATIONS.get(locale, EMAIL_TRANSLATIONS["zh-TW"])
     db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
 
@@ -918,17 +926,16 @@ def send_order_confirmation(user, order_out, db, locale="zh-TW"):
 
     subject = tr["subject"].replace("{order_number}", order_number)
     resend_domain_verified = os.getenv("RESEND_DOMAIN_VERIFIED", "false").lower() == "true"
-    recipients = list({user.email, OWNER_EMAIL}) if resend_domain_verified else [OWNER_EMAIL]
+    to = [user.email] if resend_domain_verified else [OWNER_EMAIL]
+    cc = [OWNER_EMAIL] if resend_domain_verified else []
+    params = {"from": from_email, "to": to, "subject": subject, "html": html}
+    if cc:
+        params["cc"] = cc
 
     try:
         resend.api_key = resend_api_key
-        resend.Emails.send({
-            "from": from_email,
-            "to": recipients,
-            "subject": subject,
-            "html": html,
-        })
-        print(f"Order confirmation email sent to {recipients}")
+        resend.Emails.send(params)
+        print(f"Order confirmation email sent to={to} cc={cc}")
     except Exception as e:
         print(f"Email sending failed: {e}")
 
