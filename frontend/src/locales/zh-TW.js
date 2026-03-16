@@ -120,6 +120,7 @@ export default {
     savePickupToast: '取貨時間已更新',
     cancelPickupEdit: '取消',
     greeting: 'Hi {name}，感謝您的預訂！',
+    sectionTitle: '購物訂單',
     createdAt: '訂單成立時間',
     updatedAt: '訂單更新時間',
     buyer: '購買人',

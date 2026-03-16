@@ -38,6 +38,7 @@
         <p class="orders-greeting">
           {{ i18n.t('orders.greeting', { name: userStore.currentUser.first_name }) }}
         </p>
+        <h2 class="orders-section-title">{{ i18n.t('orders.sectionTitle') }}</h2>
 
         <!-- DataTable toolbar -->
         <div class="dt-toolbar">
@@ -540,6 +541,11 @@ function fromPickerFormat(str) {
 /* ── Orders greeting ─────────────────────────────────────────────────────── */
 .orders-greeting {
   font-size: 1rem; font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+}
+.orders-section-title {
+  font-size: 1.25rem; font-weight: 700;
   color: var(--charcoal);
   margin-bottom: 16px;
 }

@@ -120,6 +120,7 @@ export default {
     savePickupToast: 'Pickup time updated',
     cancelPickupEdit: 'Cancel',
     greeting: 'Hi {name}, thanks for your order!',
+    sectionTitle: 'Product Orders',
     createdAt: 'Order Date',
     updatedAt: 'Updated At',
     buyer: 'Buyer',
