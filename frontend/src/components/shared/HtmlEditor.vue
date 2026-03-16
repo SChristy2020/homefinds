@@ -16,23 +16,39 @@
         <input ref="fileInput" type="file" accept="image/*" style="display:none" @change="onImageFile" />
       </label>
       <div class="tb-sep"></div>
+      <button type="button" class="tb-btn" @mousedown.prevent="exec('indent')" title="縮排">⇥</button>
+      <button type="button" class="tb-btn" @mousedown.prevent="exec('outdent')" title="取消縮排">⇤</button>
+      <div class="tb-sep"></div>
       <button type="button" class="tb-btn" @mousedown.prevent="exec('removeFormat')" title="清除格式" style="font-size:0.72rem">清格式</button>
     </div>
-    <div
-      ref="editorEl"
-      class="editor-body"
-      contenteditable="true"
-      @input="onInput"
-      @keyup="checkState"
-      @mouseup="checkState"
-      @focus="checkState"
-    ></div>
+    <div class="editor-body-wrap">
+      <div
+        ref="editorEl"
+        class="editor-body"
+        contenteditable="true"
+        @input="onInput"
+        @keydown="onKeydown"
+        @paste="onPaste"
+        @keyup="checkState"
+        @mouseup="checkState"
+        @click="onEditorClick"
+        @focus="checkState"
+      ></div>
+      <!-- Image resize overlay -->
+      <div v-if="selectedImg" class="img-resize-overlay" :style="overlayStyle">
+        <div class="resize-handle nw" @mousedown.prevent="startResize($event, 'nw')"></div>
+        <div class="resize-handle ne" @mousedown.prevent="startResize($event, 'ne')"></div>
+        <div class="resize-handle sw" @mousedown.prevent="startResize($event, 'sw')"></div>
+        <div class="resize-handle se" @mousedown.prevent="startResize($event, 'se')"></div>
+        <div class="img-size-label">{{ imgSizeLabel }}</div>
+      </div>
+    </div>
     <div v-if="uploading" class="editor-uploading">上傳中...</div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { api } from '@/utils/api'
 
 const props = defineProps({
@@ -48,16 +64,81 @@ const italicActive = ref(false)
 const underlineActive = ref(false)
 const uploading = ref(false)
 
+// ── Image resize ──────────────────────────────────────────────────────────────
+const selectedImg = ref(null)
+const overlayStyle = ref({})
+const imgSizeLabel = ref('')
+
+function updateOverlay() {
+  if (!selectedImg.value || !editorEl.value) return
+  const editorRect = editorEl.value.getBoundingClientRect()
+  const imgRect = selectedImg.value.getBoundingClientRect()
+  overlayStyle.value = {
+    left:   (imgRect.left - editorRect.left + editorEl.value.scrollLeft) + 'px',
+    top:    (imgRect.top  - editorRect.top  + editorEl.value.scrollTop)  + 'px',
+    width:  imgRect.width  + 'px',
+    height: imgRect.height + 'px',
+  }
+  imgSizeLabel.value = `${Math.round(imgRect.width)} × ${Math.round(imgRect.height)}`
+}
+
+function onEditorClick(e) {
+  if (e.target.tagName === 'IMG') {
+    selectedImg.value = e.target
+    updateOverlay()
+  } else {
+    selectedImg.value = null
+  }
+}
+
+function onDocumentClick(e) {
+  if (!editorEl.value?.contains(e.target)) {
+    selectedImg.value = null
+  }
+}
+
+function startResize(e, corner) {
+  if (!selectedImg.value) return
+  const img = selectedImg.value
+  const startX = e.clientX
+  const startW = img.getBoundingClientRect().width
+
+  function onMouseMove(e) {
+    const dx = e.clientX - startX
+    const newW = Math.max(40, corner === 'nw' || corner === 'sw' ? startW - dx : startW + dx)
+    img.style.width  = newW + 'px'
+    img.style.height = 'auto'
+    updateOverlay()
+  }
+
+  function onMouseUp() {
+    document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mouseup', onMouseUp)
+    emit('update:modelValue', editorEl.value.innerHTML)
+  }
+
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', onMouseUp)
+}
+
+// ── Lifecycle ─────────────────────────────────────────────────────────────────
 onMounted(() => {
   if (editorEl.value) editorEl.value.innerHTML = props.modelValue || ''
+  document.addEventListener('click', onDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
 })
 
 watch(() => props.modelValue, (val) => {
   if (editorEl.value && editorEl.value.innerHTML !== (val || '')) {
     editorEl.value.innerHTML = val || ''
+    selectedImg.value = null
   }
 })
 
+// ── Editor commands ───────────────────────────────────────────────────────────
 function onInput() {
   emit('update:modelValue', editorEl.value.innerHTML)
 }
@@ -85,19 +166,41 @@ function insertImageUrl() {
   if (url) exec('insertImage', url)
 }
 
+async function onPaste(e) {
+  const items = Array.from(e.clipboardData?.items || [])
+  const imageItem = items.find(item => item.type.startsWith('image/'))
+  if (!imageItem) return
+  e.preventDefault()
+  const file = imageItem.getAsFile()
+  if (!file) return
+  uploading.value = true
+  try {
+    const { url } = await api.upload(file)
+    if (url) exec('insertImage', url)
+  } catch {
+    const url = URL.createObjectURL(file)
+    exec('insertImage', url)
+  } finally {
+    uploading.value = false
+  }
+}
+
+function onKeydown(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault()
+    exec(e.shiftKey ? 'outdent' : 'indent')
+  }
+  if (e.key === 'Escape') selectedImg.value = null
+}
+
 async function onImageFile(e) {
   const file = e.target.files[0]
   if (!file) return
   uploading.value = true
   try {
-    const form = new FormData()
-    form.append('file', file)
-    const endpoint = props.roomId ? `/api/room/${props.roomId}/images` : '/api/uploads'
-    const res = await api.upload(endpoint, form)
-    const url = res.url || res.image_url
+    const { url } = await api.upload(file)
     if (url) exec('insertImage', url)
   } catch {
-    // fallback: insert as object URL
     const url = URL.createObjectURL(file)
     exec('insertImage', url)
   } finally {
@@ -111,7 +214,6 @@ async function onImageFile(e) {
 .html-editor {
   border: 1.5px solid var(--border);
   border-radius: 6px;
-  overflow: hidden;
   background: #fff;
 }
 .editor-toolbar {
@@ -121,6 +223,7 @@ async function onImageFile(e) {
   padding: 5px 8px;
   background: var(--surface, #f8f8f6);
   border-bottom: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
   flex-wrap: wrap;
 }
 .tb-btn {
@@ -144,6 +247,9 @@ async function onImageFile(e) {
   background: var(--border);
   margin: 0 3px;
 }
+.editor-body-wrap {
+  position: relative;
+}
 .editor-body {
   min-height: 120px;
   padding: 10px 12px;
@@ -161,6 +267,43 @@ async function onImageFile(e) {
 .editor-body :deep(ul ul) { list-style-type: circle; }
 .editor-body :deep(ul ul ul) { list-style-type: square; }
 .editor-body :deep(blockquote) { margin-left: 1.5em; padding-left: 0.75em; border-left: 3px solid var(--border); }
+
+/* Image resize overlay */
+.img-resize-overlay {
+  position: absolute;
+  border: 2px solid #4a90e2;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-radius: 3px;
+}
+.resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border: 2px solid #4a90e2;
+  border-radius: 2px;
+  pointer-events: all;
+  box-sizing: border-box;
+}
+.resize-handle.nw { top: -5px;    left: -5px;   cursor: nw-resize; }
+.resize-handle.ne { top: -5px;    right: -5px;  cursor: ne-resize; }
+.resize-handle.sw { bottom: -5px; left: -5px;   cursor: sw-resize; }
+.resize-handle.se { bottom: -5px; right: -5px;  cursor: se-resize; }
+.img-size-label {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .editor-uploading {
   padding: 4px 12px;
   font-size: 0.78rem;
