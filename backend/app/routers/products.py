@@ -9,7 +9,11 @@ from app.models.category import Category, CategoryTranslation
 from app.models.order import Order, OrderItem
 from app.models.user import User
 from app.schemas.product import ProductCreate, ProductUpdate, ProductOut, ImageOut, TranslationCreate, TranslationOut
-from app.services.email_service import send_product_restored_notification
+from app.services.email_service import (
+    send_product_restored_notification,
+    send_item_snatched_pending_notification,
+    send_order_auto_cancelled_notification,
+)
 
 class SortItem(PydanticModel):
     id: int
@@ -85,8 +89,10 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
     new_status = product.status
 
     # 商品從 available/reserved 改成 sold：連鎖更新未付款訂單
+    _snatched_affected_ids: set[int] = set()
+    _snatched_cancelled_ids: set[int] = set()
     if old_status in ("available", "reserved") and new_status == "sold":
-        _handle_product_sold(product_id, db)
+        _snatched_affected_ids, _snatched_cancelled_ids = _handle_product_sold(product_id, db)
 
     # 商品從 sold 改回 available/reserved：連鎖更新相關訂單
     trigger_restore_email = False
@@ -96,6 +102,39 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
 
     db.commit()
     db.refresh(product)
+
+    # 寄信通知所有受搶購影響的訂單 user
+    if _snatched_affected_ids:
+        _pid = product_id
+        _affected = set(_snatched_affected_ids)
+        _cancelled = set(_snatched_cancelled_ids)
+
+        def _send_snatched_emails():
+            new_db = SessionLocal()
+            try:
+                for affected_order_id in _affected:
+                    try:
+                        affected_order = new_db.query(Order).filter(Order.id == affected_order_id).first()
+                        if not affected_order:
+                            continue
+                        affected_user = new_db.query(User).filter(User.id == affected_order.user_id).first()
+                        if not affected_user:
+                            continue
+                        time.sleep(0.6)
+                        if affected_order_id in _cancelled:
+                            send_order_auto_cancelled_notification(
+                                affected_user, affected_order.order_number, [_pid], new_db
+                            )
+                        else:
+                            send_item_snatched_pending_notification(
+                                affected_user, [_pid], new_db
+                            )
+                    except Exception as e:
+                        print(f"[update_product sold] affected order {affected_order_id} email failed: {e}")
+            finally:
+                new_db.close()
+
+        threading.Thread(target=_send_snatched_emails, daemon=True).start()
 
     if trigger_restore_email:
         _pid = product_id
@@ -123,8 +162,9 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
     return _build_out(product, db)
 
 
-def _handle_product_sold(product_id: int, db: Session):
-    """Admin 直接將商品設為 sold 時，連鎖更新所有未付款訂單中的該商品項目。"""
+def _handle_product_sold(product_id: int, db: Session) -> tuple[set[int], set[int]]:
+    """Admin 直接將商品設為 sold 時，連鎖更新所有未付款訂單中的該商品項目。
+    回傳 (affected_order_ids, cancelled_order_ids)。"""
     from datetime import datetime
     sold_at = datetime.now()
 
@@ -140,7 +180,7 @@ def _handle_product_sold(product_id: int, db: Session):
         .all()
     )
 
-    affected_order_ids = set()
+    affected_order_ids: set[int] = set()
     for item in pending_items:
         item.status = "sold"
         item.sold_at = sold_at
@@ -149,6 +189,7 @@ def _handle_product_sold(product_id: int, db: Session):
     db.flush()
 
     # 若某訂單所有商品都已售出或取消 → 自動取消該訂單
+    cancelled_order_ids: set[int] = set()
     for order_id in affected_order_ids:
         order = db.query(Order).filter(Order.id == order_id).first()
         if not order or order.order_status != "pending_payment":
@@ -156,6 +197,9 @@ def _handle_product_sold(product_id: int, db: Session):
         all_items = db.query(OrderItem).filter(OrderItem.order_id == order_id).all()
         if all_items and all(i.status in ("sold", "cancelled") for i in all_items):
             order.order_status = "cancelled"
+            cancelled_order_ids.add(order_id)
+
+    return affected_order_ids, cancelled_order_ids
 
 
 def _handle_product_unsold(product_id: int, db: Session):
