@@ -41,6 +41,11 @@
         <div class="resize-handle sw" @mousedown.prevent="startResize($event, 'sw')"></div>
         <div class="resize-handle se" @mousedown.prevent="startResize($event, 'se')"></div>
         <div class="img-size-label">{{ imgSizeLabel }}</div>
+        <div class="img-align-toolbar">
+          <button class="align-btn" :class="{ active: imgAlign === 'left' }"   @mousedown.prevent="setImgAlign('left')"   title="靠左">⬛︎←</button>
+          <button class="align-btn" :class="{ active: imgAlign === 'center' }" @mousedown.prevent="setImgAlign('center')" title="置中">↔</button>
+          <button class="align-btn" :class="{ active: imgAlign === 'right' }"  @mousedown.prevent="setImgAlign('right')"  title="靠右">→⬛︎</button>
+        </div>
       </div>
     </div>
     <div v-if="uploading" class="editor-uploading">上傳中...</div>
@@ -85,6 +90,7 @@ function updateOverlay() {
 function onEditorClick(e) {
   if (e.target.tagName === 'IMG') {
     selectedImg.value = e.target
+    imgAlign.value = getImgAlign(e.target)
     updateOverlay()
   } else {
     selectedImg.value = null
@@ -95,6 +101,27 @@ function onDocumentClick(e) {
   if (!editorEl.value?.contains(e.target)) {
     selectedImg.value = null
   }
+}
+
+const imgAlign = ref('left')
+
+function getImgAlign(img) {
+  if (!img) return 'left'
+  const ml = img.style.marginLeft
+  const mr = img.style.marginRight
+  if (ml === 'auto' && mr === 'auto') return 'center'
+  if (ml === 'auto') return 'right'
+  return 'left'
+}
+
+function setImgAlign(align) {
+  if (!selectedImg.value) return
+  const img = selectedImg.value
+  if (align === 'center') { img.style.marginLeft = 'auto'; img.style.marginRight = 'auto' }
+  else if (align === 'right') { img.style.marginLeft = 'auto'; img.style.marginRight = '0' }
+  else { img.style.marginLeft = '0'; img.style.marginRight = 'auto' }
+  imgAlign.value = align
+  emit('update:modelValue', editorEl.value.innerHTML)
 }
 
 function startResize(e, corner) {
@@ -303,6 +330,31 @@ async function onImageFile(e) {
   white-space: nowrap;
   pointer-events: none;
 }
+.img-align-toolbar {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  background: rgba(0,0,0,0.65);
+  border-radius: 4px;
+  padding: 3px 4px;
+  pointer-events: all;
+  white-space: nowrap;
+}
+.align-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.align-btn:hover { background: rgba(255,255,255,0.2); }
+.align-btn.active { background: rgba(255,255,255,0.35); border-color: rgba(255,255,255,0.5); }
 
 .editor-uploading {
   padding: 4px 12px;
