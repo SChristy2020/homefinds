@@ -10,6 +10,7 @@
       <button type="button" class="tb-btn" @mousedown.prevent="exec('insertOrderedList')" title="有序清單">1. 列表</button>
       <div class="tb-sep"></div>
       <button type="button" class="tb-btn" @mousedown.prevent="insertLink" title="插入連結">🔗</button>
+      <button type="button" class="tb-btn" @mousedown.prevent="insertMailto" title="插入Email連結">✉️</button>
       <button type="button" class="tb-btn" @mousedown.prevent="insertImageUrl" title="插入圖片網址">🖼</button>
       <label class="tb-btn tb-upload" title="上傳圖片">
         📤
@@ -186,6 +187,17 @@ function checkState() {
 function insertLink() {
   const url = prompt('請輸入連結網址:', 'https://')
   if (url) exec('createLink', url)
+}
+
+function insertMailto() {
+  const email = prompt('請輸入 Email 地址:')
+  if (!email) return
+  const sel = window.getSelection()
+  const text = sel && sel.toString() ? sel.toString() : email
+  const html = `<a href="mailto:${email}">${text}</a>`
+  document.execCommand('insertHTML', false, html)
+  editorEl.value.focus()
+  emit('update:modelValue', editorEl.value.innerHTML)
 }
 
 function insertImageUrl() {
