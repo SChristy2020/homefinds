@@ -42,7 +42,7 @@
           </div>
         </div>
 
-        <button class="btn-primary" :disabled="!selection.end" @click="showConfirm = true">
+        <button class="btn-primary book-btn" :disabled="!selection.end" @click="showConfirm = true">
           {{ i18n.t('rent.bookNow') }}
         </button>
       </div>
@@ -197,7 +197,7 @@ onMounted(async () => {
 .price-summary { margin-top: 16px; padding-top: 14px; border-top: 1.5px solid var(--border); }
 
 /* Date details */
-.date-details { display: flex; flex-direction: column; gap: 4px;}
+.date-details { display: flex; flex-direction: column; gap: 4px; padding-bottom: 4px;}
 .date-detail-row { font-size: 1rem; color: var(--charcoal); }
 .date-label { font-weight: 600; }
 
@@ -212,6 +212,8 @@ onMounted(async () => {
 .early-bird-label { font-size: 1rem; font-weight: 600; }
 .early-bird-price { font-size: 1.5rem; font-weight: 800; }
 .early-bird-note { font-size: 0.9rem; font-weight: 500; }
+
+.book-btn { width: 100%; }
 
 .room-description { font-size: 1rem; color: var(--charcoal); line-height: 1.7; padding: 2rem 1rem; }
 .room-description :deep(ul), .room-description :deep(ol) { padding-left: 1.5em; }
