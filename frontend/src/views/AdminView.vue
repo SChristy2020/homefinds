@@ -319,8 +319,8 @@
       </div>
     </BaseModal>
 
-    <input ref="prodFileInput" type="file" accept="image/*" style="display:none" @change="onProdFileChange" />
-    <input ref="roomFileInput" type="file" accept="image/*" style="display:none" @change="onRoomFileChange" />
+    <input ref="prodFileInput" type="file" accept="image/*" multiple style="display:none" @change="onProdFileChange" />
+    <input ref="roomFileInput" type="file" accept="image/*" multiple style="display:none" @change="onRoomFileChange" />
   </div>
 </template>
 
@@ -543,12 +543,14 @@ function addProdImage() {
 }
 
 async function onProdFileChange(e) {
-  const file = e.target.files[0]
-  if (!file) return
+  const files = Array.from(e.target.files)
+  if (!files.length) return
   prodUploading.value = true
   try {
-    const { url } = await api.upload(file)
-    prodImages.value.push({ tempId: Date.now(), url, isNew: true })
+    await Promise.all(files.map(async (file) => {
+      const { url } = await api.upload(file)
+      prodImages.value.push({ tempId: Date.now() + Math.random(), url, isNew: true })
+    }))
   } catch {
     toast.show('圖片上傳失敗')
   } finally {
@@ -704,12 +706,14 @@ function addRoomImage() {
 }
 
 async function onRoomFileChange(e) {
-  const file = e.target.files[0]
-  if (!file) return
+  const files = Array.from(e.target.files)
+  if (!files.length) return
   roomUploading.value = true
   try {
-    const { url } = await api.upload(file)
-    roomImages.value.push({ tempId: Date.now(), url, isNew: true })
+    await Promise.all(files.map(async (file) => {
+      const { url } = await api.upload(file)
+      roomImages.value.push({ tempId: Date.now() + Math.random(), url, isNew: true })
+    }))
   } catch {
     toast.show('圖片上傳失敗')
   } finally {
