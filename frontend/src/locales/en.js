@@ -1,8 +1,8 @@
 export default {
   nav: {
     shop: 'Shop',
-    rent: 'Room for Rent',
-    orders: 'My Orders',
+    rent: 'Subleases',
+    orders: 'Orders',
     admin: 'Admin',
   },
   shop: {
