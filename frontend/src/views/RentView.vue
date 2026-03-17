@@ -12,7 +12,10 @@
 
       <!-- Price summary -->
       <div v-if="selection.start" class="price-summary">
-        <div class="price-big">${{ totalPrice }} USD</div>
+        <div class="price-row">
+          <span v-if="nights >= 7 && originalPrice > totalPrice" class="price-original">${{ originalPrice }} USD</span>
+          <span class="price-big">${{ totalPrice }} USD</span>
+        </div>
         <div class="date-range">
           {{ formatDate(selection.start) }} –
           {{ selection.end ? formatDate(selection.end) : '...' }}
@@ -85,6 +88,12 @@ const nights = computed(() => {
   return Math.round((selection.value.end - selection.value.start) / (1000 * 60 * 60 * 24))
 })
 
+const originalPrice = computed(() => {
+  const n = nights.value
+  if (!n || !room.value) return 0
+  return Math.round(n * Number(room.value.price_per_night || 0))
+})
+
 const totalPrice = computed(() => {
   const n = nights.value
   if (!n || !room.value) return 0
@@ -151,6 +160,8 @@ onMounted(async () => {
 .booking-panel { flex: 1; min-width: 280px; }
 .avail-note { font-size: 0.82rem; color: var(--mid); margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
 .price-summary { margin-top: 16px; padding-top: 14px; border-top: 1.5px solid var(--border); }
+.price-row { display: flex; align-items: baseline; gap: 8px; }
+.price-original { font-size: 1rem; color: var(--mid); text-decoration: line-through; }
 .price-big { font-size: 1.4rem; font-weight: 700; color: var(--charcoal); }
 .date-range { font-size: 0.8rem; color: var(--mid); margin: 4px 0 12px; }
 .room-description { font-size: 0.88rem; color: var(--charcoal); line-height: 1.7; }
