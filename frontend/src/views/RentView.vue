@@ -158,13 +158,13 @@ onMounted(async () => {
 .rent-title { font-size: 1.3rem; font-weight: 700; text-align: center; color: var(--charcoal); margin: 0 0 4px; }
 .room-layout { display: flex; gap: 28px; flex-wrap: wrap; }
 .booking-panel { flex: 1; min-width: 280px; }
-.avail-note { font-size: 0.82rem; color: var(--mid); margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
+.avail-note { font-size: 1rem; color: var(--mid); margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
 .price-summary { margin-top: 16px; padding-top: 14px; border-top: 1.5px solid var(--border); }
 .price-row { display: flex; align-items: baseline; gap: 8px; }
 .price-original { font-size: 1rem; color: var(--mid); text-decoration: line-through; }
-.price-big { font-size: 1.4rem; font-weight: 700; color: var(--charcoal); }
-.date-range { font-size: 0.8rem; color: var(--mid); margin: 4px 0 12px; }
-.room-description { font-size: 0.88rem; color: var(--charcoal); line-height: 1.7; }
+.price-big { font-size: 1.6rem; font-weight: 700; color: var(--charcoal); }
+.date-range { font-size: 1rem; color: var(--mid); margin: 4px 0 12px; }
+.room-description { font-size: 1rem; color: var(--charcoal); line-height: 1.7; padding: 2rem 1rem; }
 .room-description :deep(ul), .room-description :deep(ol) { padding-left: 1.5em; }
 .room-description :deep(ul) { list-style-type: disc; }
 .room-description :deep(ol) { list-style-type: decimal; }
