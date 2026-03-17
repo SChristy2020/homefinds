@@ -12,6 +12,7 @@
       <button type="button" class="tb-btn" @mousedown.prevent="insertLink" title="插入連結">🔗</button>
       <button type="button" class="tb-btn" @mousedown.prevent="insertMailto" title="插入Email連結">✉️</button>
       <button type="button" class="tb-btn" @mousedown.prevent="insertImageUrl" title="插入圖片網址">🖼</button>
+      <button type="button" class="tb-btn" @mousedown.prevent="insertGoogleMap" title="嵌入 Google 地圖">🗺</button>
       <label class="tb-btn tb-upload" title="上傳圖片">
         📤
         <input ref="fileInput" type="file" accept="image/*" style="display:none" @change="onImageFile" />
@@ -205,6 +206,28 @@ function insertImageUrl() {
   if (url) exec('insertImage', url)
 }
 
+function insertGoogleMap() {
+  const input = prompt('請貼上 Google 地圖的 <iframe> 嵌入碼，或 embed 網址（maps/embed?pb=...）:')
+  if (!input) return
+
+  let iframeHtml = input.trim()
+
+  // 若使用者只貼 URL，自動包成 iframe
+  if (!iframeHtml.startsWith('<')) {
+    if (!iframeHtml.includes('google.com/maps')) {
+      alert('請貼入有效的 Google 地圖網址或 iframe 嵌入碼。')
+      return
+    }
+    iframeHtml = `<iframe src="${iframeHtml}" width="100%" height="400" style="border:0;border-radius:6px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`
+  }
+
+  // 在 iframe 外包一層 div 方便排版
+  const html = `<div class="map-embed" style="margin:12px 0;">${iframeHtml}</div><p><br></p>`
+  document.execCommand('insertHTML', false, html)
+  editorEl.value.focus()
+  emit('update:modelValue', editorEl.value.innerHTML)
+}
+
 async function onPaste(e) {
   const items = Array.from(e.clipboardData?.items || [])
   const imageItem = items.find(item => item.type.startsWith('image/'))
@@ -306,6 +329,8 @@ async function onImageFile(e) {
 .editor-body :deep(ul ul) { list-style-type: circle; }
 .editor-body :deep(ul ul ul) { list-style-type: square; }
 .editor-body :deep(blockquote) { margin-left: 1.5em; padding-left: 0.75em; border-left: 3px solid var(--border); }
+.editor-body :deep(iframe) { max-width: 100%; width: 100% !important; height: 360px; border: none; border-radius: 6px; display: block; margin: 8px 0; }
+.editor-body :deep(.map-embed) { width: 100%; }
 
 /* Image resize overlay */
 .img-resize-overlay {

@@ -222,4 +222,6 @@ onMounted(async () => {
 .room-description :deep(ul ul) { list-style-type: circle; }
 .room-description :deep(ul ul ul) { list-style-type: square; }
 .room-description :deep(blockquote) { margin-left: 1.5em; padding-left: 0.75em; border-left: 3px solid var(--border); }
+.room-description :deep(iframe) { width: 100% !important; max-width: 100%; height: 400px; border: none; border-radius: 6px; display: block; margin: 8px 0; }
+.room-description :deep(.map-embed) { width: 100%; }
 </style>

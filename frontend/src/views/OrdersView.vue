@@ -838,6 +838,8 @@ function fromPickerFormat(str) {
 .rent-guide-content :deep(ul ul) { list-style-type: circle; }
 .rent-guide-content :deep(ul ul ul) { list-style-type: square; }
 .rent-guide-content :deep(blockquote) { margin-left: 1.5em; padding-left: 0.75em; border-left: 3px solid var(--border); }
+.rent-guide-content :deep(iframe) { width: 100% !important; max-width: 100%; height: 360px; border: none; border-radius: 6px; display: block; margin: 8px 0; }
+.rent-guide-content :deep(.map-embed) { width: 100%; }
 .rent-guide-empty { font-size: 0.82rem; color: var(--mid); font-style: italic; }
 
 /* ── Back button ─────────────────────────────────────────────────────────── */

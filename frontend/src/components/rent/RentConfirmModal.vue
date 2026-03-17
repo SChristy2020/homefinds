@@ -76,4 +76,6 @@ function handleConfirm() {
 .policy strong { color: var(--charcoal); }
 .policy-row { display: flex; gap: 10px; margin-bottom: 2px; }
 .days { font-weight: 600; color: var(--charcoal); min-width: 100px; }
+.policy :deep(iframe) { width: 100% !important; max-width: 100%; height: 200px; border: none; border-radius: 6px; display: block; margin: 8px 0; }
+.policy :deep(.map-embed) { width: 100%; }
 </style>
