@@ -317,7 +317,7 @@ const shoppingGuideOpen = ref(false)
 const rentGuideOpen = ref(false)
 const roomBookingMap = ref({})
 const roomBookingDescription = computed(() =>
-  roomBookingMap.value[i18n.locale.value] || roomBookingMap.value['zh-TW'] || ''
+  roomBookingMap.value[i18n.locale] || roomBookingMap.value['zh-TW'] || ''
 )
 
 const form = ref({ name: '', email: '', phone: '' })

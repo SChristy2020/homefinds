@@ -55,7 +55,7 @@ const open = ref(false)
 const activeTab = ref('shopping')
 const roomBookingMap = ref({})
 const roomBookingDescription = computed(() =>
-  roomBookingMap.value[i18n.locale.value] || roomBookingMap.value['zh-TW'] || ''
+  roomBookingMap.value[i18n.locale] || roomBookingMap.value['zh-TW'] || ''
 )
 
 onMounted(async () => {
