@@ -1,3 +1,11 @@
+<!--
+ * @Author: Christy qsa8647332@gmail.com
+ * @Date: 2026-03-16 23:38:15
+ * @LastEditors: Christy qsa8647332@gmail.com
+ * @LastEditTime: 2026-03-17 00:44:22
+ * @FilePath: \homefinds\frontend\src\components\rent\RoomGallery.vue
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
 <template>
   <div class="room-gallery">
     <template v-if="images && images.length">
@@ -36,13 +44,12 @@ function next() { current.value = (current.value + 1) % totalSlides.value }
 .room-gallery {
   flex: 1; min-width: 260px;
   background: linear-gradient(135deg, #1a1a1a 0%, #2e2e2e 100%);
-  border-radius: 6px; min-height: 320px;
+  border-radius: 6px;
   position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
 }
 .gallery-img {
-  width: 100%; height: 100%; object-fit: cover;
-  position: absolute; inset: 0;
+  width: 100%; height: auto; display: block;
 }
 .gallery-placeholder {
   color: rgba(255,255,255,0.2);
@@ -52,13 +59,13 @@ function next() { current.value = (current.value + 1) % totalSlides.value }
 .gallery-label { font-size: 0.9rem; font-family: var(--font-body); margin-top: 8px; }
 .gallery-nav {
   position: absolute; top: 50%; transform: translateY(-50%);
-  background: rgba(255,255,255,0.15); border: none;
+  background: rgba(0,0,0,0.15); border: none;
   color: #fff; width: 36px; height: 36px;
   border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.18s;
 }
-.gallery-nav:hover { background: rgba(255,255,255,0.3); }
+.gallery-nav:hover { background: rgba(0,0,0,0.3); }
 .gallery-nav.left  { left: 12px; }
 .gallery-nav.right { right: 12px; }
 .gallery-dots {
@@ -67,7 +74,7 @@ function next() { current.value = (current.value + 1) % totalSlides.value }
 }
 .dot {
   width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(255,255,255,0.35); cursor: pointer;
+  background: rgba(0,0,0,0.35); cursor: pointer;
   transition: background 0.2s;
 }
 .dot.active { background: #fff; }
