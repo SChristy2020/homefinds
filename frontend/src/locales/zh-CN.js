@@ -147,6 +147,13 @@ export default {
     night: '晚',
     nights: '晚',
     confirm: '确认',
+    checkIn: '入住时间: ',
+    checkOut: '退房时间: ',
+    totalStay: '共',
+    totalStaySuffix: '晚',
+    bookNow: '立即抢购',
+    earlyBirdLabel: '早鸟优惠: ',
+    earlyBirdNote: '*3月预定优惠再9折',
   },
   rentConfirm: {
     title: '预约订房',

@@ -8,21 +8,42 @@
     <!-- Booking panel -->
     <div class="booking-panel">
       <p class="avail-note"><CalendarDays :size="14" /> {{ availNote }}</p>
+
       <RentCalendar v-model:selection="selection" :rent-start="rentStart" :rent-end="rentEnd" />
 
       <!-- Price summary -->
       <div v-if="selection.start" class="price-summary">
+        <!-- Date detail rows -->
+        <div class="date-details">
+          <div class="date-detail-row">
+            <span class="date-label">{{ i18n.t('rent.checkIn') }} </span>
+            <span>{{ formatDate(selection.start) }}　　</span>
+            <span class="date-label">{{ i18n.t('rent.checkOut') }} </span>
+            <span>{{ selection.end ? formatDate(selection.end) : '...' }}</span>
+          </div>
+          <div v-if="nights > 0" class="date-detail-row">
+            <span class="date-label">{{ i18n.t('rent.totalStay') }} </span>
+            <span>{{ nightsSummary }}</span>
+          </div>
+        </div>
+
+        <!-- Price row -->
         <div class="price-row">
-          <span v-if="nights >= 7 && originalPrice > totalPrice" class="price-original">${{ originalPrice }} USD</span>
+          <span v-if="originalPrice > totalPrice" class="price-original">${{ originalPrice }} USD</span>
           <span class="price-big">${{ totalPrice }} USD</span>
         </div>
-        <div class="date-range">
-          {{ formatDate(selection.start) }} –
-          {{ selection.end ? formatDate(selection.end) : '...' }}
-          <span v-if="nights > 0"> &nbsp; {{ i18n.t('rent.total') }} {{ nights }} {{ nights === 1 ? i18n.t('rent.night') : i18n.t('rent.nights') }}</span>
+
+        <!-- Early bird (if booking in March) -->
+        <div v-if="isEarlyBird" class="early-bird-section">
+          <div class="early-bird-main">
+            <span class="early-bird-label">{{ i18n.t('rent.earlyBirdLabel') }}</span>
+            <span class="early-bird-price">${{ earlyBirdPrice }} USD</span>
+            <span class="early-bird-note">{{ i18n.t('rent.earlyBirdNote') }}</span>
+          </div>
         </div>
+
         <button class="btn-primary" :disabled="!selection.end" @click="showConfirm = true">
-          {{ i18n.t('rent.confirm') }}
+          {{ i18n.t('rent.bookNow') }}
         </button>
       </div>
       <p v-else class="mt-16 text-sm text-muted">{{ i18n.t('rent.selectDates') }}</p>
@@ -38,7 +59,7 @@
     v-model="showConfirm"
     :selection="selection"
     :nights="nights"
-    :total-price="totalPrice"
+    :total-price="finalPrice"
     :booking-description="roomBookingDescription"
     @confirmed="onConfirmed"
   />
@@ -46,7 +67,7 @@
     v-model="showSuccess"
     :reservation="lastReservation"
     :nights="nights"
-    :total-price="totalPrice"
+    :total-price="finalPrice"
     :selection="selection"
   />
 </template>
@@ -121,6 +142,16 @@ const totalPrice = computed(() => {
   return Math.round(total)
 })
 
+const nightsSummary = computed(() => {
+  if (i18n.locale === 'en') return `${nights.value} ${nights.value === 1 ? 'Night' : 'Nights'}`
+  return `${nights.value}${i18n.t('rent.totalStaySuffix')}`
+})
+
+// 早鳥：3月預定再9折
+const isEarlyBird = computed(() => new Date().getMonth() === 2) // March = index 2
+const earlyBirdPrice = computed(() => Math.round(totalPrice.value * 0.9))
+const finalPrice = computed(() => isEarlyBird.value ? earlyBirdPrice.value : totalPrice.value)
+
 function formatDate(d) {
   if (!d) return ''
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
@@ -158,12 +189,30 @@ onMounted(async () => {
 .rent-title { font-size: 1.3rem; font-weight: 700; text-align: center; color: var(--charcoal); margin: 0 0 4px; }
 .room-layout { display: flex; gap: 28px; flex-wrap: wrap; }
 .booking-panel { flex: 1; min-width: 280px; }
+
+/* Avail note */
 .avail-note { font-size: 1rem; color: var(--mid); margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
+
+/* Price summary */
 .price-summary { margin-top: 16px; padding-top: 14px; border-top: 1.5px solid var(--border); }
-.price-row { display: flex; align-items: baseline; gap: 8px; }
+
+/* Date details */
+.date-details { display: flex; flex-direction: column; gap: 4px;}
+.date-detail-row { font-size: 1rem; color: var(--charcoal); }
+.date-label { font-weight: 600; }
+
+/* Price row */
+.price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
 .price-original { font-size: 1rem; color: var(--mid); text-decoration: line-through; }
 .price-big { font-size: 1.6rem; font-weight: 700; color: var(--charcoal); }
-.date-range { font-size: 1rem; color: var(--mid); margin: 4px 0 12px; }
+
+/* Early bird */
+.early-bird-section { margin-bottom: 14px; }
+.early-bird-main { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; color: #c0392b; }
+.early-bird-label { font-size: 1rem; font-weight: 600; }
+.early-bird-price { font-size: 1.5rem; font-weight: 800; }
+.early-bird-note { font-size: 0.9rem; font-weight: 500; }
+
 .room-description { font-size: 1rem; color: var(--charcoal); line-height: 1.7; padding: 2rem 1rem; }
 .room-description :deep(ul), .room-description :deep(ol) { padding-left: 1.5em; }
 .room-description :deep(ul) { list-style-type: disc; }

@@ -147,6 +147,13 @@ export default {
     night: '晚',
     nights: '晚',
     confirm: '確認',
+    checkIn: '入住時間: ',
+    checkOut: '退房時間: ',
+    totalStay: '共',
+    totalStaySuffix: '晚',
+    bookNow: '立即搶購',
+    earlyBirdLabel: '早鳥優惠: ',
+    earlyBirdNote: '*3月預定優惠再9折',
   },
   rentConfirm: {
     title: '預約訂房',

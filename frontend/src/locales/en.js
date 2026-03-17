@@ -147,6 +147,13 @@ export default {
     night: 'night',
     nights: 'nights',
     confirm: 'Confirm',
+    checkIn: 'Check-in: ',
+    checkOut: 'Check-out: ',
+    totalStay: 'Total Stay: ',
+    totalStaySuffix: '',
+    bookNow: 'Book Now',
+    earlyBirdLabel: 'Early Bird Special: ',
+    earlyBirdNote: '*Book in March for an additional 10% OFF!',
   },
   rentConfirm: {
     title: 'Reservation',

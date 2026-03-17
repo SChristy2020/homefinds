@@ -2,7 +2,7 @@
  * @Author: Christy qsa8647332@gmail.com
  * @Date: 2026-03-16 23:38:15
  * @LastEditors: Christy qsa8647332@gmail.com
- * @LastEditTime: 2026-03-17 00:44:22
+ * @LastEditTime: 2026-03-17 01:17:27
  * @FilePath: \homefinds\frontend\src\components\rent\RoomGallery.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -43,7 +43,7 @@ function next() { current.value = (current.value + 1) % totalSlides.value }
 <style scoped>
 .room-gallery {
   flex: 1; min-width: 260px;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2e2e2e 100%);
+  background: rgba(255,255,255,0.2);
   border-radius: 6px;
   position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
