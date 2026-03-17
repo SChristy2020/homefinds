@@ -141,7 +141,7 @@ export default {
   },
   rent: {
     title: '🌟 北卡 UNC/Duke 优质短租 🌟',
-    available: '开放日期: 4/25 \u2013 6/29, 2026',
+    available: '开放日期:',
     selectDates: '请选择入住与退房日期',
     total: '共',
     night: '晚',

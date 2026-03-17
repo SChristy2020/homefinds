@@ -141,7 +141,7 @@ export default {
   },
   rent: {
     title: '🌟 UNC/Duke Premium Sublease 🌟',
-    available: 'Available: Apr 25 \u2013 Jun 29, 2026',
+    available: 'Available:',
     selectDates: 'Please select check-in and check-out dates',
     total: 'total',
     night: 'night',

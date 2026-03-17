@@ -21,23 +21,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { useI18nStore } from '@/stores/i18n'
 
-const props = defineProps({ selection: Object })
+const props = defineProps({
+  selection: Object,
+  rentStart: Date,
+  rentEnd: Date,
+})
 const emit = defineEmits(['update:selection'])
 
 const i18n = useI18nStore()
 
-const RENT_START = new Date(2026, 3, 25)
-const RENT_END   = new Date(2026, 5, 29)
-
 const weekdays = computed(() => i18n.t('calendar.weekdays'))
 const months   = computed(() => i18n.t('calendar.months'))
 
-const year  = ref(2026)
-const month = ref(3) // April (0-indexed)
+const year  = ref(props.rentStart ? props.rentStart.getFullYear() : new Date().getFullYear())
+const month = ref(props.rentStart ? props.rentStart.getMonth() : new Date().getMonth())
+
+watch(() => props.rentStart, (val) => {
+  if (val) { year.value = val.getFullYear(); month.value = val.getMonth() }
+}, { immediate: false })
 
 const title = computed(() => {
   return i18n.t('calendar.titleFormat', { year: year.value, month: months.value[month.value] })
@@ -66,7 +71,7 @@ const days = computed(() => {
 function getDayClass(day) {
   if (!day) return 'empty'
   const d = day.full
-  if (d < RENT_START || d > RENT_END) return 'disabled'
+  if (!props.rentStart || !props.rentEnd || d < props.rentStart || d > props.rentEnd) return 'disabled'
   const { start, end } = props.selection
   const today = new Date(); today.setHours(0,0,0,0)
   if (start && d.toDateString() === start.toDateString()) return 'selected-start'
@@ -79,7 +84,7 @@ function getDayClass(day) {
 function selectDay(day) {
   if (!day) return
   const d = day.full
-  if (d < RENT_START || d > RENT_END) return
+  if (!props.rentStart || !props.rentEnd || d < props.rentStart || d > props.rentEnd) return
   const { start, end } = props.selection
   if (!start || (start && end) || d < start) {
     emit('update:selection', { start: d, end: null })

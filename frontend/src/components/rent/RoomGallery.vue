@@ -1,6 +1,9 @@
 <template>
   <div class="room-gallery">
-    <div class="gallery-placeholder">
+    <template v-if="images && images.length">
+      <img :src="images[current].url" :key="current" class="gallery-img" />
+    </template>
+    <div v-else class="gallery-placeholder">
       <Home :size="40" />
       <div class="gallery-label">Room Photos</div>
     </div>
@@ -19,12 +22,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Home, ChevronLeft, ChevronRight } from 'lucide-vue-next'
-const totalSlides = 4
+
+const props = defineProps({ images: Array })
+const totalSlides = computed(() => props.images?.length || 1)
 const current = ref(0)
-function prev() { current.value = (current.value - 1 + totalSlides) % totalSlides }
-function next() { current.value = (current.value + 1) % totalSlides }
+function prev() { current.value = (current.value - 1 + totalSlides.value) % totalSlides.value }
+function next() { current.value = (current.value + 1) % totalSlides.value }
 </script>
 
 <style scoped>
@@ -34,6 +39,10 @@ function next() { current.value = (current.value + 1) % totalSlides }
   border-radius: 6px; min-height: 320px;
   position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
+}
+.gallery-img {
+  width: 100%; height: 100%; object-fit: cover;
+  position: absolute; inset: 0;
 }
 .gallery-placeholder {
   color: rgba(255,255,255,0.2);

@@ -3,12 +3,12 @@
   <h1 class="rent-title">{{ i18n.t('rent.title') }}</h1>
   <div class="room-layout">
     <!-- Gallery -->
-    <RoomGallery />
+    <RoomGallery :images="roomImages" />
 
     <!-- Booking panel -->
     <div class="booking-panel">
-      <p class="avail-note"><CalendarDays :size="14" /> {{ i18n.t('rent.available') }}</p>
-      <RentCalendar v-model:selection="selection" />
+      <p class="avail-note"><CalendarDays :size="14" /> {{ availNote }}</p>
+      <RentCalendar v-model:selection="selection" :rent-start="rentStart" :rent-end="rentEnd" />
 
       <!-- Price summary -->
       <div v-if="selection.start" class="price-summary">
@@ -59,9 +59,21 @@ import RentConfirmModal from '@/components/rent/RentConfirmModal.vue'
 import RentSuccessModal from '@/components/rent/RentSuccessModal.vue'
 
 const i18n = useI18nStore()
-const RATE_PER_NIGHT = 222
-const selection = ref({ start: new Date(2026, 3, 25), end: new Date(2026, 5, 29) })
+const room = ref(null)
+const selection = ref({ start: null, end: null })
 const roomTranslations = ref({})
+const roomImages = ref([])
+
+const rentStart = computed(() => room.value?.available_from ? new Date(room.value.available_from + 'T00:00:00') : null)
+const rentEnd   = computed(() => room.value?.available_to   ? new Date(room.value.available_to   + 'T00:00:00') : null)
+
+const availNote = computed(() => {
+  const base = i18n.t('rent.available')
+  if (!rentStart.value || !rentEnd.value) return base
+  const fmt = d => `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`
+  return `${base} ${fmt(rentStart.value)} – ${fmt(rentEnd.value)}`
+})
+
 const roomDescription = computed(() => roomTranslations.value[i18n.locale]?.description || '')
 const roomBookingDescription = computed(() => roomTranslations.value[i18n.locale]?.booking_description || '')
 const showConfirm = ref(false)
@@ -72,7 +84,33 @@ const nights = computed(() => {
   if (!selection.value.start || !selection.value.end) return 0
   return Math.round((selection.value.end - selection.value.start) / (1000 * 60 * 60 * 24))
 })
-const totalPrice = computed(() => nights.value * RATE_PER_NIGHT)
+
+const totalPrice = computed(() => {
+  const n = nights.value
+  if (!n || !room.value) return 0
+  const { price_per_night, price_7_nights, price_30_days, price_full_period } = room.value
+
+  // 全租期間
+  if (price_full_period && rentStart.value && rentEnd.value) {
+    const fullNights = Math.round((rentEnd.value - rentStart.value) / (1000 * 60 * 60 * 24))
+    if (n === fullNights) return Number(price_full_period)
+  }
+
+  let remaining = n
+  let total = 0
+  if (price_30_days && remaining >= 30) {
+    const months = Math.floor(remaining / 30)
+    total += months * Number(price_30_days)
+    remaining -= months * 30
+  }
+  if (price_7_nights && remaining >= 7) {
+    const weeks = Math.floor(remaining / 7)
+    total += weeks * Number(price_7_nights)
+    remaining -= weeks * 7
+  }
+  total += remaining * Number(price_per_night || 0)
+  return Math.round(total)
+})
 
 function formatDate(d) {
   if (!d) return ''
@@ -89,12 +127,18 @@ onMounted(async () => {
   try {
     const rooms = await api.get('/api/room')
     if (rooms.length) {
-      const room = rooms[0]
+      const r = rooms[0]
+      room.value = r
+      roomImages.value = (r.images || []).sort((a, b) => a.sort_order - b.sort_order)
       const map = {}
-      for (const t of (room.translations || [])) {
+      for (const t of (r.translations || [])) {
         map[t.locale] = { description: t.description || '', booking_description: t.booking_description || '' }
       }
       roomTranslations.value = map
+      // 預設選取全部租期
+      if (rentStart.value && rentEnd.value) {
+        selection.value = { start: rentStart.value, end: rentEnd.value }
+      }
     }
   } catch {}
 })
