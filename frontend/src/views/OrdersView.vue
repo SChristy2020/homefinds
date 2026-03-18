@@ -592,6 +592,9 @@ async function saveDepositStatus(res) {
   if (editingDepositValue.value === 'paid' && !res.deposit_paid) {
     await reservationsStore.updateDepositPaid(res.id)
     toast.show(i18n.t('reservations.depositPaidToast'))
+  } else if (editingDepositValue.value === 'unpaid' && res.deposit_paid) {
+    await reservationsStore.updateDepositUnpaid(res.id)
+    toast.show(i18n.t('reservations.depositUnpaidToast'))
   }
   editingDepositResId.value = null
 }
@@ -608,6 +611,9 @@ async function saveFullyPaidStatus(res) {
   if (editingFullyPaidValue.value === 'paid' && !res.fully_paid) {
     await reservationsStore.updateFullyPaid(res.id)
     toast.show(i18n.t('reservations.fullyPaidToast'))
+  } else if (editingFullyPaidValue.value === 'unpaid' && res.fully_paid) {
+    await reservationsStore.updateFullyUnpaid(res.id)
+    toast.show(i18n.t('reservations.fullyUnpaidToast'))
   }
   editingFullyPaidResId.value = null
 }

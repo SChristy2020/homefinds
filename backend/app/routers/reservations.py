@@ -58,12 +58,32 @@ def mark_deposit_paid(reservation_id: int, db: Session = Depends(get_db)):
     db.refresh(r)
     return r
 
+@router.put("/{reservation_id}/deposit-unpaid", response_model=ReservationOut)
+def mark_deposit_unpaid(reservation_id: int, db: Session = Depends(get_db)):
+    r = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    r.deposit_paid = 0
+    db.commit()
+    db.refresh(r)
+    return r
+
 @router.put("/{reservation_id}/fully-paid", response_model=ReservationOut)
 def mark_fully_paid(reservation_id: int, db: Session = Depends(get_db)):
     r = db.query(Reservation).filter(Reservation.id == reservation_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Reservation not found")
     r.fully_paid = 1
+    db.commit()
+    db.refresh(r)
+    return r
+
+@router.put("/{reservation_id}/fully-unpaid", response_model=ReservationOut)
+def mark_fully_unpaid(reservation_id: int, db: Session = Depends(get_db)):
+    r = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    r.fully_paid = 0
     db.commit()
     db.refresh(r)
     return r

@@ -272,7 +272,9 @@ export default {
     updatedAt:        '更新时间',
     noReservations:   '目前没有任何租屋订单',
     markPaid:         '标记已付',
-    depositPaidToast: '订金已标记为已付款',
-    fullyPaidToast:   '已标记为全额付款',
+    depositPaidToast:   '订金已标记为已付款',
+    depositUnpaidToast: '订金已还原为未付款',
+    fullyPaidToast:     '已标记为全额付款',
+    fullyUnpaidToast:   '已还原为未付款',
   },
 }

@@ -272,7 +272,9 @@ export default {
     updatedAt:        'Updated At',
     noReservations:   'No rental orders yet',
     markPaid:         'Mark Paid',
-    depositPaidToast: 'Deposit marked as paid',
-    fullyPaidToast:   'Marked as fully paid',
+    depositPaidToast:   'Deposit marked as paid',
+    depositUnpaidToast: 'Deposit reverted to unpaid',
+    fullyPaidToast:     'Marked as fully paid',
+    fullyUnpaidToast:   'Reverted to unpaid',
   },
 }
