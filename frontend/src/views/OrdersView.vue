@@ -298,15 +298,15 @@
               <td :colspan="isAdmin ? 13 : 9">
                 <div class="res-expand-grid">
                   <div class="res-detail-cell">
-                    <span class="res-detail-label">名字</span>
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailFirstName') }}</span>
                     <span class="res-detail-value">{{ isAdmin ? res.buyer_first_name : userStore.currentUser?.first_name }}</span>
                   </div>
                   <div class="res-detail-cell">
-                    <span class="res-detail-label">姓氏</span>
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailLastName') }}</span>
                     <span class="res-detail-value">{{ isAdmin ? res.buyer_last_name : userStore.currentUser?.last_name }}</span>
                   </div>
                   <div class="res-detail-cell">
-                    <span class="res-detail-label">稱呼</span>
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailSalutation') }}</span>
                     <span class="res-detail-value">{{ isAdmin ? res.buyer_salutation : userStore.currentUser?.salutation }}</span>
                   </div>
                   <div class="res-detail-cell">
@@ -314,27 +314,27 @@
                     <span class="res-detail-value">{{ isAdmin ? res.buyer_email : userStore.currentUser?.email }}</span>
                   </div>
                   <div class="res-detail-cell">
-                    <span class="res-detail-label">電話</span>
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailPhone') }}</span>
                     <span class="res-detail-value">{{ isAdmin ? res.buyer_phone : userStore.currentUser?.phone }}</span>
                   </div>
                   <div class="res-detail-cell">
-                    <span class="res-detail-label">出生年份 (西元)</span>
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailBirthYear') }}</span>
                     <span class="res-detail-value">{{ res.birth_year || '—' }}</span>
                   </div>
                   <div class="res-detail-cell">
-                    <span class="res-detail-label">職業</span>
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailOccupation') }}</span>
                     <span class="res-detail-value">{{ res.occupation || '—' }}</span>
                   </div>
                   <div class="res-detail-cell">
-                    <span class="res-detail-label">是否有其他人或寵物入住?</span>
-                    <span class="res-detail-value">{{ res.has_guests_or_pets ? '是' : '否' }}</span>
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailGuestsPets') }}</span>
+                    <span class="res-detail-value">{{ res.has_guests_or_pets ? i18n.t('reservations.detailGuestsPetsYes') : i18n.t('reservations.detailGuestsPetsNo') }}</span>
                   </div>
                   <div class="res-detail-cell res-detail-cell--span3">
-                    <span class="res-detail-label">請簡單描述總入住人數、同住成員身分或寵物</span>
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailGuestsPetsDesc') }}</span>
                     <span class="res-detail-value">{{ res.guests_pets_description || '—' }}</span>
                   </div>
                   <div class="res-detail-cell res-detail-cell--span3">
-                    <span class="res-detail-label">需求備註</span>
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailSpecialRequests') }}</span>
                     <span class="res-detail-value">{{ res.special_requests || '—' }}</span>
                   </div>
                 </div>
