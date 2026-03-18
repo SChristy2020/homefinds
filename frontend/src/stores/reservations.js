@@ -21,35 +21,33 @@ export const useReservationsStore = defineStore('reservations', () => {
     return result
   }
 
+  function mergeResult(reservationId, result) {
+    const idx = reservations.value.findIndex(r => r.id === reservationId)
+    if (idx !== -1) reservations.value[idx] = { ...reservations.value[idx], ...result }
+    sessionStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations.value))
+  }
+
   async function updateDepositPaid(reservationId) {
     const result = await api.put(`/api/reservations/${reservationId}/deposit-paid`)
-    const idx = reservations.value.findIndex(r => r.id === reservationId)
-    if (idx !== -1) reservations.value[idx] = result
-    sessionStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations.value))
+    mergeResult(reservationId, result)
     return result
   }
 
   async function updateDepositUnpaid(reservationId) {
     const result = await api.put(`/api/reservations/${reservationId}/deposit-unpaid`)
-    const idx = reservations.value.findIndex(r => r.id === reservationId)
-    if (idx !== -1) reservations.value[idx] = result
-    sessionStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations.value))
+    mergeResult(reservationId, result)
     return result
   }
 
   async function updateFullyPaid(reservationId) {
     const result = await api.put(`/api/reservations/${reservationId}/fully-paid`)
-    const idx = reservations.value.findIndex(r => r.id === reservationId)
-    if (idx !== -1) reservations.value[idx] = result
-    sessionStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations.value))
+    mergeResult(reservationId, result)
     return result
   }
 
   async function updateFullyUnpaid(reservationId) {
     const result = await api.put(`/api/reservations/${reservationId}/fully-unpaid`)
-    const idx = reservations.value.findIndex(r => r.id === reservationId)
-    if (idx !== -1) reservations.value[idx] = result
-    sessionStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations.value))
+    mergeResult(reservationId, result)
     return result
   }
 
