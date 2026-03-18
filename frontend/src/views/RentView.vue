@@ -13,33 +13,37 @@
 
       <!-- Price summary -->
       <div v-if="selection.start" class="price-summary">
-        <!-- Date detail rows -->
-        <div class="date-details">
-          <div class="date-detail-row">
-            <span class="date-label">{{ i18n.t('rent.checkIn') }} </span>
-            <span>{{ formatDate(selection.start) }}　　</span>
-            <span class="date-label">{{ i18n.t('rent.checkOut') }} </span>
-            <span>{{ selection.end ? formatDate(selection.end) : '...' }}</span>
+        <!-- Date row -->
+        <div class="date-row">
+          <div class="date-col">
+            <span class="date-col-label">{{ i18n.t('rent.checkIn') }}</span>
+            <span class="date-col-value">{{ formatDate(selection.start) }}</span>
           </div>
-          <div v-if="nights > 0" class="date-detail-row">
-            <span class="date-label">{{ i18n.t('rent.totalStay') }} </span>
-            <span>{{ nightsSummary }}</span>
+          <span class="date-arrow">→</span>
+          <div class="date-col">
+            <span class="date-col-label">{{ i18n.t('rent.checkOut') }}</span>
+            <span class="date-col-value">{{ selection.end ? formatDate(selection.end) : '...' }}</span>
           </div>
+          <span v-if="nights > 0" class="nights-badge">{{ i18n.t('rent.totalStay') }}{{ nights }}{{ i18n.t('rent.totalStaySuffix') }}</span>
         </div>
 
-        <!-- Price row -->
-        <div class="price-row">
-          <span v-if="originalPrice > totalPrice" class="price-original">${{ originalPrice }} USD</span>
-          <span class="price-big">${{ totalPrice }} USD</span>
+        <!-- Original price row -->
+        <div class="price-line">
+          <span class="price-line-label">{{ i18n.t('rent.originalLabel') }}</span>
+          <span class="price-line-value price-original">USD {{ originalPrice }}</span>
+        </div>
+
+        <!-- Special price row -->
+        <div class="price-line">
+          <span class="price-line-label">{{ i18n.t('rent.specialLabel') }}</span>
+          <span class="price-line-value price-special">USD {{ totalPrice }}</span>
         </div>
 
         <!-- Early bird (if booking in March) -->
-        <div v-if="isEarlyBird" class="early-bird-section">
-          <div class="early-bird-main">
-            <span class="early-bird-label">{{ i18n.t('rent.earlyBirdLabel') }}</span>
-            <span class="early-bird-price">${{ earlyBirdPrice }} USD</span>
-            <span class="early-bird-note">{{ i18n.t('rent.earlyBirdNote') }}</span>
-          </div>
+        <div v-if="isEarlyBird" class="price-line early-bird-line">
+          <span class="price-line-label early-bird-label">{{ i18n.t('rent.earlyBirdLabel') }}</span>
+          <span class="price-line-value early-bird-price">USD {{ earlyBirdPrice }}</span>
+          <span class="early-bird-note">{{ i18n.t('rent.earlyBirdNote') }}</span>
         </div>
 
         <button class="btn-primary book-btn" :disabled="!selection.end" @click="showConfirm = true">
@@ -142,11 +146,6 @@ const totalPrice = computed(() => {
   return Math.round(total)
 })
 
-const nightsSummary = computed(() => {
-  if (i18n.locale === 'en') return `${nights.value} ${nights.value === 1 ? 'Night' : 'Nights'}`
-  return `${nights.value}${i18n.t('rent.totalStaySuffix')}`
-})
-
 // 早鳥：3月預定再9折
 const isEarlyBird = computed(() => new Date().getMonth() === 2) // March = index 2
 const earlyBirdPrice = computed(() => Math.round(totalPrice.value * 0.9))
@@ -193,25 +192,34 @@ onMounted(async () => {
 /* Avail note */
 .avail-note { font-size: 1rem; color: var(--mid); margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
 
-/* Price summary */
-.price-summary { margin-top: 16px; padding-top: 14px; border-top: 1.5px solid var(--border); }
+/* Price summary card */
+.price-summary { margin-top: 16px; padding: 16px 20px; border-radius: 10px; display: flex; flex-direction: column; gap: 2px; background: rgb(255 255 255 / 60%); box-shadow: 3px 3px 11px 1px #cccc; transition: .2s;}
+.price-summary:hover { background: rgb(255 255 255 / 80%); box-shadow: 3px 3px 11px 1px #7d7d7dcc;}
 
-/* Date details */
-.date-details { display: flex; flex-direction: column; gap: 4px; padding-bottom: 4px;}
-.date-detail-row { font-size: 1rem; color: var(--charcoal); }
-.date-label { font-weight: 600; }
+.price-summary:hover .price-special, .price-summary:hover .early-bird-price {
+  text-decoration: underline;
+}
 
-/* Price row */
-.price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
-.price-original { font-size: 1rem; color: var(--mid); text-decoration: line-through; }
-.price-big { font-size: 1.6rem; font-weight: 700; color: var(--charcoal); }
+/* Date row */
+.date-row { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; margin-bottom: 6px;border-bottom: 1px solid var(--border); }
+.date-col { display: flex; flex-direction: column; gap: 2px; }
+.date-col-label { font-size: 0.78rem; color: var(--mid); }
+.date-col-value { font-size: 0.95rem; font-weight: 600; color: var(--charcoal); }
+.date-arrow { font-size: 1.1rem; color: var(--mid); padding: 0 4px; margin-top: 10px; }
+.nights-badge { margin-left: auto; font-size: 0.95rem; font-weight: 600; color: var(--charcoal); white-space: nowrap; }
+
+/* Price lines */
+.price-line { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.price-line-label { font-size: 0.95rem; color: var(--charcoal); min-width: 5em; }
+.price-line-value { font-size: 1rem; }
+.price-original { color: var(--mid); text-decoration: line-through; }
+.price-special { font-size: 1.5rem; font-weight: 700; color: var(--charcoal);}
 
 /* Early bird */
-.early-bird-section { margin-bottom: 14px; }
-.early-bird-main { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; color: #c0392b; }
-.early-bird-label { font-size: 1rem; font-weight: 600; }
-.early-bird-price { font-size: 1.5rem; font-weight: 800; }
-.early-bird-note { font-size: 0.9rem; font-weight: 500; }
+.early-bird-line { color: #c0392b; }
+.early-bird-label { font-weight: 600; color: #c0392b; }
+.early-bird-price { font-size: 1.5rem; font-weight: 800; color: #c0392b; }
+.early-bird-note { font-size: 0.88rem; font-weight: 500; color: #c0392b; }
 
 .book-btn { width: 100%; }
 
