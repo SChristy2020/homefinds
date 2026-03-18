@@ -1,14 +1,129 @@
 <template>
   <BaseModal :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)">
-    <h2 class="modal-title">{{ i18n.t('rentConfirm.title') }}</h2>
-    <p class="text-sm text-muted">
-      {{ fmt(selection.start) }} – {{ fmt(selection.end) }}
-      &nbsp; {{ i18n.t('rentConfirm.total') }} {{ nights }} {{ nights === 1 ? i18n.t('rentConfirm.night') : i18n.t('rentConfirm.nights') }}
-    </p>
-    <div class="price-line">${{ totalPrice }} USD</div>
 
-    <UserInfoForm v-model="form" class="mt-16" />
+    <!-- Title -->
+    <h2 class="modal-title">
+      {{ i18n.t('rentConfirm.title') }}
+    </h2>
 
+    <hr class="divider" />
+
+    <!-- Date row -->
+    <div class="section-title">{{ i18n.t('rentConfirm.stayInfo') }}</div>
+    <div class="date-row">
+      <div class="date-col">
+        <span class="date-label">{{ i18n.t('rent.checkIn') }}</span>
+        <span class="date-value">{{ fmt(selection.start) }}</span>
+      </div>
+      <span class="date-arrow">→</span>
+      <div class="date-col">
+        <span class="date-label">{{ i18n.t('rent.checkOut') }}</span>
+        <span class="date-value">{{ fmt(selection.end) }}</span>
+      </div>
+      <span class="nights-badge">{{ i18n.t('rentConfirm.total') }}{{ nights }}{{ i18n.t('rentConfirm.nights') }}</span>
+    </div>
+
+    <!-- Price section -->
+    <div class="price-section">
+      <div class="price-line">
+        <span class="price-label">{{ i18n.t('rent.originalLabel') }}</span>
+        <span class="price-value price-original">USD {{ originalPrice }}</span>
+      </div>
+      <div class="price-line">
+        <span class="price-label">{{ i18n.t('rent.specialLabel') }}</span>
+        <span class="price-value price-special">USD {{ specialPrice }}</span>
+      </div>
+      <div v-if="isEarlyBird" class="price-line early-bird-line">
+        <span class="price-label early-bird-label">{{ i18n.t('rent.earlyBirdLabel') }}</span>
+        <span class="price-value early-bird-price">USD {{ earlyBirdPrice }}</span>
+        <span class="early-bird-note">{{ i18n.t('rent.earlyBirdNote') }}</span>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Basic info -->
+    <div class="section-title">{{ i18n.t('rentConfirm.basicInfo') }}</div>
+
+    <!-- Name row -->
+    <div class="form-row">
+      <div class="form-group" :class="{ 'has-error': touched.firstName && !validName(form.firstName) }">
+        <label>{{ i18n.t('userForm.firstName') }}</label>
+        <input v-model="form.firstName" :placeholder="i18n.t('userForm.firstName')" @blur="touched.firstName = true" />
+        <span v-if="touched.firstName && !validName(form.firstName)" class="field-error">{{ nameError }}</span>
+      </div>
+      <div class="form-group" :class="{ 'has-error': touched.lastName && !validName(form.lastName) }">
+        <label>{{ i18n.t('userForm.lastName') }}</label>
+        <input v-model="form.lastName" :placeholder="i18n.t('userForm.lastName')" @blur="touched.lastName = true" />
+        <span v-if="touched.lastName && !validName(form.lastName)" class="field-error">{{ nameError }}</span>
+      </div>
+    </div>
+
+    <!-- Salutation -->
+    <div class="form-group">
+      <label>{{ i18n.t('userForm.salutation') }}</label>
+      <div class="radio-group">
+        <label v-for="(key, i) in salutationKeys" :key="key">
+          <input type="radio" :checked="form.salutation === key" @change="form.salutation = key" /> {{ salutationLabels[i] }}
+        </label>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group" :class="{ 'has-error': touched.email && !validEmail(form.email) }">
+      <label>Email</label>
+      <input v-model="form.email" type="email" placeholder="your@email.com" @blur="touched.email = true" />
+      <span v-if="touched.email && !validEmail(form.email)" class="field-error">{{ emailError }}</span>
+    </div>
+
+    <!-- Phone -->
+    <div class="form-group" :class="{ 'has-error': touched.phone && !validPhone(form.phone) }">
+      <label>{{ i18n.t('userForm.phone') }}</label>
+      <input v-model="form.phone" :placeholder="i18n.t('userForm.phonePlaceholder')" @blur="touched.phone = true" />
+      <span v-if="touched.phone && !validPhone(form.phone)" class="field-error">{{ phoneError }}</span>
+    </div>
+
+    <!-- Birth year & Occupation -->
+    <div class="form-row">
+      <div class="form-group" :class="{ 'has-error': touched.birthYear && !validBirthYear(form.birthYear) }">
+        <label>{{ i18n.t('rentConfirm.birthYear') }}</label>
+        <input v-model="form.birthYear" type="number" :placeholder="i18n.t('rentConfirm.birthYearPlaceholder')" min="1930" max="2020" @blur="touched.birthYear = true" />
+        <span v-if="touched.birthYear && !validBirthYear(form.birthYear)" class="field-error">{{ birthYearError }}</span>
+      </div>
+      <div class="form-group" :class="{ 'has-error': touched.occupation && !validOccupation(form.occupation) }">
+        <label>{{ i18n.t('rentConfirm.occupation') }}</label>
+        <input v-model="form.occupation" :placeholder="i18n.t('rentConfirm.occupationPlaceholder')" @blur="touched.occupation = true" />
+        <span v-if="touched.occupation && !validOccupation(form.occupation)" class="field-error">{{ occupationError }}</span>
+      </div>
+    </div>
+
+    <!-- Guests / Pets -->
+    <div class="form-group">
+      <label>{{ i18n.t('rentConfirm.guestsPets') }}</label>
+      <div class="radio-group">
+        <label><input type="radio" :checked="form.hasGuestsPets === true"  @change="form.hasGuestsPets = true"  /> {{ i18n.t('rentConfirm.yes') }}</label>
+        <label><input type="radio" :checked="form.hasGuestsPets === false" @change="form.hasGuestsPets = false" /> {{ i18n.t('rentConfirm.no') }}</label>
+      </div>
+    </div>
+    <div v-if="form.hasGuestsPets" class="form-group" :class="{ 'has-error': touched.guestsPetsDescription && !validGuestsDesc(form.guestsPetsDescription) }">
+      <label>{{ i18n.t('rentConfirm.guestsPetsDesc') }}</label>
+      <textarea v-model="form.guestsPetsDescription" :placeholder="i18n.t('rentConfirm.guestsPetsDescPlaceholder')" rows="3" @blur="touched.guestsPetsDescription = true"></textarea>
+      <span v-if="touched.guestsPetsDescription && !validGuestsDesc(form.guestsPetsDescription)" class="field-error">{{ guestsDescError }}</span>
+    </div>
+
+    <!-- Special requests -->
+    <div class="form-group">
+      <label>{{ i18n.t('rentConfirm.specialRequests') }}</label>
+      <span class="field-note field-note--alert">{{ i18n.t('rentConfirm.specialRequestsNote') }}</span>
+      <textarea v-model="form.specialRequests" :placeholder="i18n.t('rentConfirm.specialRequestsPlaceholder')" rows="3"></textarea>
+    </div>
+
+    <!-- Confirm button -->
+    <div style="margin-top: 16px;">
+      <button class="btn-primary btn-block" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('rentConfirm.confirmBtn') }}</button>
+    </div>
+
+    <!-- Policy -->
     <div v-if="bookingDescription" class="policy" v-html="bookingDescription"></div>
     <div v-else class="policy">
       <p v-html="i18n.t('rentConfirm.depositNote')"></p>
@@ -20,55 +135,142 @@
       <p class="mt-8">{{ i18n.t('rentConfirm.remainingNote') }}</p>
     </div>
 
-    <div style="text-align:right; margin-top:16px;">
-      <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('rentConfirm.confirm') }}</button>
-    </div>
   </BaseModal>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import BaseModal from '@/components/shared/BaseModal.vue'
-import UserInfoForm from '@/components/shared/UserInfoForm.vue'
 import { useI18nStore } from '@/stores/i18n'
 
 const props = defineProps({
-  modelValue: Boolean,
-  selection: Object,
-  nights: Number,
-  totalPrice: Number,
+  modelValue:    Boolean,
+  selection:     Object,
+  nights:        Number,
+  totalPrice:    Number,  // final price (after early bird if applicable)
+  originalPrice: { type: Number, default: 0 },
+  specialPrice:  { type: Number, default: 0 },
+  earlyBirdPrice:{ type: Number, default: 0 },
+  isEarlyBird:   { type: Boolean, default: false },
   bookingDescription: { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue', 'confirmed'])
 
 const i18n = useI18nStore()
-const form = ref({ firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', zelleRefund: 'phone', zelleRefundOther: '' })
+
+const salutationKeys   = ['Mr.', 'Ms.']
+const salutationLabels = computed(() => i18n.t('userForm.salutations'))
+
+const emptyForm = () => ({
+  firstName: '', lastName: '', salutation: 'Mr.',
+  email: '', phone: '',
+  birthYear: '', occupation: '',
+  hasGuestsPets: false, guestsPetsDescription: '',
+  specialRequests: '',
+})
+const form    = ref(emptyForm())
+const touched = ref({
+  firstName: false, lastName: false, email: false, phone: false,
+  birthYear: false, occupation: false, guestsPetsDescription: false,
+})
+
+const NAME_RE  = /^[a-zA-Z\u4e00-\u9fff\u3400-\u4dbf\s-]+$/
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function validName(v)      { return !!v && NAME_RE.test(v) }
+function validEmail(v)     { return !!v && EMAIL_RE.test(v) }
+function validPhone(v)     { return !!v && v.replace(/\D/g, '').length >= 7 }
+function validBirthYear(v) { const n = Number(v); return !!v && Number.isInteger(n) && n >= 1930 && n <= 2020 }
+function validOccupation(v){ return !!v && v.trim().length > 0 }
+function validGuestsDesc(v){ return !!v && v.trim().length > 0 }
+
+const nameError       = computed(() => i18n.t('rentConfirm.errorName'))
+const emailError      = computed(() => i18n.t('rentConfirm.errorEmail'))
+const phoneError      = computed(() => i18n.t('rentConfirm.errorPhone'))
+const birthYearError  = computed(() => i18n.t('rentConfirm.errorBirthYear'))
+const occupationError = computed(() => i18n.t('rentConfirm.errorRequired'))
+const guestsDescError = computed(() => i18n.t('rentConfirm.errorGuestsDesc'))
 
 const isValid = computed(() =>
-  form.value.firstName && form.value.lastName &&
-  form.value.email && form.value.phone
+  validName(form.value.firstName) && validName(form.value.lastName) &&
+  validEmail(form.value.email) && validPhone(form.value.phone) &&
+  validBirthYear(form.value.birthYear) && validOccupation(form.value.occupation) &&
+  (!form.value.hasGuestsPets || validGuestsDesc(form.value.guestsPetsDescription))
 )
 
 function fmt(d) {
   if (!d) return ''
-  return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
 }
 
 function handleConfirm() {
+  // 觸發所有欄位的驗證提示
+  Object.keys(touched.value).forEach(k => touched.value[k] = true)
   if (!isValid.value) return
   emit('confirmed', { ...form.value })
-  form.value = { firstName: '', lastName: '', salutation: 'Mr.', email: '', phone: '', zelleRefund: 'phone', zelleRefundOther: '' }
+  form.value = emptyForm()
+  touched.value = { firstName: false, lastName: false, email: false, phone: false }
 }
 </script>
 
 <style scoped>
 .modal-title {
   font-family: var(--font-display);
-  font-size: 1.25rem; font-weight: 600; margin-bottom: 8px;
+  font-size: 1.25rem; font-weight: 600; margin-bottom: 12px;
 }
-.price-line { font-size: 1.2rem; font-weight: 700; margin: 8px 0; }
+.title-en { font-size: 1rem; font-weight: 400; color: var(--mid); margin-left: 4px; }
+
+/* Date row */
+.date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.date-col { display: flex; flex-direction: column; gap: 1px; }
+.date-label { font-size: 0.75rem; color: var(--mid); }
+.date-value { font-size: 0.95rem; font-weight: 600; color: var(--charcoal); }
+.date-arrow { font-size: 1.1rem; color: var(--mid); padding: 0 2px; margin-top: 10px; }
+.nights-badge { margin-left: auto; font-size: 0.9rem; font-weight: 600; color: var(--charcoal); white-space: nowrap; }
+
+/* Price section */
+.price-section { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+.price-line { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.price-label { font-size: 0.9rem; color: var(--charcoal); min-width: 4em; }
+.price-value { font-size: 1rem; }
+.price-original { color: var(--mid); text-decoration: line-through; }
+.price-special { font-size: 1.4rem; font-weight: 700; color: var(--charcoal); }
+.early-bird-line { color: #c0392b; }
+.early-bird-label { font-weight: 600; color: #c0392b; }
+.early-bird-price { font-size: 1.4rem; font-weight: 800; color: #c0392b; }
+.early-bird-note { font-size: 0.85rem; font-weight: 500; color: #c0392b; }
+
+.divider { border: none; border-top: 1.5px solid var(--border); margin: 12px 0; }
+
+.section-title { font-weight: 600; font-size: 1rem; margin-bottom: 10px; color: var(--charcoal); }
+
+/* Form */
+.form-row { display: flex; gap: 12px; }
+.form-row .form-group { flex: 1; }
+.form-group { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
+.form-group label { font-size: 0.95rem; color: var(--charcoal); font-weight: 500; }
+.form-group input, .form-group textarea {
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; font-size: 0.9rem; width: 100%; box-sizing: border-box;
+  background: var(--surface, #fafafa);
+}
+.form-group input[type="number"] { -moz-appearance: textfield; }
+.form-group input[type="number"]::-webkit-outer-spin-button,
+.form-group input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+.form-group textarea { resize: vertical; }
+.has-error input, .has-error textarea { border-color: #e74c3c; }
+.field-error { font-size: 0.72rem; color: #e74c3c; }
+.field-note { font-size: 0.82rem; color: var(--mid); }
+.field-note--alert { color: #c0392b; font-weight: 600; }
+
+.radio-group { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.9rem; }
+.radio-group label { display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap; }
+
+.btn-block { width: 100%; }
+
+/* Policy */
 .policy {
-  font-size: 0.78rem; color: var(--mid);
+  font-size: 0.9rem;
   margin-top: 12px; padding-top: 12px;
   border-top: 1.5px solid var(--border);
 }

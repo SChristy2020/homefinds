@@ -1,26 +1,33 @@
 from pydantic import BaseModel
 from datetime import date, datetime
+from typing import Optional
 
 class ReservationCreate(BaseModel):
-    user_id:        int
-    check_in:       date
-    check_out:      date
-    nights:         int
-    deposit_amount: float
-    total_price:    float
+    user_id:                 int
+    check_in:                date
+    check_out:               date
+    nights:                  int
+    deposit_amount:          float
+    total_price:             float
+    has_guests_or_pets:      bool = False
+    guests_pets_description: Optional[str] = None
+    special_requests:        Optional[str] = None
 
 class ReservationOut(BaseModel):
-    id:             int
-    user_id:        int
-    check_in:       date
-    check_out:      date
-    nights:         int
-    deposit_paid:   int
-    deposit_amount: float
-    total_price:    float
-    fully_paid:     int
-    created_at:     datetime
-    updated_at:     datetime
+    id:                      int
+    user_id:                 int
+    check_in:                date
+    check_out:               date
+    nights:                  int
+    deposit_paid:            int
+    deposit_amount:          float
+    total_price:             float
+    fully_paid:              int
+    has_guests_or_pets:      int
+    guests_pets_description: Optional[str]
+    special_requests:        Optional[str]
+    created_at:              datetime
+    updated_at:              datetime
 
     class Config:
         from_attributes = True

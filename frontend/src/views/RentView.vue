@@ -64,6 +64,10 @@
     :selection="selection"
     :nights="nights"
     :total-price="finalPrice"
+    :original-price="originalPrice"
+    :special-price="totalPrice"
+    :early-bird-price="earlyBirdPrice"
+    :is-early-bird="isEarlyBird"
     :booking-description="roomBookingDescription"
     @confirmed="onConfirmed"
   />

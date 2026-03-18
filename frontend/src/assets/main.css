@@ -94,11 +94,11 @@ body {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 12px;
+  gap: 2px;
+  margin-bottom: 20px;
 }
 .form-group label {
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--mid);
 }
