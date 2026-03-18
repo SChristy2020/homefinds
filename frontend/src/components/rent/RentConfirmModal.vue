@@ -1,5 +1,5 @@
 <template>
-  <BaseModal :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)">
+  <BaseModal :modelValue="modelValue" noBackdropClose @update:modelValue="$emit('update:modelValue', $event)">
 
     <!-- ───────────── STEP 1: Form ───────────── -->
     <template v-if="step === 1">
