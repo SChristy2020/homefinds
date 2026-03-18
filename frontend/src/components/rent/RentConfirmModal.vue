@@ -34,7 +34,7 @@
         </div>
         <div class="price-line">
           <span class="price-label">{{ i18n.t('rent.specialLabel') }}</span>
-          <span class="price-value price-special">USD {{ specialPrice }}</span>
+          <span class="price-value price-special" :class="{ strikethrough: isEarlyBird }">USD {{ specialPrice }}</span>
         </div>
         <div v-if="isEarlyBird" class="price-line early-bird-line">
           <span class="price-label early-bird-label">{{ i18n.t('rent.earlyBirdLabel') }}</span>
@@ -246,7 +246,7 @@
         </div>
         <div class="price-line">
           <span class="price-label">{{ i18n.t('rent.specialLabel') }}</span>
-          <span class="price-value price-special">USD {{ specialPrice }}</span>
+          <span class="price-value price-special" :class="{ strikethrough: isEarlyBird }">USD {{ specialPrice }}</span>
         </div>
         <div v-if="isEarlyBird" class="price-line early-bird-line">
           <span class="price-label early-bird-label">{{ i18n.t('rent.earlyBirdLabel') }}</span>
@@ -339,7 +339,7 @@
         </div>
         <div class="price-line">
           <span class="price-label">{{ i18n.t('rent.specialLabel') }}</span>
-          <span class="price-value price-special">USD {{ specialPrice }}</span>
+          <span class="price-value price-special" :class="{ strikethrough: isEarlyBird }">USD {{ specialPrice }}</span>
         </div>
         <div v-if="isEarlyBird" class="price-line early-bird-line">
           <span class="price-label early-bird-label">{{ i18n.t('rent.earlyBirdLabel') }}</span>

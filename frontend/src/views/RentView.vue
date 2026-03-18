@@ -36,7 +36,7 @@
         <!-- Special price row -->
         <div class="price-line">
           <span class="price-line-label">{{ i18n.t('rent.specialLabel') }}</span>
-          <span class="price-line-value price-special">USD {{ totalPrice }}</span>
+          <span class="price-line-value price-special" :class="{ strikethrough: isEarlyBird }">USD {{ totalPrice }}</span>
         </div>
 
         <!-- Early bird (if booking in March) -->
@@ -197,10 +197,6 @@ onMounted(async () => {
 /* Price summary card */
 .price-summary { margin-top: 16px; padding: 16px 20px; border-radius: 10px; display: flex; flex-direction: column; gap: 2px; background: rgb(255 255 255 / 60%); box-shadow: 3px 3px 11px 1px #cccc; transition: .2s;}
 .price-summary:hover { background: rgb(255 255 255 / 80%); box-shadow: 3px 3px 11px 1px #7d7d7dcc;}
-
-.price-summary:hover .price-special, .price-summary:hover .early-bird-price {
-  text-decoration: underline;
-}
 
 /* Date row */
 .date-row { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; margin-bottom: 6px;border-bottom: 1px solid var(--border); }

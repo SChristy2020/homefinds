@@ -202,7 +202,7 @@ export default {
     autoCancelNote: '*This reservation will be automatically cancelled if unpaid within 1 hour',
     notifyBtn: 'Deposit Paid — Notify Christy!',
     salutationLabel: 'Salutation',
-    receiptTitle: 'Ready for Your Stay',
+    receiptTitle: 'Ready for Your Stay!',
     receiptGreeting: 'Hi {name}, thank you for your reservation!',
     receiptNote1: 'Christy will verify your payment and confirm your request shortly.',
     receiptNote2: 'A confirmation email will be sent once the payment is processed, and the dates will be marked as "Reserved".',
