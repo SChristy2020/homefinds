@@ -209,9 +209,9 @@
       <div class="zelle-block">
         <p class="zelle-title">🔥 {{ i18n.t('rentConfirm.zelleInfo') }}</p>
         <ul>
-          <li>帳號: (984)373-9392</li>
-          <li>戶名: SHU CHING LI</li>
-          <li>備註: 請務必註明您的「訂單編號」</li>
+          <li>{{ i18n.t('rentConfirm.zellePhone') }}</li>
+          <li>{{ i18n.t('rentConfirm.zelleName') }}</li>
+          <li>{{ i18n.t('rentConfirm.zelleMemo') }}</li>
         </ul>
       </div>
 
