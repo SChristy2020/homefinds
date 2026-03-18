@@ -552,7 +552,7 @@ function handleNotify() {
 .deposit-note { font-size: 0.82rem; color: #c0392b; font-weight: 500; }
 
 .auto-cancel-note {
-  font-size: 0.82rem; color: #c0392b; font-weight: 700; padding: 1rem 0 0 0;
+  color: #c0392b; font-weight: 700; padding: 1rem 0 0 0;
 }
 .api-error {
   font-size: 0.85rem; color: #c0392b; margin-bottom: 8px; font-weight: 600;
