@@ -9,6 +9,8 @@ class ReservationCreate(BaseModel):
     nights:                  int
     deposit_amount:          float
     total_price:             float
+    birth_year:              Optional[int] = None
+    occupation:              Optional[str] = None
     has_guests_or_pets:      bool = False
     guests_pets_description: Optional[str] = None
     special_requests:        Optional[str] = None
@@ -24,6 +26,8 @@ class ReservationOut(BaseModel):
     deposit_amount:          float
     total_price:             float
     fully_paid:              int
+    birth_year:              Optional[int]
+    occupation:              Optional[str]
     has_guests_or_pets:      int
     guests_pets_description: Optional[str]
     special_requests:        Optional[str]

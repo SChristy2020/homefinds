@@ -15,6 +15,8 @@ class Reservation(Base):
     deposit_amount           = Column(Numeric(10,2), nullable=False)
     total_price              = Column(Numeric(10,2), nullable=False)
     fully_paid               = Column(TINYINT(1),    nullable=False, default=0)
+    birth_year               = Column(Integer,       nullable=True)
+    occupation               = Column(String(100),   nullable=True)
     has_guests_or_pets       = Column(TINYINT(1),    nullable=False, default=0)
     guests_pets_description  = Column(Text,          nullable=True)
     special_requests         = Column(Text,          nullable=True)

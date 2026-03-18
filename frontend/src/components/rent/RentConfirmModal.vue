@@ -387,8 +387,6 @@ async function handleConfirm() {
       email:       form.value.email,
       phone:       form.value.phone,
       zelle_refund: 'phone',
-      birth_year:  parseInt(form.value.birthYear),
-      occupation:  form.value.occupation,
       locale:      i18n.locale,
     })
 
@@ -399,6 +397,8 @@ async function handleConfirm() {
       nights:                  props.nights,
       deposit_amount:          depositAmount.value,
       total_price:             props.totalPrice,
+      birth_year:              parseInt(form.value.birthYear),
+      occupation:              form.value.occupation,
       has_guests_or_pets:      form.value.hasGuestsPets,
       guests_pets_description: form.value.guestsPetsDescription || null,
       special_requests:        form.value.specialRequests || null,

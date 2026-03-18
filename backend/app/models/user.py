@@ -11,8 +11,6 @@ class User(Base):
     salutation         = Column(String(10),  nullable=False)
     email              = Column(String(100), nullable=False)
     phone              = Column(String(20),  nullable=False)
-    birth_year         = Column(Integer,     nullable=True)
-    occupation         = Column(String(100), nullable=True)
     zelle_refund       = Column(Enum("phone", "email", "other"), nullable=False, default="phone")
     zelle_refund_other = Column(String(100), nullable=True)
     locale             = Column(String(10),  nullable=False, default="zh-TW")
