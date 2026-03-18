@@ -234,17 +234,23 @@
           </tbody>
           <tbody v-else>
             <tr v-for="res in reservationsStore.reservations" :key="res.id" class="order-row">
-              <td class="td-order-no">{{ res.id }}</td>
+              <td class="td-order-no">{{ res.order_number || res.id }}</td>
               <td>{{ formatDate(res.check_in) }}</td>
               <td>{{ formatDate(res.check_out) }}</td>
               <td>{{ res.nights }}</td>
               <td>${{ res.deposit_amount }}</td>
               <td :class="res.deposit_paid ? 'status-paid' : 'status-unpaid'">
-                {{ res.deposit_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}
+                <span>{{ res.deposit_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}</span>
+                <button v-if="isAdmin && !res.deposit_paid" class="btn-mark-paid" @click.stop="handleMarkDepositPaid(res)">
+                  {{ i18n.t('reservations.markPaid') }}
+                </button>
               </td>
               <td>${{ res.total_price }}</td>
               <td :class="res.fully_paid ? 'status-paid' : 'status-unpaid'">
-                {{ res.fully_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}
+                <span>{{ res.fully_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}</span>
+                <button v-if="isAdmin && !res.fully_paid" class="btn-mark-paid" @click.stop="handleMarkFullyPaid(res)">
+                  {{ i18n.t('reservations.markPaid') }}
+                </button>
               </td>
               <template v-if="isAdmin">
                 <td class="td-buyer">{{ res.buyer_last_name }} {{ res.buyer_first_name }}</td>
@@ -535,6 +541,16 @@ async function saveAdminNotes(order) {
 async function handleCancel(itemId) {
   await ordersStore.cancelOrderItem(itemId)
   toast.show(i18n.t('orders.cancelToast'))
+}
+
+async function handleMarkDepositPaid(res) {
+  await reservationsStore.updateDepositPaid(res.id)
+  toast.show(i18n.t('reservations.depositPaidToast'))
+}
+
+async function handleMarkFullyPaid(res) {
+  await reservationsStore.updateFullyPaid(res.id)
+  toast.show(i18n.t('reservations.fullyPaidToast'))
 }
 
 function reset() {
@@ -841,6 +857,15 @@ function fromPickerFormat(str) {
 .rent-guide-content :deep(iframe) { width: 100% !important; max-width: 100%; height: 360px; border: none; border-radius: 6px; display: block; margin: 8px 0; }
 .rent-guide-content :deep(.map-embed) { width: 100%; }
 .rent-guide-empty { font-size: 0.82rem; color: var(--mid); font-style: italic; }
+
+/* ── Mark paid button (admin) ────────────────────────────────────────────── */
+.btn-mark-paid {
+  margin-left: 6px; padding: 2px 8px;
+  background: none; border: 1px solid currentColor; border-radius: var(--radius);
+  font-size: 0.72rem; color: inherit; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-mark-paid:hover { opacity: 0.7; }
 
 /* ── Back button ─────────────────────────────────────────────────────────── */
 .back-btn-wrap { display: flex; justify-content: center; margin-top: 16px; }

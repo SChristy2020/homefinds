@@ -328,5 +328,8 @@ export default {
     createdAt:        '建立時間',
     updatedAt:        '更新時間',
     noReservations:   '目前沒有任何租屋訂單',
+    markPaid:         '標記已付',
+    depositPaidToast: '訂金已標記為已付款',
+    fullyPaidToast:   '已標記為全額付款',
   },
 }

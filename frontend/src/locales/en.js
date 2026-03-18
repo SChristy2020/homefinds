@@ -267,5 +267,8 @@ export default {
     createdAt:        'Created At',
     updatedAt:        'Updated At',
     noReservations:   'No rental orders yet',
+    markPaid:         'Mark Paid',
+    depositPaidToast: 'Deposit marked as paid',
+    fullyPaidToast:   'Marked as fully paid',
   },
 }
