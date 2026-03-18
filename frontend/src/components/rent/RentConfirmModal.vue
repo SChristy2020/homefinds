@@ -612,8 +612,8 @@ async function handleNotify() {
 /* Info grid (step 2 summary) */
 .info-grid {
   display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-  gap: 6px 12px;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 20px 12px;
   margin-bottom: 12px;
   font-size: 0.9rem;
 }

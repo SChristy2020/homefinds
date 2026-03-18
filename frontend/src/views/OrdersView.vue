@@ -229,11 +229,11 @@
           </thead>
           <tbody v-if="reservationsStore.reservations.length === 0">
             <tr>
-              <td :colspan="isAdmin ? 14 : 9" class="td-empty">{{ i18n.t('reservations.noReservations') }}</td>
+              <td :colspan="isAdmin ? 13 : 9" class="td-empty">{{ i18n.t('reservations.noReservations') }}</td>
             </tr>
           </tbody>
-          <tbody v-else>
-            <tr v-for="res in reservationsStore.reservations" :key="res.id" class="order-row">
+          <tbody v-for="res in reservationsStore.reservations" v-else :key="res.id">
+            <tr class="order-row" :class="{ expanded: expandedResId === res.id }" @click="toggleExpandRes(res.id)">
               <td class="td-order-no">{{ res.order_number || res.id }}</td>
               <td>{{ formatDate(res.check_in) }}</td>
               <td>{{ formatDate(res.check_out) }}</td>
@@ -291,6 +291,54 @@
               </template>
               <td class="td-created">{{ formatDateTime(res.created_at) }}</td>
               <td v-if="isAdmin" class="td-created">{{ formatDateTime(res.updated_at) }}</td>
+            </tr>
+
+            <!-- Expanded reservation details row -->
+            <tr v-if="expandedResId === res.id" class="expand-row">
+              <td :colspan="isAdmin ? 13 : 9">
+                <div class="res-expand-grid">
+                  <div class="res-detail-cell">
+                    <span class="res-detail-label">名字</span>
+                    <span class="res-detail-value">{{ isAdmin ? res.buyer_first_name : userStore.currentUser?.first_name }}</span>
+                  </div>
+                  <div class="res-detail-cell">
+                    <span class="res-detail-label">姓氏</span>
+                    <span class="res-detail-value">{{ isAdmin ? res.buyer_last_name : userStore.currentUser?.last_name }}</span>
+                  </div>
+                  <div class="res-detail-cell">
+                    <span class="res-detail-label">稱呼</span>
+                    <span class="res-detail-value">{{ isAdmin ? res.buyer_salutation : userStore.currentUser?.salutation }}</span>
+                  </div>
+                  <div class="res-detail-cell">
+                    <span class="res-detail-label">Email</span>
+                    <span class="res-detail-value">{{ isAdmin ? res.buyer_email : userStore.currentUser?.email }}</span>
+                  </div>
+                  <div class="res-detail-cell">
+                    <span class="res-detail-label">電話</span>
+                    <span class="res-detail-value">{{ isAdmin ? res.buyer_phone : userStore.currentUser?.phone }}</span>
+                  </div>
+                  <div class="res-detail-cell">
+                    <span class="res-detail-label">出生年份 (西元)</span>
+                    <span class="res-detail-value">{{ res.birth_year || '—' }}</span>
+                  </div>
+                  <div class="res-detail-cell">
+                    <span class="res-detail-label">職業</span>
+                    <span class="res-detail-value">{{ res.occupation || '—' }}</span>
+                  </div>
+                  <div class="res-detail-cell">
+                    <span class="res-detail-label">是否有其他人或寵物入住?</span>
+                    <span class="res-detail-value">{{ res.has_guests_or_pets ? '是' : '否' }}</span>
+                  </div>
+                  <div class="res-detail-cell res-detail-cell--span3">
+                    <span class="res-detail-label">請簡單描述總入住人數、同住成員身分或寵物</span>
+                    <span class="res-detail-value">{{ res.guests_pets_description || '—' }}</span>
+                  </div>
+                  <div class="res-detail-cell res-detail-cell--span3">
+                    <span class="res-detail-label">需求備註</span>
+                    <span class="res-detail-value">{{ res.special_requests || '—' }}</span>
+                  </div>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -362,6 +410,7 @@ const form = ref({ name: '', email: '', phone: '' })
 const errors = ref({ name: '', email: '', phone: '' })
 
 const expandedOrderId = ref(null)
+const expandedResId = ref(null)
 
 // ── DataTable state ───────────────────────────────────────────────────────────
 const searchQuery = ref('')
@@ -510,6 +559,10 @@ async function handleLookup() {
   }
 }
 
+function toggleExpandRes(resId) {
+  expandedResId.value = expandedResId.value === resId ? null : resId
+}
+
 function toggleExpand(orderId) {
   expandedOrderId.value = expandedOrderId.value === orderId ? null : orderId
   if (editingOrderId.value && editingOrderId.value !== orderId) {
@@ -622,6 +675,7 @@ function reset() {
   ordersStore.clearOrders()
   reservationsStore.clearReservations()
   expandedOrderId.value = null
+  expandedResId.value = null
   editingOrderId.value = null
   userStore.logout()
   form.value = { name: '', email: '', phone: '' }
@@ -893,7 +947,37 @@ function fromPickerFormat(str) {
 .reservations-section-title {
   margin-top: 0;
 }
-.reservations-table tbody tr:hover { background: #edf4f4; }
+.reservations-table tbody tr.order-row:hover { background: #edf4f4; }
+.reservations-table tbody tr.order-row { cursor: pointer; }
+
+/* ── Reservation expand ──────────────────────────────────────────────────── */
+.res-expand-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px 24px;
+  padding: 14px 16px;
+  background: #fff;
+}
+.res-detail-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.res-detail-cell--span3 {
+  grid-column: span 3;
+}
+.res-detail-label {
+  color: var(--mid);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+.res-detail-value {
+  color: var(--charcoal);
+  font-size: 0.88rem;
+  font-weight: 500;
+  word-break: break-word;
+}
 
 /* ── Shopping guide ──────────────────────────────────────────────────────── */
 .shopping-guide-wrap {
