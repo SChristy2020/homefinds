@@ -22,6 +22,17 @@
       <button type="button" class="tb-btn" @mousedown.prevent="exec('outdent')" title="取消縮排">⇤</button>
       <div class="tb-sep"></div>
       <button type="button" class="tb-btn" @mousedown.prevent="exec('removeFormat')" title="清除格式" style="font-size:0.72rem">清格式</button>
+      <div class="tb-sep"></div>
+      <button type="button" class="tb-btn" :class="{ active: headingActive === 'h1' }" @mousedown.prevent="applyHeading('h1')" title="標題 1" style="font-weight:700;font-size:0.9rem">H1</button>
+      <button type="button" class="tb-btn" :class="{ active: headingActive === 'h2' }" @mousedown.prevent="applyHeading('h2')" title="標題 2" style="font-weight:700;font-size:0.84rem">H2</button>
+      <button type="button" class="tb-btn" :class="{ active: headingActive === 'h3' }" @mousedown.prevent="applyHeading('h3')" title="標題 3" style="font-weight:700;font-size:0.8rem">H3</button>
+      <button type="button" class="tb-btn" :class="{ active: headingActive === 'h4' }" @mousedown.prevent="applyHeading('h4')" title="標題 4" style="font-weight:700;font-size:0.76rem">H4</button>
+      <div class="tb-sep"></div>
+      <label class="tb-btn tb-color" title="文字顏色" @mousedown.prevent="openColorPicker">
+        <span class="color-icon" :style="{ borderBottom: `3px solid ${currentColor}` }">A</span>
+        <input type="color" v-model="currentColor" @change="applyColor" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none" ref="colorInput" />
+        <span class="color-arrow">▾</span>
+      </label>
     </div>
     <div class="editor-body-wrap">
       <div
@@ -66,10 +77,14 @@ const emit = defineEmits(['update:modelValue'])
 
 const editorEl = ref(null)
 const fileInput = ref(null)
+const colorInput = ref(null)
 const boldActive = ref(false)
 const italicActive = ref(false)
 const underlineActive = ref(false)
 const uploading = ref(false)
+const headingActive = ref('')
+const currentColor = ref('#e53935')
+const savedRange = ref(null)
 
 // ── Image resize ──────────────────────────────────────────────────────────────
 const selectedImg = ref(null)
@@ -183,6 +198,38 @@ function checkState() {
   boldActive.value = document.queryCommandState('bold')
   italicActive.value = document.queryCommandState('italic')
   underlineActive.value = document.queryCommandState('underline')
+  const block = document.queryCommandValue('formatBlock').toLowerCase()
+  headingActive.value = ['h1','h2','h3','h4'].includes(block) ? block : ''
+}
+
+function applyHeading(tag) {
+  const block = document.queryCommandValue('formatBlock').toLowerCase()
+  if (block === tag) {
+    document.execCommand('formatBlock', false, 'p')
+  } else {
+    document.execCommand('formatBlock', false, tag)
+  }
+  editorEl.value.focus()
+  emit('update:modelValue', editorEl.value.innerHTML)
+  checkState()
+}
+
+function openColorPicker() {
+  const sel = window.getSelection()
+  if (sel && sel.rangeCount > 0) {
+    savedRange.value = sel.getRangeAt(0).cloneRange()
+  }
+  colorInput.value.click()
+}
+
+function applyColor() {
+  if (savedRange.value) {
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(savedRange.value)
+  }
+  document.execCommand('foreColor', false, currentColor.value)
+  emit('update:modelValue', editorEl.value.innerHTML)
 }
 
 function insertLink() {
@@ -393,6 +440,27 @@ async function onImageFile(e) {
 .align-btn:hover { background: rgba(255,255,255,0.2); }
 .align-btn.active { background: rgba(255,255,255,0.35); border-color: rgba(255,255,255,0.5); }
 
+.tb-color {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 3px 6px;
+}
+.color-icon {
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.color-arrow {
+  font-size: 0.6rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.editor-body :deep(h1) { font-size: 1.8rem; font-weight: 700; margin: 0.4em 0; }
+.editor-body :deep(h2) { font-size: 1.4rem; font-weight: 700; margin: 0.4em 0; }
+.editor-body :deep(h3) { font-size: 1.15rem; font-weight: 700; margin: 0.4em 0; }
+.editor-body :deep(h4) { font-size: 1rem; font-weight: 700; margin: 0.4em 0; }
 .editor-uploading {
   padding: 4px 12px;
   font-size: 0.78rem;
