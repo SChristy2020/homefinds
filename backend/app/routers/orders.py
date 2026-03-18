@@ -114,7 +114,7 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     count    = str(len(body.items)).zfill(2)
     order.order_number = f'S{short_id}{total}{count}'
 
-    user.has_reservation = 1
+    user.has_purchase = 1
     db.commit()
     db.refresh(order)
     order_out = _build_out(order, db)
