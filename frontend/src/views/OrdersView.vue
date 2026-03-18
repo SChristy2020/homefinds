@@ -239,18 +239,50 @@
               <td>{{ formatDate(res.check_out) }}</td>
               <td>{{ res.nights }}</td>
               <td>${{ res.deposit_amount }}</td>
-              <td :class="res.deposit_paid ? 'status-paid' : 'status-unpaid'">
-                <span>{{ res.deposit_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}</span>
-                <button v-if="isAdmin && !res.deposit_paid" class="btn-mark-paid" @click.stop="handleMarkDepositPaid(res)">
-                  {{ i18n.t('reservations.markPaid') }}
-                </button>
+              <td :class="editingDepositResId !== res.id ? (res.deposit_paid ? 'status-paid' : 'status-unpaid') : ''">
+                <template v-if="!isAdmin || editingDepositResId !== res.id">
+                  <span class="status-display">
+                    <span>{{ res.deposit_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}</span>
+                    <button v-if="isAdmin" class="btn-edit-icon" @click.stop="startEditDeposit(res)" title="編輯">
+                      <Pencil :size="12" />
+                    </button>
+                  </span>
+                </template>
+                <template v-else>
+                  <div class="status-edit-wrap" @click.stop>
+                    <select v-model="editingDepositValue" class="status-select">
+                      <option value="paid">{{ i18n.t('reservations.paid') }}</option>
+                      <option value="unpaid">{{ i18n.t('reservations.unpaid') }}</option>
+                    </select>
+                    <div class="pickup-edit-actions">
+                      <button class="btn-save-pickup" @click.stop="saveDepositStatus(res)">{{ i18n.t('orders.savePickup') }}</button>
+                      <button class="btn-cancel-pickup" @click.stop="cancelEditDeposit">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                    </div>
+                  </div>
+                </template>
               </td>
               <td>${{ res.total_price }}</td>
-              <td :class="res.fully_paid ? 'status-paid' : 'status-unpaid'">
-                <span>{{ res.fully_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}</span>
-                <button v-if="isAdmin && !res.fully_paid" class="btn-mark-paid" @click.stop="handleMarkFullyPaid(res)">
-                  {{ i18n.t('reservations.markPaid') }}
-                </button>
+              <td :class="editingFullyPaidResId !== res.id ? (res.fully_paid ? 'status-paid' : 'status-unpaid') : ''">
+                <template v-if="!isAdmin || editingFullyPaidResId !== res.id">
+                  <span class="status-display">
+                    <span>{{ res.fully_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}</span>
+                    <button v-if="isAdmin" class="btn-edit-icon" @click.stop="startEditFullyPaid(res)" title="編輯">
+                      <Pencil :size="12" />
+                    </button>
+                  </span>
+                </template>
+                <template v-else>
+                  <div class="status-edit-wrap" @click.stop>
+                    <select v-model="editingFullyPaidValue" class="status-select">
+                      <option value="paid">{{ i18n.t('reservations.paid') }}</option>
+                      <option value="unpaid">{{ i18n.t('reservations.unpaid') }}</option>
+                    </select>
+                    <div class="pickup-edit-actions">
+                      <button class="btn-save-pickup" @click.stop="saveFullyPaidStatus(res)">{{ i18n.t('orders.savePickup') }}</button>
+                      <button class="btn-cancel-pickup" @click.stop="cancelEditFullyPaid">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                    </div>
+                  </div>
+                </template>
               </td>
               <template v-if="isAdmin">
                 <td class="td-buyer">{{ res.buyer_last_name }} {{ res.buyer_first_name }}</td>
@@ -543,14 +575,41 @@ async function handleCancel(itemId) {
   toast.show(i18n.t('orders.cancelToast'))
 }
 
-async function handleMarkDepositPaid(res) {
-  await reservationsStore.updateDepositPaid(res.id)
-  toast.show(i18n.t('reservations.depositPaidToast'))
+const editingDepositResId = ref(null)
+const editingDepositValue = ref('')
+const editingFullyPaidResId = ref(null)
+const editingFullyPaidValue = ref('')
+
+function startEditDeposit(res) {
+  editingDepositResId.value = res.id
+  editingDepositValue.value = res.deposit_paid ? 'paid' : 'unpaid'
+}
+function cancelEditDeposit() {
+  editingDepositResId.value = null
+  editingDepositValue.value = ''
+}
+async function saveDepositStatus(res) {
+  if (editingDepositValue.value === 'paid' && !res.deposit_paid) {
+    await reservationsStore.updateDepositPaid(res.id)
+    toast.show(i18n.t('reservations.depositPaidToast'))
+  }
+  editingDepositResId.value = null
 }
 
-async function handleMarkFullyPaid(res) {
-  await reservationsStore.updateFullyPaid(res.id)
-  toast.show(i18n.t('reservations.fullyPaidToast'))
+function startEditFullyPaid(res) {
+  editingFullyPaidResId.value = res.id
+  editingFullyPaidValue.value = res.fully_paid ? 'paid' : 'unpaid'
+}
+function cancelEditFullyPaid() {
+  editingFullyPaidResId.value = null
+  editingFullyPaidValue.value = ''
+}
+async function saveFullyPaidStatus(res) {
+  if (editingFullyPaidValue.value === 'paid' && !res.fully_paid) {
+    await reservationsStore.updateFullyPaid(res.id)
+    toast.show(i18n.t('reservations.fullyPaidToast'))
+  }
+  editingFullyPaidResId.value = null
 }
 
 function reset() {
