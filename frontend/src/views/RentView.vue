@@ -162,8 +162,6 @@ function formatDate(d) {
 
 function onConfirmed(formData) {
   lastReservation.value = formData
-  showConfirm.value = false
-  showSuccess.value = true
 }
 
 onMounted(async () => {

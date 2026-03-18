@@ -202,6 +202,10 @@ export default {
     autoCancelNote: '*若未在1小时内付款，该订单将自动取消',
     notifyBtn: '已付订金，通知Christy!',
     salutationLabel: '称呼',
+    receiptTitle: '准备入住',
+    receiptGreeting: 'Hi {name}，感谢您的预订！',
+    receiptNote1: 'Christy将会尽快核对款项并确认需求！',
+    receiptNote2: '确认收到款项后，会寄发 Email 通知，并将该时段更新为「已预订」。',
   },
   rentSuccess: {
     title: '预约成功',

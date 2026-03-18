@@ -141,7 +141,7 @@
     </template>
 
     <!-- ───────────── STEP 2: Confirmation / Payment ───────────── -->
-    <template v-else>
+    <template v-else-if="step === 2">
 
       <!-- scroll anchor -->
       <div ref="step2Top"></div>
@@ -286,6 +286,127 @@
 
     </template>
 
+    <!-- ───────────── STEP 3: Receipt ───────────── -->
+    <template v-else-if="step === 3">
+
+      <!-- scroll anchor -->
+      <div ref="step3Top"></div>
+
+      <!-- Title -->
+      <h2 class="modal-title">
+        {{ i18n.t('rentConfirm.receiptTitle') }}
+      </h2>
+
+      <!-- Home icon -->
+      <div class="confirm-icon">
+        <Home :size="40" color="#C4956A" />
+      </div>
+
+      <!-- Greeting -->
+      <p class="receipt-greeting">
+        {{ i18n.t('rentConfirm.receiptGreeting', { name: form.firstName }) }}<br>
+        {{ i18n.t('rentConfirm.receiptNote1') }}<br>
+        {{ i18n.t('rentConfirm.receiptNote2') }}
+      </p>
+
+      <hr class="divider" />
+
+      <!-- Itinerary -->
+      <div class="section-title">{{ i18n.t('rentConfirm.stayInfo') }}</div>
+
+      <div class="order-no-row">
+        <span class="order-no-label">{{ i18n.t('rentConfirm.orderNoLabel') }}：</span>
+        <span class="order-no-value">{{ orderNumber }}</span>
+      </div>
+
+      <div class="date-row">
+        <div class="date-col">
+          <span class="date-label">{{ i18n.t('rent.checkIn') }}</span>
+          <span class="date-value">{{ fmt(selection.start) }}</span>
+        </div>
+        <span class="date-arrow">→</span>
+        <div class="date-col">
+          <span class="date-label">{{ i18n.t('rent.checkOut') }}</span>
+          <span class="date-value">{{ fmt(selection.end) }}</span>
+        </div>
+        <span class="nights-badge">{{ i18n.t('rentConfirm.total') }}{{ nights }}{{ i18n.t('rentConfirm.nights') }}</span>
+      </div>
+
+      <div class="price-section">
+        <div class="price-line">
+          <span class="price-label">{{ i18n.t('rent.originalLabel') }}</span>
+          <span class="price-value price-original">USD {{ originalPrice }}</span>
+        </div>
+        <div class="price-line">
+          <span class="price-label">{{ i18n.t('rent.specialLabel') }}</span>
+          <span class="price-value price-special">USD {{ specialPrice }}</span>
+        </div>
+        <div v-if="isEarlyBird" class="price-line early-bird-line">
+          <span class="price-label early-bird-label">{{ i18n.t('rent.earlyBirdLabel') }}</span>
+          <span class="price-value early-bird-price">USD {{ earlyBirdPrice }}</span>
+        </div>
+      </div>
+
+      <div class="deposit-row">
+        <span class="deposit-label">{{ i18n.t('rentConfirm.depositAmountLabel') }}</span>
+        <span class="deposit-amount">USD {{ depositAmount }}</span>
+        <span class="deposit-note">{{ i18n.t('rentConfirm.depositAmountNote') }}</span>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Basic info summary -->
+      <div class="section-title">{{ i18n.t('rentConfirm.basicInfo') }}</div>
+      <div class="info-grid">
+        <span class="info-label">{{ i18n.t('userForm.firstName') }}</span>
+        <span class="info-value">{{ form.firstName }}</span>
+
+        <span class="info-label">{{ i18n.t('userForm.lastName') }}</span>
+        <span class="info-value">{{ form.lastName }}</span>
+
+        <span class="info-label">{{ i18n.t('rentConfirm.salutationLabel') }}</span>
+        <span class="info-value">{{ form.salutation }}</span>
+
+        <span class="info-label">Email</span>
+        <span class="info-value">{{ form.email }}</span>
+
+        <span class="info-label">{{ i18n.t('userForm.phone') }}</span>
+        <span class="info-value">{{ form.phone }}</span>
+
+        <span class="info-label">{{ i18n.t('rentConfirm.birthYear') }}</span>
+        <span class="info-value">{{ form.birthYear }}</span>
+
+        <span class="info-label">{{ i18n.t('rentConfirm.occupation') }}</span>
+        <span class="info-value">{{ form.occupation }}</span>
+
+        <span class="info-label">{{ i18n.t('rentConfirm.guestsPets') }}</span>
+        <span class="info-value">{{ form.hasGuestsPets ? i18n.t('rentConfirm.yes') : i18n.t('rentConfirm.no') }}</span>
+
+        <template v-if="form.hasGuestsPets && form.guestsPetsDescription">
+          <span class="info-label">{{ i18n.t('rentConfirm.guestsPetsDesc') }}</span>
+          <span class="info-value">{{ form.guestsPetsDescription }}</span>
+        </template>
+
+        <template v-if="form.specialRequests">
+          <span class="info-label">{{ i18n.t('rentConfirm.specialRequests') }}</span>
+          <span class="info-value">{{ form.specialRequests }}</span>
+        </template>
+      </div>
+
+      <!-- Policy -->
+      <div v-if="bookingDescription" class="policy" v-html="bookingDescription"></div>
+      <div v-else class="policy">
+        <p v-html="i18n.t('rentConfirm.depositNote')"></p>
+        <p>{{ i18n.t('rentConfirm.cancelNote') }}</p>
+        <p class="mt-8"><strong>{{ i18n.t('rentConfirm.refundPolicy') }}</strong></p>
+        <div class="policy-row"><span class="days">14+ days:</span><span>{{ i18n.t('rentConfirm.refund14') }}</span></div>
+        <div class="policy-row"><span class="days">7–13 days:</span><span>{{ i18n.t('rentConfirm.refund7') }}</span></div>
+        <div class="policy-row"><span class="days">&lt;7 days / no-show:</span><span>{{ i18n.t('rentConfirm.refundLess') }}</span></div>
+        <p class="mt-8">{{ i18n.t('rentConfirm.remainingNote') }}</p>
+      </div>
+
+    </template>
+
   </BaseModal>
 </template>
 
@@ -316,10 +437,18 @@ const loading = ref(false)
 const apiError = ref('')
 const orderNumber = ref('')
 const step2Top = ref(null)
+const step3Top = ref(null)
 
 // Reset step when modal closes
 watch(() => props.modelValue, (val) => {
-  if (!val) { step.value = 1; apiError.value = ''; orderNumber.value = '' }
+  if (!val) {
+    step.value = 1
+    apiError.value = ''
+    orderNumber.value = ''
+    form.value = emptyForm()
+    touched.value = { firstName: false, lastName: false, email: false, phone: false,
+                      birthYear: false, occupation: false, guestsPetsDescription: false }
+  }
 })
 
 const salutationKeys   = ['Mr.', 'Ms.']
@@ -415,12 +544,11 @@ async function handleConfirm() {
   }
 }
 
-function handleNotify() {
+async function handleNotify() {
   emit('confirmed', { ...form.value, orderNumber: orderNumber.value })
-  form.value = emptyForm()
-  touched.value = { firstName: false, lastName: false, email: false, phone: false,
-                    birthYear: false, occupation: false, guestsPetsDescription: false }
-  step.value = 1
+  step.value = 3
+  await nextTick()
+  step3Top.value?.closest('.modal')?.scrollTo({ top: 0, behavior: 'instant' })
 }
 </script>
 
@@ -550,6 +678,13 @@ function handleNotify() {
 .deposit-label { font-size: 0.9rem; color: var(--charcoal); min-width: 5em;}
 .deposit-amount { font-size: 1.4rem; font-weight: 800; color: var(--charcoal); }
 .deposit-note { font-size: 0.82rem; color: #c0392b; font-weight: 500; }
+
+.receipt-greeting {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--charcoal);
+  margin-bottom: 4px;
+}
 
 .auto-cancel-note {
   color: #c0392b; font-weight: 700; padding: 1rem 0 0 0;
