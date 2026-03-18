@@ -191,6 +191,18 @@ export default {
     refundLess: '不退款',
     remainingNote: '請於入住時繳交剩餘 70% 租金。',
     confirm: '確認',
+    // Step 2 — confirmation view
+    confirmTitle: '房源預留確認',
+    backToEdit: '返回編輯',
+    depositWarning: '日期將優先保留給「先完成付款」的房客。',
+    depositPayNote: '支付金額：請依訂單之訂金金額付款 (總金額之 30%)。',
+    zelleInfo: 'Zelle 匯款資訊：',
+    orderNoLabel: '訂單編號',
+    depositAmountLabel: '訂金金額',
+    depositAmountNote: '*請依此金額進行匯款',
+    autoCancelNote: '*若未在1小時內付款，該訂單將自動取消',
+    notifyBtn: '已付訂金，通知Christy!',
+    salutationLabel: '稱呼',
   },
   rentSuccess: {
     title: '預約成功',

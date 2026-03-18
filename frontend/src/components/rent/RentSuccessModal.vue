@@ -8,6 +8,7 @@
     </p>
     <div class="price-line">${{ totalPrice }} USD</div>
     <div v-if="reservation" class="info">
+      <p v-if="reservation.orderNumber" class="order-no">{{ reservation.orderNumber }}</p>
       <p>{{ i18n.t('rentSuccess.name') }}: {{ reservation.firstName }} {{ reservation.lastName }}</p>
       <p>{{ i18n.t('rentSuccess.email') }}: {{ reservation.email }}</p>
       <p>{{ i18n.t('rentSuccess.phone') }}: {{ reservation.phone }}</p>
@@ -39,4 +40,5 @@ function fmt(d) {
 .price-line { font-size: 1.1rem; font-weight: 700; text-align: center; margin: 8px 0 16px; }
 .info { font-size: 0.83rem; color: var(--mid); }
 .info p { margin-bottom: 3px; }
+.order-no { font-size: 1rem; font-weight: 700; color: var(--charcoal); letter-spacing: 0.05em; margin-bottom: 8px; }
 </style>

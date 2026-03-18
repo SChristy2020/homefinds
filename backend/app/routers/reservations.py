@@ -15,6 +15,10 @@ def create_reservation(body: ReservationCreate, db: Session = Depends(get_db)):
     reservation = Reservation(**body.model_dump())
     db.add(reservation)
     user.has_reservation = 1
+    db.flush()  # get reservation.id before commit
+    dep = str(int(reservation.deposit_amount)).zfill(3)
+    nts = str(reservation.nights).zfill(2)
+    reservation.order_number = f"R{str(reservation.id).zfill(2)}{dep}{nts}"
     db.commit()
     db.refresh(reservation)
     return reservation

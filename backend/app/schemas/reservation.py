@@ -15,6 +15,7 @@ class ReservationCreate(BaseModel):
 
 class ReservationOut(BaseModel):
     id:                      int
+    order_number:            Optional[str]
     user_id:                 int
     check_in:                date
     check_out:               date
