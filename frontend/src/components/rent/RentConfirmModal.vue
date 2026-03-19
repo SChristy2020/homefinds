@@ -434,6 +434,7 @@ const step = ref(1)
 const loading = ref(false)
 const apiError = ref('')
 const orderNumber = ref('')
+const reservationId = ref(null)
 const step2Top = ref(null)
 const step3Top = ref(null)
 
@@ -443,6 +444,7 @@ watch(() => props.modelValue, (val) => {
     step.value = 1
     apiError.value = ''
     orderNumber.value = ''
+    reservationId.value = null
     form.value = emptyForm()
     touched.value = { firstName: false, lastName: false, email: false, phone: false,
                       birthYear: false, occupation: false, guestsPetsDescription: false }
@@ -536,6 +538,7 @@ async function handleConfirm() {
     })
 
     orderNumber.value = reservation.order_number
+    reservationId.value = reservation.id
     step.value = 2
     await nextTick()
     step2Top.value?.closest('.modal')?.scrollTo({ top: 0, behavior: 'instant' })
@@ -547,6 +550,16 @@ async function handleConfirm() {
 }
 
 async function handleNotify() {
+  loading.value = true
+  apiError.value = ''
+  try {
+    await api.post(`/api/reservations/${reservationId.value}/notify-deposit`)
+  } catch (e) {
+    apiError.value = e.detail || '提交失敗，請再試一次'
+    loading.value = false
+    return
+  }
+  loading.value = false
   emit('confirmed', { ...form.value, orderNumber: orderNumber.value })
   step.value = 3
   await nextTick()

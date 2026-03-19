@@ -1696,3 +1696,357 @@ def send_reservation_confirmation(user, reservation, db):
         print(f"Reservation confirmation sent to={to} cc={cc}: {subject[:60]}")
     except Exception as e:
         print(f"Reservation email sending failed: {e}")
+
+
+# ── Deposit notification translations ─────────────────────────────────────────
+DEPOSIT_NOTIFICATION_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "準備入住！訂單編號 {order_number} - Christy's HomeFinds",
+        "header": "準備入住!",
+        "greeting_line1": "Hi {first_name}，感謝您的預訂！",
+        "greeting_line2": "Christy將會盡快核對款項並確認需求!",
+        "greeting_line3": "確認收到款項後，會寄發 Email 通知，並將該時段更新為「已預訂」。",
+        "stay_info": "您的行程",
+        "order_no_label": "訂單編號",
+        "check_in_label": "入住時間",
+        "check_out_label": "退房時間",
+        "nights_label": "共{nights}晚",
+        "original_label": "原價",
+        "special_label": "特價",
+        "early_bird_label": "早鳥優惠",
+        "early_bird_note": "*3月預定優惠再9折",
+        "deposit_amount_label": "訂金金額",
+        "deposit_amount_note": "*請依此金額進行匯款",
+        "basic_info": "基本資料",
+        "label_first_name": "名字",
+        "label_last_name": "姓氏",
+        "label_salutation": "稱呼",
+        "label_email": "Email",
+        "label_phone": "電話",
+        "label_birth_year": "出生年份",
+        "label_occupation": "職業",
+        "label_has_guests_pets": "是否有其他人或寵物入住?",
+        "label_guests_pets_desc": "請簡單描述總入住人數、同住成員身分或寵物",
+        "label_special_requests": "需求備註",
+        "yes": "是",
+        "no": "否",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "准备入住！订单编号 {order_number} - Christy's HomeFinds",
+        "header": "准备入住!",
+        "greeting_line1": "Hi {first_name}，感谢您的预订！",
+        "greeting_line2": "Christy将会尽快核对款项并确认需求！",
+        "greeting_line3": "确认收到款项后，会寄发 Email 通知，并将该时段更新为「已预订」。",
+        "stay_info": "您的行程",
+        "order_no_label": "订单编号",
+        "check_in_label": "入住时间",
+        "check_out_label": "退房时间",
+        "nights_label": "共{nights}晚",
+        "original_label": "原价",
+        "special_label": "特价",
+        "early_bird_label": "早鸟优惠",
+        "early_bird_note": "*3月预定优惠再9折",
+        "deposit_amount_label": "订金金额",
+        "deposit_amount_note": "*请依此金额进行汇款",
+        "basic_info": "基本资料",
+        "label_first_name": "名字",
+        "label_last_name": "姓氏",
+        "label_salutation": "称呼",
+        "label_email": "Email",
+        "label_phone": "电话",
+        "label_birth_year": "出生年份",
+        "label_occupation": "职业",
+        "label_has_guests_pets": "是否有其他人或宠物入住?",
+        "label_guests_pets_desc": "请简单描述总入住人数、同住成员身分或宠物",
+        "label_special_requests": "需求备注",
+        "yes": "是",
+        "no": "否",
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "Reservation Confirmation! Order No. {order_number} - Christy's HomeFinds",
+        "header": "Reservation Confirmed!",
+        "greeting_line1": "Hi {first_name}, thank you for your reservation!",
+        "greeting_line2": "We are currently verifying your payment and will confirm your reservation shortly.",
+        "greeting_line3": "You will receive a final confirmation email once your payment has been processed. Your dates will then be officially marked as \"Reserved\".",
+        "stay_info": "Your Trip",
+        "order_no_label": "Order No.",
+        "check_in_label": "Check-in",
+        "check_out_label": "Check-out",
+        "nights_label": "{nights} nights",
+        "original_label": "Original",
+        "special_label": "Special",
+        "early_bird_label": "Early Bird",
+        "early_bird_note": "*Book in March for an extra 10% OFF!",
+        "deposit_amount_label": "Deposit",
+        "deposit_amount_note": "*Please transfer this exact amount to secure your booking.",
+        "basic_info": "Basic Information",
+        "label_first_name": "First Name",
+        "label_last_name": "Last Name",
+        "label_salutation": "Salutation",
+        "label_email": "Email",
+        "label_phone": "Phone",
+        "label_birth_year": "Birth Year",
+        "label_occupation": "Occupation",
+        "label_has_guests_pets": "Will there be additional occupants or pets?",
+        "label_guests_pets_desc": "Please provide details on occupants, relationships, and pets.",
+        "label_special_requests": "Special Requests",
+        "yes": "Yes",
+        "no": "No",
+        "footer": "💡 Any questions? Feel free to contact Christy:",
+    },
+}
+
+
+def send_deposit_notification(user, reservation, db):
+    """當 user 點選「已付訂金，通知Christy!」時，寄送確認信給 user 並 CC admin。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
+    tr = DEPOSIT_NOTIFICATION_TRANSLATIONS.get(locale, DEPOSIT_NOTIFICATION_TRANSLATIONS["zh-TW"])
+
+    # Fetch admin-configured booking description for this locale
+    room_translation = db.query(RoomTranslation).filter(
+        RoomTranslation.locale == locale
+    ).first()
+    booking_description = (room_translation.booking_description or "") if room_translation else ""
+
+    order_number = reservation.order_number or ""
+    subject = tr["subject"].replace("{order_number}", order_number)
+
+    def fmt_date(d):
+        return f"{d.month:02d}/{d.day:02d}/{d.year}"
+
+    check_in_str  = fmt_date(reservation.check_in)
+    check_out_str = fmt_date(reservation.check_out)
+    nights        = reservation.nights
+    nights_str    = tr["nights_label"].replace("{nights}", str(nights))
+
+    deposit_amount = _format_price(float(reservation.deposit_amount))
+
+    original_price   = float(reservation.original_price)   if reservation.original_price   else None
+    special_price    = float(reservation.special_price)     if reservation.special_price     else None
+    early_bird_price = float(reservation.early_bird_price)  if reservation.early_bird_price  else None
+    is_early_bird    = bool(reservation.is_early_bird)
+
+    original_price_html = ""
+    if original_price is not None:
+        original_price_html = f"""
+              <tr>
+                <td style="padding:4px 0;font-size:13px;color:#888;width:120px;">{tr["original_label"]}</td>
+                <td style="padding:4px 0;font-size:13px;color:#aaa;text-decoration:line-through;">USD {_format_price(original_price)}</td>
+              </tr>"""
+
+    special_price_html = ""
+    if special_price is not None:
+        sp_style = "text-decoration:line-through;color:#aaa;" if is_early_bird else "font-size:1.1em;font-weight:700;color:#1a1a1a;"
+        special_price_html = f"""
+              <tr>
+                <td style="padding:4px 0;font-size:13px;color:#888;">{tr["special_label"]}</td>
+                <td style="padding:4px 0;font-size:13px;{sp_style}">USD {_format_price(special_price)}</td>
+              </tr>"""
+
+    early_bird_html = ""
+    if is_early_bird and early_bird_price is not None:
+        early_bird_html = f"""
+              <tr>
+                <td style="padding:4px 0;font-size:13px;color:#c0392b;font-weight:600;">{tr["early_bird_label"]}</td>
+                <td style="padding:4px 0;font-size:1.1em;font-weight:800;color:#c0392b;">
+                  USD {_format_price(early_bird_price)}
+                  <span style="display:block;font-weight:500;margin-left:4px;">{tr["early_bird_note"]}</span>
+                </td>
+              </tr>"""
+
+    has_guests = bool(reservation.has_guests_or_pets)
+    guests_desc = reservation.guests_pets_description or ""
+    special_requests = reservation.special_requests or ""
+
+    guests_pets_row = f"""
+              <tr>
+                <td style="padding:4px 0;font-size:13px;color:#888;width:160px;">{tr["label_has_guests_pets"]}</td>
+                <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{tr["yes"] if has_guests else tr["no"]}</td>
+              </tr>"""
+
+    guests_desc_row = ""
+    if has_guests and guests_desc:
+        guests_desc_row = f"""
+              <tr>
+                <td style="padding:4px 0;font-size:13px;color:#888;">{tr["label_guests_pets_desc"]}</td>
+                <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{guests_desc}</td>
+              </tr>"""
+
+    special_requests_row = ""
+    if special_requests:
+        special_requests_row = f"""
+              <tr>
+                <td style="padding:4px 0;font-size:13px;color:#888;">{tr["label_special_requests"]}</td>
+                <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{special_requests}</td>
+              </tr>"""
+
+    birth_year = str(reservation.birth_year) if reservation.birth_year else ""
+    occupation = reservation.occupation or ""
+
+    greeting_line1 = tr["greeting_line1"].replace("{first_name}", user.first_name)
+
+    html = f"""<!DOCTYPE html>
+<html lang="{tr["html_lang"]}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{tr["header"]}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Noto Sans TC',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);max-width:600px;">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
+              <div style="font-size:36px;margin-bottom:8px;">🏠</div>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">
+                <a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
+                <span style="color:#1a1a1a;"> {tr["header"]}</span>
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:24px 28px;">
+
+              <!-- Greeting -->
+              <p style="font-size:15px;font-weight:700;margin:0 0 4px;">{greeting_line1}</p>
+              <p style="font-size:13px;margin:0 0 4px;">{tr["greeting_line2"]}</p>
+              <p style="font-size:13px;color:#444;margin:0 0 20px;">{tr["greeting_line3"]}</p>
+
+              <hr style="border:none;border-top:1px solid #f0ebe3;margin:0 0 20px;" />
+
+              <!-- Itinerary section -->
+              <p style="font-size:14px;font-weight:700;color:#1a1a1a;margin:0 0 12px;">{tr["stay_info"]}</p>
+
+              <!-- Order number -->
+              <p style="font-size:13px;margin:0 0 10px;">
+                <span style="color:#888;">{tr["order_no_label"]}</span>
+                <span style="font-family:monospace;background:#f4f4f4;border-radius:4px;padding:2px 8px;letter-spacing:0.05em;font-weight:700;font-size:20px;">{order_number}</span>
+              </p>
+
+              <!-- Dates -->
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
+                <tr>
+                  <td style="font-size:12px;color:#888;">{tr["check_in_label"]}</td>
+                  <td style="padding:0 12px;font-size:13px;color:#888;">→</td>
+                  <td style="font-size:12px;color:#888;">{tr["check_out_label"]}</td>
+                  <td style="padding-left:20px;font-size:13px;font-weight:600;color:#1a1a1a;white-space:nowrap;">{nights_str}</td>
+                </tr>
+                <tr>
+                  <td style="font-size:15px;font-weight:700;color:#1a1a1a;">{check_in_str}</td>
+                  <td></td>
+                  <td style="font-size:15px;font-weight:700;color:#1a1a1a;">{check_out_str}</td>
+                  <td></td>
+                </tr>
+              </table>
+
+              <!-- Price breakdown -->
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:12px;width:100%;">
+                <tbody>
+                  {original_price_html}
+                  {special_price_html}
+                  {early_bird_html}
+                  <tr>
+                    <td style="padding:6px 0 4px;font-size:13px;color:#888;">{tr["deposit_amount_label"]}</td>
+                    <td style="padding:6px 0 4px;">
+                      <span style="font-size:1.2em;font-weight:800;color:#c0392b;">USD {deposit_amount}</span>
+                      <span style="font-size:14px;font-weight:700;color:#c0392b;margin-left:6px;display:block;">{tr["deposit_amount_note"]}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <hr style="border:none;border-top:1px solid #f0ebe3;margin:0 0 20px;" />
+
+              <!-- Basic info section -->
+              <p style="font-size:14px;font-weight:700;color:#1a1a1a;margin:0 0 12px;">{tr["basic_info"]}</p>
+              <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+                <tbody>
+                  <tr>
+                    <td style="padding:4px 0;font-size:13px;color:#888;width:160px;">{tr["label_first_name"]}</td>
+                    <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{user.first_name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px 0;font-size:13px;color:#888;">{tr["label_last_name"]}</td>
+                    <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{user.last_name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px 0;font-size:13px;color:#888;">{tr["label_salutation"]}</td>
+                    <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{user.salutation}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px 0;font-size:13px;color:#888;">{tr["label_email"]}</td>
+                    <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{user.email}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px 0;font-size:13px;color:#888;">{tr["label_phone"]}</td>
+                    <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{user.phone}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px 0;font-size:13px;color:#888;">{tr["label_birth_year"]}</td>
+                    <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{birth_year}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px 0;font-size:13px;color:#888;">{tr["label_occupation"]}</td>
+                    <td style="padding:4px 0;font-size:13px;color:#1a1a1a;">{occupation}</td>
+                  </tr>
+                  {guests_pets_row}
+                  {guests_desc_row}
+                  {special_requests_row}
+                </tbody>
+              </table>
+
+              <hr style="border:none;border-top:1px solid #f0ebe3;margin:20px 0;" />
+
+              <!-- Booking guide (from admin settings) -->
+              <div style="font-size:13px;color:#444;">{booking_description}</div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 28px 28px;border-top:1px solid #f0f0f0;font-size:12px;color:#888;text-align:center;">
+              {tr["footer"]}
+              <a href="mailto:qsa8647332@gmail.com" style="color:#c9a96e;text-decoration:none;">qsa8647332@gmail.com</a>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    resend_domain_verified = os.getenv("RESEND_DOMAIN_VERIFIED", "false").lower() == "true"
+    to = [user.email] if resend_domain_verified else [OWNER_EMAIL]
+    cc = [OWNER_EMAIL] if resend_domain_verified else []
+    params = {"from": from_email, "to": to, "subject": subject, "html": html}
+    if cc:
+        params["cc"] = cc
+
+    try:
+        time.sleep(1)
+        resend.api_key = resend_api_key
+        resend.Emails.send(params)
+        print(f"Deposit notification sent to={to} cc={cc}: {subject[:60]}")
+    except Exception as e:
+        print(f"Deposit notification email sending failed: {e}")

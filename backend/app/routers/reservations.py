@@ -5,7 +5,7 @@ from app.database import get_db, SessionLocal
 from app.models.reservation import Reservation
 from app.models.user import User
 from app.schemas.reservation import ReservationCreate, ReservationOut, ReservationWithUser
-from app.services.email_service import send_reservation_confirmation
+from app.services.email_service import send_reservation_confirmation, send_deposit_notification
 
 router = APIRouter()
 
@@ -62,6 +62,27 @@ def get_reservation(reservation_id: int, db: Session = Depends(get_db)):
     if not r:
         raise HTTPException(status_code=404, detail="Reservation not found")
     return r
+
+@router.post("/{reservation_id}/notify-deposit", status_code=200)
+def notify_deposit_paid(reservation_id: int, db: Session = Depends(get_db)):
+    r = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    user = db.query(User).filter(User.id == r.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    _user_id, _reservation_id = user.id, r.id
+    def _send_email():
+        new_db = SessionLocal()
+        try:
+            new_user = new_db.query(User).filter(User.id == _user_id).first()
+            new_reservation = new_db.query(Reservation).filter(Reservation.id == _reservation_id).first()
+            send_deposit_notification(new_user, new_reservation, new_db)
+        finally:
+            new_db.close()
+    threading.Thread(target=_send_email, daemon=True).start()
+    return {"ok": True}
 
 @router.put("/{reservation_id}/deposit-paid", response_model=ReservationOut)
 def mark_deposit_paid(reservation_id: int, db: Session = Depends(get_db)):
