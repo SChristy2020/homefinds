@@ -217,7 +217,7 @@ onMounted(async () => {
 .early-bird-line { color: #c0392b; }
 .early-bird-label { font-weight: 600; color: #c0392b; }
 .early-bird-price { font-size: 1.5rem; font-weight: 800; color: #c0392b; }
-.early-bird-note { font-weight: 500; color: #c0392b; }
+.early-bird-note { font-weight: 500; color: #c0392b; margin-top: -14px;}
 
 .book-btn { width: 100%; }
 

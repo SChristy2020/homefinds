@@ -524,6 +524,10 @@ async function handleConfirm() {
       nights:                  props.nights,
       deposit_amount:          depositAmount.value,
       total_price:             props.totalPrice,
+      original_price:          props.originalPrice || null,
+      special_price:           props.specialPrice || null,
+      early_bird_price:        props.isEarlyBird ? props.earlyBirdPrice : null,
+      is_early_bird:           props.isEarlyBird,
       birth_year:              parseInt(form.value.birthYear),
       occupation:              form.value.occupation,
       has_guests_or_pets:      form.value.hasGuestsPets,
@@ -577,7 +581,7 @@ async function handleNotify() {
 .early-bird-line { color: #c0392b; }
 .early-bird-label { font-weight: 600; color: #c0392b; }
 .early-bird-price { font-size: 1.4rem; font-weight: 800; color: #c0392b; }
-.early-bird-note { font-weight: 500; color: #c0392b; }
+.early-bird-note { font-weight: 500; color: #c0392b; margin-top: -14px;}
 
 .divider { border: none; border-top: 1.5px solid var(--border); margin: 12px 0; }
 

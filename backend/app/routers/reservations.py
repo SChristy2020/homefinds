@@ -1,9 +1,11 @@
+import threading
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.database import get_db, SessionLocal
 from app.models.reservation import Reservation
 from app.models.user import User
 from app.schemas.reservation import ReservationCreate, ReservationOut, ReservationWithUser
+from app.services.email_service import send_reservation_confirmation
 
 router = APIRouter()
 
@@ -21,6 +23,18 @@ def create_reservation(body: ReservationCreate, db: Session = Depends(get_db)):
     reservation.order_number = f"R{str(reservation.id).zfill(2)}{dep}{nts}"
     db.commit()
     db.refresh(reservation)
+
+    _user_id, _reservation_id = user.id, reservation.id
+    def _send_email():
+        new_db = SessionLocal()
+        try:
+            new_user = new_db.query(User).filter(User.id == _user_id).first()
+            new_reservation = new_db.query(Reservation).filter(Reservation.id == _reservation_id).first()
+            send_reservation_confirmation(new_user, new_reservation, new_db)
+        finally:
+            new_db.close()
+    threading.Thread(target=_send_email, daemon=True).start()
+
     return reservation
 
 @router.get("/all", response_model=list[ReservationWithUser])
