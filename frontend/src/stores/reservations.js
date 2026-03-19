@@ -27,26 +27,8 @@ export const useReservationsStore = defineStore('reservations', () => {
     sessionStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations.value))
   }
 
-  async function updateDepositPaid(reservationId) {
-    const result = await api.put(`/api/reservations/${reservationId}/deposit-paid`)
-    mergeResult(reservationId, result)
-    return result
-  }
-
-  async function updateDepositUnpaid(reservationId) {
-    const result = await api.put(`/api/reservations/${reservationId}/deposit-unpaid`)
-    mergeResult(reservationId, result)
-    return result
-  }
-
-  async function updateFullyPaid(reservationId) {
-    const result = await api.put(`/api/reservations/${reservationId}/fully-paid`)
-    mergeResult(reservationId, result)
-    return result
-  }
-
-  async function updateFullyUnpaid(reservationId) {
-    const result = await api.put(`/api/reservations/${reservationId}/fully-unpaid`)
+  async function updateOrderStatus(reservationId, orderStatus) {
+    const result = await api.put(`/api/reservations/${reservationId}/status`, { order_status: orderStatus })
     mergeResult(reservationId, result)
     return result
   }
@@ -56,5 +38,5 @@ export const useReservationsStore = defineStore('reservations', () => {
     sessionStorage.removeItem(RESERVATIONS_KEY)
   }
 
-  return { reservations, fetchReservationsByUser, fetchAllReservations, updateDepositPaid, updateDepositUnpaid, updateFullyPaid, updateFullyUnpaid, clearReservations }
+  return { reservations, fetchReservationsByUser, fetchAllReservations, updateOrderStatus, clearReservations }
 })

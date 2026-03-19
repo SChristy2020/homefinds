@@ -1,11 +1,17 @@
 import threading
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.database import get_db, SessionLocal
 from app.models.reservation import Reservation
 from app.models.user import User
 from app.schemas.reservation import ReservationCreate, ReservationOut, ReservationWithUser
 from app.services.email_service import send_reservation_confirmation, send_deposit_notification
+
+ORDER_STATUSES = ['待付訂金', '待入住', '已入住', '已退房', '已取消']
+
+class OrderStatusUpdate(BaseModel):
+    order_status: str
 
 router = APIRouter()
 
@@ -84,42 +90,14 @@ def notify_deposit_paid(reservation_id: int, db: Session = Depends(get_db)):
     threading.Thread(target=_send_email, daemon=True).start()
     return {"ok": True}
 
-@router.put("/{reservation_id}/deposit-paid", response_model=ReservationOut)
-def mark_deposit_paid(reservation_id: int, db: Session = Depends(get_db)):
+@router.put("/{reservation_id}/status", response_model=ReservationOut)
+def update_order_status(reservation_id: int, body: OrderStatusUpdate, db: Session = Depends(get_db)):
+    if body.order_status not in ORDER_STATUSES:
+        raise HTTPException(status_code=400, detail=f"Invalid order_status. Must be one of: {ORDER_STATUSES}")
     r = db.query(Reservation).filter(Reservation.id == reservation_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Reservation not found")
-    r.deposit_paid = 1
-    db.commit()
-    db.refresh(r)
-    return r
-
-@router.put("/{reservation_id}/deposit-unpaid", response_model=ReservationOut)
-def mark_deposit_unpaid(reservation_id: int, db: Session = Depends(get_db)):
-    r = db.query(Reservation).filter(Reservation.id == reservation_id).first()
-    if not r:
-        raise HTTPException(status_code=404, detail="Reservation not found")
-    r.deposit_paid = 0
-    db.commit()
-    db.refresh(r)
-    return r
-
-@router.put("/{reservation_id}/fully-paid", response_model=ReservationOut)
-def mark_fully_paid(reservation_id: int, db: Session = Depends(get_db)):
-    r = db.query(Reservation).filter(Reservation.id == reservation_id).first()
-    if not r:
-        raise HTTPException(status_code=404, detail="Reservation not found")
-    r.fully_paid = 1
-    db.commit()
-    db.refresh(r)
-    return r
-
-@router.put("/{reservation_id}/fully-unpaid", response_model=ReservationOut)
-def mark_fully_unpaid(reservation_id: int, db: Session = Depends(get_db)):
-    r = db.query(Reservation).filter(Reservation.id == reservation_id).first()
-    if not r:
-        raise HTTPException(status_code=404, detail="Reservation not found")
-    r.fully_paid = 0
+    r.order_status = body.order_status
     db.commit()
     db.refresh(r)
     return r

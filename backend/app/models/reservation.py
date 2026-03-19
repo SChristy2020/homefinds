@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Numeric, Date, DateTime, ForeignKey, Text, String, func
+from sqlalchemy import Column, Integer, Numeric, Date, DateTime, ForeignKey, Text, String, Enum, func
 from sqlalchemy.dialects.mysql import TINYINT
 from app.database import Base
 
@@ -11,14 +11,13 @@ class Reservation(Base):
     check_in                 = Column(Date,          nullable=False)
     check_out                = Column(Date,          nullable=False)
     nights                   = Column(Integer,       nullable=False)
-    deposit_paid             = Column(TINYINT(1),    nullable=False, default=0)
     deposit_amount           = Column(Numeric(10,2), nullable=False)
     total_price              = Column(Numeric(10,2), nullable=False)
     original_price           = Column(Numeric(10,2), nullable=True)
     special_price            = Column(Numeric(10,2), nullable=True)
     early_bird_price         = Column(Numeric(10,2), nullable=True)
     is_early_bird            = Column(TINYINT(1),    nullable=False, default=0)
-    fully_paid               = Column(TINYINT(1),    nullable=False, default=0)
+    order_status             = Column(Enum('待付訂金', '待入住', '已入住', '已退房', '已取消'), nullable=False, default='待付訂金')
     birth_year               = Column(Integer,       nullable=True)
     occupation               = Column(String(100),   nullable=True)
     has_guests_or_pets       = Column(TINYINT(1),    nullable=False, default=0)

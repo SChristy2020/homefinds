@@ -26,14 +26,13 @@ class ReservationOut(BaseModel):
     check_in:                date
     check_out:               date
     nights:                  int
-    deposit_paid:            int
     deposit_amount:          float
     total_price:             float
     original_price:          Optional[float]
     special_price:           Optional[float]
     early_bird_price:        Optional[float]
     is_early_bird:           int
-    fully_paid:              int
+    order_status:            str
     birth_year:              Optional[int]
     occupation:              Optional[str]
     has_guests_or_pets:      int

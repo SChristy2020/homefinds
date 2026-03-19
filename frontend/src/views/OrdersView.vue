@@ -215,9 +215,8 @@
               <th>{{ i18n.t('reservations.checkOut') }}</th>
               <th>{{ i18n.t('reservations.nights') }}</th>
               <th>{{ i18n.t('reservations.depositAmount') }}</th>
-              <th>{{ i18n.t('reservations.depositPaid') }}</th>
               <th>{{ i18n.t('reservations.totalPrice') }}</th>
-              <th>{{ i18n.t('reservations.fullyPaid') }}</th>
+              <th>{{ i18n.t('reservations.orderStatus') }}</th>
               <template v-if="isAdmin">
                 <th>{{ i18n.t('reservations.buyer') }}</th>
                 <th>{{ i18n.t('reservations.buyerEmail') }}</th>
@@ -229,7 +228,7 @@
           </thead>
           <tbody v-if="reservationsStore.reservations.length === 0">
             <tr>
-              <td :colspan="isAdmin ? 13 : 9" class="td-empty">{{ i18n.t('reservations.noReservations') }}</td>
+              <td :colspan="isAdmin ? 12 : 8" class="td-empty">{{ i18n.t('reservations.noReservations') }}</td>
             </tr>
           </tbody>
           <tbody v-for="res in reservationsStore.reservations" v-else :key="res.id">
@@ -239,47 +238,24 @@
               <td>{{ formatDate(res.check_out) }}</td>
               <td>{{ res.nights }}</td>
               <td>${{ res.deposit_amount }}</td>
-              <td :class="editingDepositResId !== res.id ? (res.deposit_paid ? 'status-paid' : 'status-unpaid') : ''">
-                <template v-if="!isAdmin || editingDepositResId !== res.id">
-                  <span class="status-display">
-                    <span>{{ res.deposit_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}</span>
-                    <button v-if="isAdmin" class="btn-edit-icon" @click.stop="startEditDeposit(res)" title="編輯">
-                      <Pencil :size="12" />
-                    </button>
-                  </span>
-                </template>
-                <template v-else>
-                  <div class="status-edit-wrap" @click.stop>
-                    <select v-model="editingDepositValue" class="status-select">
-                      <option value="paid">{{ i18n.t('reservations.paid') }}</option>
-                      <option value="unpaid">{{ i18n.t('reservations.unpaid') }}</option>
-                    </select>
-                    <div class="pickup-edit-actions">
-                      <button class="btn-save-pickup" @click.stop="saveDepositStatus(res)">{{ i18n.t('orders.savePickup') }}</button>
-                      <button class="btn-cancel-pickup" @click.stop="cancelEditDeposit">{{ i18n.t('orders.cancelPickupEdit') }}</button>
-                    </div>
-                  </div>
-                </template>
-              </td>
               <td>${{ res.total_price }}</td>
-              <td :class="editingFullyPaidResId !== res.id ? (res.fully_paid ? 'status-paid' : 'status-unpaid') : ''">
-                <template v-if="!isAdmin || editingFullyPaidResId !== res.id">
+              <td :class="editingStatusResId !== res.id ? orderStatusClass(res.order_status) : ''">
+                <template v-if="!isAdmin || editingStatusResId !== res.id">
                   <span class="status-display">
-                    <span>{{ res.fully_paid ? i18n.t('reservations.paid') : i18n.t('reservations.unpaid') }}</span>
-                    <button v-if="isAdmin" class="btn-edit-icon" @click.stop="startEditFullyPaid(res)" title="編輯">
+                    <span>{{ resStatusLabel(res.order_status) }}</span>
+                    <button v-if="isAdmin" class="btn-edit-icon" @click.stop="startEditResStatus(res)" title="編輯">
                       <Pencil :size="12" />
                     </button>
                   </span>
                 </template>
                 <template v-else>
                   <div class="status-edit-wrap" @click.stop>
-                    <select v-model="editingFullyPaidValue" class="status-select">
-                      <option value="paid">{{ i18n.t('reservations.paid') }}</option>
-                      <option value="unpaid">{{ i18n.t('reservations.unpaid') }}</option>
+                    <select v-model="editingStatusValue" class="status-select">
+                      <option v-for="s in ORDER_STATUSES" :key="s" :value="s">{{ resStatusLabel(s) }}</option>
                     </select>
                     <div class="pickup-edit-actions">
-                      <button class="btn-save-pickup" @click.stop="saveFullyPaidStatus(res)">{{ i18n.t('orders.savePickup') }}</button>
-                      <button class="btn-cancel-pickup" @click.stop="cancelEditFullyPaid">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                      <button class="btn-save-pickup" @click.stop="saveResStatus(res)">{{ i18n.t('orders.savePickup') }}</button>
+                      <button class="btn-cancel-pickup" @click.stop="cancelEditStatus">{{ i18n.t('orders.cancelPickupEdit') }}</button>
                     </div>
                   </div>
                 </template>
@@ -295,7 +271,7 @@
 
             <!-- Expanded reservation details row -->
             <tr v-if="expandedResId === res.id" class="expand-row">
-              <td :colspan="isAdmin ? 13 : 9">
+              <td :colspan="isAdmin ? 12 : 8">
                 <div class="res-expand-grid">
                   <div class="res-detail-cell">
                     <span class="res-detail-label">{{ i18n.t('reservations.detailFirstName') }}</span>
@@ -594,6 +570,7 @@ function startEditStatus(order) {
 
 function cancelEditStatus() {
   editingStatusOrderId.value = null
+  editingStatusResId.value = null
   editingStatusValue.value = ''
 }
 
@@ -628,47 +605,31 @@ async function handleCancel(itemId) {
   toast.show(i18n.t('orders.cancelToast'))
 }
 
-const editingDepositResId = ref(null)
-const editingDepositValue = ref('')
-const editingFullyPaidResId = ref(null)
-const editingFullyPaidValue = ref('')
+const ORDER_STATUSES = ['待付訂金', '待入住', '已入住', '已退房', '已取消']
 
-function startEditDeposit(res) {
-  editingDepositResId.value = res.id
-  editingDepositValue.value = res.deposit_paid ? 'paid' : 'unpaid'
-}
-function cancelEditDeposit() {
-  editingDepositResId.value = null
-  editingDepositValue.value = ''
-}
-async function saveDepositStatus(res) {
-  if (editingDepositValue.value === 'paid' && !res.deposit_paid) {
-    await reservationsStore.updateDepositPaid(res.id)
-    toast.show(i18n.t('reservations.depositPaidToast'))
-  } else if (editingDepositValue.value === 'unpaid' && res.deposit_paid) {
-    await reservationsStore.updateDepositUnpaid(res.id)
-    toast.show(i18n.t('reservations.depositUnpaidToast'))
-  }
-  editingDepositResId.value = null
+function resStatusLabel(status) {
+  return i18n.t(`reservations.statusLabels.${status}`) || status
 }
 
-function startEditFullyPaid(res) {
-  editingFullyPaidResId.value = res.id
-  editingFullyPaidValue.value = res.fully_paid ? 'paid' : 'unpaid'
+const editingStatusResId = ref(null)
+
+function orderStatusClass(status) {
+  if (status === '已取消') return 'status-cancelled'
+  if (status === '已退房') return 'status-paid'
+  if (status === '已入住') return 'status-paid'
+  return 'status-unpaid'
 }
-function cancelEditFullyPaid() {
-  editingFullyPaidResId.value = null
-  editingFullyPaidValue.value = ''
+
+function startEditResStatus(res) {
+  editingStatusResId.value = res.id
+  editingStatusValue.value = res.order_status
 }
-async function saveFullyPaidStatus(res) {
-  if (editingFullyPaidValue.value === 'paid' && !res.fully_paid) {
-    await reservationsStore.updateFullyPaid(res.id)
-    toast.show(i18n.t('reservations.fullyPaidToast'))
-  } else if (editingFullyPaidValue.value === 'unpaid' && res.fully_paid) {
-    await reservationsStore.updateFullyUnpaid(res.id)
-    toast.show(i18n.t('reservations.fullyUnpaidToast'))
+async function saveResStatus(res) {
+  if (editingStatusValue.value && editingStatusValue.value !== res.order_status) {
+    await reservationsStore.updateOrderStatus(res.id, editingStatusValue.value)
+    toast.show(i18n.t('reservations.statusUpdatedToast'))
   }
-  editingFullyPaidResId.value = null
+  editingStatusResId.value = null
 }
 
 function reset() {
