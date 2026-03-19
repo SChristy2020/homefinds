@@ -29,6 +29,7 @@ const props = defineProps({
   selection: Object,
   rentStart: Date,
   rentEnd: Date,
+  blockedRanges: { type: Array, default: () => [] }, // [{ check_in: 'YYYY-MM-DD', check_out: 'YYYY-MM-DD' }]
 })
 const emit = defineEmits(['update:selection'])
 
@@ -68,10 +69,29 @@ const days = computed(() => {
   return list
 })
 
+// 解析 blocked ranges 為 Date 物件（只解析一次，避免重複）
+const parsedBlockedRanges = computed(() =>
+  props.blockedRanges.map(r => ({
+    checkIn:  new Date(r.check_in  + 'T00:00:00'),
+    checkOut: new Date(r.check_out + 'T00:00:00'),
+  }))
+)
+
+// 判斷某日是否在已封鎖範圍內（check_in <= d < check_out）
+function isBlocked(d) {
+  return parsedBlockedRanges.value.some(r => d >= r.checkIn && d < r.checkOut)
+}
+
+// 判斷 [start, end] 範圍是否與任何 blocked range 重疊
+function rangeOverlapsBlocked(start, end) {
+  return parsedBlockedRanges.value.some(r => start < r.checkOut && end > r.checkIn)
+}
+
 function getDayClass(day) {
   if (!day) return 'empty'
   const d = day.full
   if (!props.rentStart || !props.rentEnd || d < props.rentStart || d > props.rentEnd) return 'disabled'
+  if (isBlocked(d)) return 'blocked'
   const { start, end } = props.selection
   const today = new Date(); today.setHours(0,0,0,0)
   if (start && d.toDateString() === start.toDateString()) return 'selected-start'
@@ -85,10 +105,13 @@ function selectDay(day) {
   if (!day) return
   const d = day.full
   if (!props.rentStart || !props.rentEnd || d < props.rentStart || d > props.rentEnd) return
+  if (isBlocked(d)) return
   const { start, end } = props.selection
   if (!start || (start && end) || d < start) {
     emit('update:selection', { start: d, end: null })
   } else if (d.toDateString() !== start.toDateString()) {
+    // 若選取的範圍與已封鎖時段重疊，不允許選取
+    if (rangeOverlapsBlocked(start, d)) return
     emit('update:selection', { start, end: d })
   }
 }
@@ -116,9 +139,10 @@ function selectDay(day) {
   transition: all 0.15s; font-size: 0.8rem;
   border: 1.5px solid transparent;
 }
-.cal-day:hover:not(.disabled):not(.empty) { background: var(--accent-light); }
+.cal-day:hover:not(.disabled):not(.empty):not(.blocked) { background: var(--accent-light); }
 .cal-day.empty    { cursor: default; }
 .cal-day.disabled { color: var(--light); cursor: not-allowed; text-decoration: line-through; }
+.cal-day.blocked  { color: var(--light); cursor: not-allowed; background: #f0e8e8; text-decoration: line-through; }
 .cal-day.in-range { background: var(--accent-light); }
 .cal-day.selected-start,
 .cal-day.selected-end    { background: var(--charcoal); color: #fff; }

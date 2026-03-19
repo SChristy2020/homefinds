@@ -51,7 +51,7 @@ christy-home-finds/
         │   ├── ProductDetailModal.vue  # 商品詳情跳窗
         │   ├── CartBubble.vue     # 右下角購物車按鈕
         │   ├── CartModal.vue      # 購物車 & 結帳跳窗
-        │   └── OrderSuccessModal.vue   # 預定成功跳窗
+        │   └── OrderSuccessModal.vue   # 預訂成功跳窗
         ├── rent/                  # Room for Rent 相關元件
         │   ├── RoomGallery.vue    # 房間圖片輪播
         │   ├── RentCalendar.vue   # 日曆選日元件

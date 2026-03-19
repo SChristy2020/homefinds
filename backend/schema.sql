@@ -177,7 +177,7 @@ CREATE TABLE room_translations (
   room_id             INT          NOT NULL,
   locale              ENUM('en','zh-TW','zh-CN') NOT NULL,
   description         TEXT         NULL    COMMENT '房間描述',
-  booking_description TEXT         NULL    COMMENT '預定描述',
+  booking_description TEXT         NULL    COMMENT '預訂描述',
   PRIMARY KEY (id),
   UNIQUE KEY uq_room_locale (room_id, locale),
   CONSTRAINT fk_rt_room FOREIGN KEY (room_id)

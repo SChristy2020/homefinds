@@ -617,6 +617,7 @@ function orderStatusClass(status) {
   if (status === '已取消') return 'status-cancelled'
   if (status === '已退房') return 'status-paid'
   if (status === '已入住') return 'status-paid'
+  if (status === '待入住') return 'status-paid'
   return 'status-unpaid'
 }
 

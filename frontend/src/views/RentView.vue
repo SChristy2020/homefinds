@@ -9,7 +9,7 @@
     <div class="booking-panel">
       <p class="avail-note"><CalendarDays :size="14" /> {{ availNote }}</p>
 
-      <RentCalendar v-model:selection="selection" :rent-start="rentStart" :rent-end="rentEnd" />
+      <RentCalendar v-model:selection="selection" :rent-start="rentStart" :rent-end="rentEnd" :blocked-ranges="blockedRanges" />
 
       <!-- Price summary -->
       <div v-if="selection.start" class="price-summary">
@@ -95,6 +95,7 @@ const room = ref(null)
 const selection = ref({ start: null, end: null })
 const roomTranslations = ref({})
 const roomImages = ref([])
+const blockedRanges = ref([])
 
 const rentStart = computed(() => room.value?.available_from ? new Date(room.value.available_from + 'T00:00:00') : null)
 const rentEnd   = computed(() => room.value?.available_to   ? new Date(room.value.available_to   + 'T00:00:00') : null)
@@ -150,7 +151,7 @@ const totalPrice = computed(() => {
   return Math.round(total)
 })
 
-// 早鳥：3月預定再9折
+// 早鳥：3月預訂再9折
 const isEarlyBird = computed(() => new Date().getMonth() === 2) // March = index 2
 const earlyBirdPrice = computed(() => Math.round(totalPrice.value * 0.9))
 const finalPrice = computed(() => isEarlyBird.value ? earlyBirdPrice.value : totalPrice.value)
@@ -166,7 +167,11 @@ function onConfirmed(formData) {
 
 onMounted(async () => {
   try {
-    const rooms = await api.get('/api/room')
+    const [rooms, blocked] = await Promise.all([
+      api.get('/api/room'),
+      api.get('/api/reservations/blocked-dates').catch(() => []),
+    ])
+    blockedRanges.value = blocked || []
     if (rooms.length) {
       const r = rooms[0]
       room.value = r
