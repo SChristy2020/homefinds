@@ -12,6 +12,7 @@ from app.services.email_service import (
     send_deposit_notification,
     send_deposit_confirmed_notification,
     send_reservation_cancelled_overlap_notification,
+    send_reservation_cancelled_by_admin_notification,
 )
 
 ORDER_STATUSES = ['待付訂金', '待入住', '已入住', '已退房', '已取消']
@@ -122,6 +123,20 @@ def update_order_status(reservation_id: int, body: OrderStatusUpdate, db: Sessio
     # 當 admin 將狀態改為「待入住」時，觸發特殊流程
     if body.order_status == '待入住' and old_status != '待入住':
         _handle_deposit_confirmed(r, db)
+
+    # 當 admin 將狀態從「待付訂金」改為「已取消」時，通知 user
+    if body.order_status == '已取消' and old_status == '待付訂金':
+        _user_id, _reservation_id = r.user_id, r.id
+        def _send_cancel_email():
+            new_db = SessionLocal()
+            try:
+                new_user = new_db.query(User).filter(User.id == _user_id).first()
+                new_reservation = new_db.query(Reservation).filter(Reservation.id == _reservation_id).first()
+                if new_user and new_reservation:
+                    send_reservation_cancelled_by_admin_notification(new_user, new_reservation, new_db)
+            finally:
+                new_db.close()
+        threading.Thread(target=_send_cancel_email, daemon=True).start()
 
     return r
 

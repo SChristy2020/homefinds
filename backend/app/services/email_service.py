@@ -72,7 +72,7 @@ EMAIL_TRANSLATIONS = {
     },
     "zh-CN": {
         "html_lang": "zh-CN",
-        "subject": "预定成功！订单编号 {order_number} - Christy's HomeFinds",
+        "subject": "预定成功！订单号 {order_number} - Christy's HomeFinds",
         "header": "Christy's HomeFinds 预定成功!",
         "greeting": "Hi {first_name} 感谢您的预定！",
         "pickup_info": "期待于 {date} 与您见面领取物品。",
@@ -87,8 +87,8 @@ EMAIL_TRANSLATIONS = {
         "zelle_title": "💰 Zelle 汇款信息：",
         "zelle_account": "帐号: (984)373-9392",
         "zelle_name": "户名: SHU CHING LI",
-        "zelle_note": "备注: 请务必注明您的\"订单编号\"",
-        "order_number_label": "订单编号：",
+        "zelle_note": "备注: 请务必注明您的\"订单号\"",
+        "order_number_label": "订单号：",
         "col_thumb": "缩图",
         "col_name": "物品名称",
         "col_pickup": "可取货时间",
@@ -113,7 +113,7 @@ EMAIL_TRANSLATIONS = {
         "step2_pay_label": "付款方式：请依订单总金额透过 Zelle 汇款：",
         "step2_zelle_a": "a. 帐号: (984)373-9392",
         "step2_zelle_b": "b. 户名: SHU CHING LI",
-        "step2_zelle_c": "c. 备注: 订单编号",
+        "step2_zelle_c": "c. 备注: 订单号",
         "step3_title": "Step 3. 取货",
         "step3_items": [
             "取货时间：请依「预计取货时间」准时到现场。",
@@ -223,7 +223,7 @@ RESTORE_EMAIL_TRANSLATIONS = {
         "zelle_title": "💰 Zelle 汇款信息：",
         "zelle_account": "帐号: (984)373-9392",
         "zelle_name": "户名: SHU CHING LI",
-        "zelle_note": "备注: 请务必注明您的「订单编号」",
+        "zelle_note": "备注: 请务必注明您的「订单号」",
         "orders_link_text": "前往查看我的订单",
         "footer": "💡 有任何问题？欢迎联络 Christy:",
         "anytime": "随时",
@@ -269,7 +269,7 @@ PAYMENT_SUCCESS_TRANSLATIONS = {
         "emoji": "✅",
         "greeting": "Hi {first_name}，付款成功！",
         "body": "感谢您的付款！期待于 {pickup_time} 与您见面领取物品。",
-        "order_number_label": "订单编号：",
+        "order_number_label": "订单号：",
         "col_name": "物品名称",
         "col_price": "价格",
         "orders_link_text": "查看我的订单",
@@ -323,7 +323,7 @@ ITEM_SNATCHED_PENDING_TRANSLATIONS = {
         "zelle_title": "💰 Zelle 汇款信息：",
         "zelle_account": "帐号: (984)373-9392",
         "zelle_name": "户名: SHU CHING LI",
-        "zelle_note": "备注: 请务必注明您的「订单编号」",
+        "zelle_note": "备注: 请务必注明您的「订单号」",
         "orders_link_text": "立即前往付款",
         "footer": "💡 有任何问题？欢迎联络 Christy:",
         "anytime": "随时",
@@ -370,7 +370,7 @@ ORDER_AUTO_CANCELLED_TRANSLATIONS = {
         "emoji": "❌",
         "greeting": "Hi {first_name}，",
         "body": "您的订单中，有商品被人抢先付款了！因此您的订单已被自动取消。",
-        "order_number_label": "订单编号：",
+        "order_number_label": "订单号：",
         "col_name": "物品名称",
         "col_price": "价格",
         "orders_link_text": "查看我的订单",
@@ -418,7 +418,7 @@ ORDER_STATUS_REVERTED_TRANSLATIONS = {
         "greeting": "Hi {first_name}，",
         "body_pending": "您的订单状态已由「已付款」更改为「待付款」，请确认订单详情，如有疑问请联络 Christy。",
         "body_cancelled": "您的订单状态已由「已付款」更改为「已取消」，如有疑问请联络 Christy。",
-        "order_number_label": "订单编号：",
+        "order_number_label": "订单号：",
         "col_name": "物品名称",
         "col_price": "价格",
         "orders_link_text": "查看我的订单",
@@ -1335,7 +1335,7 @@ RENT_CONFIRMATION_TRANSLATIONS = {
     },
     "zh-CN": {
         "html_lang": "zh-CN",
-        "subject": "房源预留订金支付提醒！订单编号 {order_number} - Christy's HomeFinds",
+        "subject": "房源预留订金支付提醒！订单号 {order_number} - Christy's HomeFinds",
         "header": "请尽快支付订金以预留房源!",
         "greeting": "Hi {first_name}，您的预订快完成了！",
         "deposit_warning": "日期将优先保留给「先完成付款」的房客。",
@@ -1343,10 +1343,10 @@ RENT_CONFIRMATION_TRANSLATIONS = {
         "zelle_title": "🔥 Zelle 汇款资讯：",
         "zelle_account": "帐号: (984)373-9392",
         "zelle_name": "户名: SHU CHING LI",
-        "zelle_memo": "备注: 请务必注明您的「<strong>订单编号</strong>」",
+        "zelle_memo": "备注: 请务必注明您的「<strong>订单号</strong>」",
         "auto_cancel_note": "*若未在1小时内付款，该订单将自动取消",
         "stay_info": "您的行程",
-        "order_no_label": "订单编号",
+        "order_no_label": "订单号",
         "check_in_label": "入住时间",
         "check_out_label": "退房时间",
         "nights_label": "共{nights}晚",
@@ -1376,7 +1376,7 @@ RENT_CONFIRMATION_TRANSLATIONS = {
         "booking_guide_zelle_title": "付款方式（Zelle）：",
         "booking_guide_zelle_a": "a. 帐号: (984)373-9392",
         "booking_guide_zelle_b": "b. 户名: SHU CHING LI",
-        "booking_guide_zelle_c": "c. 备注: 订单编号",
+        "booking_guide_zelle_c": "c. 备注: 订单号",
         "footer": "💡 有任何问题？欢迎联络 Christy:",
     },
     "en": {
@@ -1735,13 +1735,13 @@ DEPOSIT_NOTIFICATION_TRANSLATIONS = {
     },
     "zh-CN": {
         "html_lang": "zh-CN",
-        "subject": "准备入住！订单编号 {order_number} - Christy's HomeFinds",
+        "subject": "准备入住！订单号 {order_number} - Christy's HomeFinds",
         "header": "准备入住!",
         "greeting_line1": "Hi {first_name}，感谢您的预订！",
         "greeting_line2": "Christy将会尽快核对款项并确认需求！",
         "greeting_line3": "确认收到款项后，会寄发 Email 通知，并将该时段更新为「已预订」。",
         "stay_info": "您的行程",
-        "order_no_label": "订单编号",
+        "order_no_label": "订单号",
         "check_in_label": "入住时间",
         "check_out_label": "退房时间",
         "nights_label": "共{nights}晚",
@@ -2088,13 +2088,13 @@ DEPOSIT_CONFIRMED_TRANSLATIONS = {
     },
     "zh-CN": {
         "html_lang": "zh-CN",
-        "subject": "房源预订成功！订单编号 {order_number} - Christy's HomeFinds",
+        "subject": "房源预订成功！订单号 {order_number} - Christy's HomeFinds",
         "header": "房源预订成功！",
         "greeting": "Hi {first_name}，感谢您的预订！",
         "confirmed_line1": "我们已确认收到您的订金，并已保留您时段的房源。",
         "confirmed_line2": "详细入住指引将于入住前 3 天透过 Email 发送，请留意您的信箱。",
         "stay_info": "您的行程",
-        "order_no_label": "订单编号",
+        "order_no_label": "订单号",
         "check_in_label": "入住时间",
         "check_out_label": "退房时间",
         "nights_label": "共{nights}晚",
@@ -2402,12 +2402,57 @@ def send_deposit_confirmed_notification(user, reservation, db):
 
 
 # ── Reservation cancelled (overlap) translations ───────────────────────────────
+RESERVATION_CANCELLED_BY_ADMIN_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "訂單取消通知 - 訂單編號 {order_number} - Christy's HomeFinds",
+        "header": "訂單取消通知",
+        "greeting_line1": "Hi {first_name}",
+        "body": "您的預訂訂單已更新為取消狀態。",
+        "body2": "如有任何疑問，歡迎聯絡 Christy 進一步說明。",
+        "stay_info": "已取消的訂單資訊",
+        "order_no_label": "訂單編號",
+        "check_in_label": "入住日期",
+        "check_out_label": "退房日期",
+        "nights_label": "共{nights}晚",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "订单取消通知 - 订单号 {order_number} - Christy's HomeFinds",
+        "header": "订单取消通知",
+        "greeting_line1": "Hi {first_name}",
+        "body": "您的预订订单已被取消。",
+        "body2": "如有任何疑问，欢迎联系 Christy 进一步说明。",
+        "stay_info": "已取消的订单信息",
+        "order_no_label": "订单号",
+        "check_in_label": "入住日期",
+        "check_out_label": "退房日期",
+        "nights_label": "共{nights}晚",
+        "footer": "💡 有任何问题？欢迎联系 Christy:",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "Reservation Cancelled - Order No. {order_number} - Christy's HomeFinds",
+        "header": "Reservation Cancelled",
+        "greeting_line1": "Hi {first_name},",
+        "body": "We are writing to inform you that your reservation has been cancelled.",
+        "body2": "Please feel free to reach out to Christy if you have any questions regarding this cancellation.",
+        "stay_info": "Cancelled Reservation Details",
+        "order_no_label": "Order No.",
+        "check_in_label": "Check-in",
+        "check_out_label": "Check-out",
+        "nights_label": "{nights} nights",
+        "footer": "💡 Any questions? Feel free to contact Christy:",
+    },
+}
+
 RESERVATION_CANCELLED_OVERLAP_TRANSLATIONS = {
     "zh-TW": {
         "html_lang": "zh-TW",
         "subject": "訂單取消通知 - 訂單編號 {order_number} - Christy's HomeFinds",
         "header": "訂單取消通知",
-        "greeting_line1": "Hi {first_name}，您好。",
+        "greeting_line1": "Hi {first_name}",
         "body": "非常抱歉，您的預訂時段已有人優先完成付款，因此您的訂單已取消。",
         "body2": "誠摯邀請您查看其他可預訂的日期，如有任何疑問，歡迎聯絡 Christy 進一步說明。",
         "stay_info": "已取消的訂單資訊",
@@ -2419,13 +2464,13 @@ RESERVATION_CANCELLED_OVERLAP_TRANSLATIONS = {
     },
     "zh-CN": {
         "html_lang": "zh-CN",
-        "subject": "订单取消通知 - 订单编号 {order_number} - Christy's HomeFinds",
+        "subject": "订单取消通知 - 订单号 {order_number} - Christy's HomeFinds",
         "header": "订单取消通知",
-        "greeting_line1": "Hi {first_name}，您好。",
+        "greeting_line1": "Hi {first_name}",
         "body": "非常抱歉，您的预订时段已有人优先完成支付，因此您的订单已取消。",
         "body2": "欢迎您查看其他可选日期，如有任何疑问，欢迎联系 Christy 进一步说明。",
         "stay_info": "已取消的订单信息",
-        "order_no_label": "订单编号",
+        "order_no_label": "订单号",
         "check_in_label": "入住日期",
         "check_out_label": "退房日期",
         "nights_label": "共{nights}晚",
@@ -2546,3 +2591,103 @@ def send_reservation_cancelled_overlap_notification(user, reservation, db):
         print(f"Reservation cancelled overlap notification sent to={to}: {subject[:60]}")
     except Exception as e:
         print(f"Reservation cancelled overlap email sending failed: {e}")
+
+
+def send_reservation_cancelled_by_admin_notification(user, reservation, db):
+    """Admin 將訂單狀態從「待付訂金」改為「已取消」時，通知該訂單的 user。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
+    tr = RESERVATION_CANCELLED_BY_ADMIN_TRANSLATIONS.get(locale, RESERVATION_CANCELLED_BY_ADMIN_TRANSLATIONS["zh-TW"])
+
+    order_number = reservation.order_number or ""
+    subject = tr["subject"].replace("{order_number}", order_number)
+
+    def fmt_date(d):
+        return f"{d.month:02d}/{d.day:02d}/{d.year}"
+
+    check_in_str  = fmt_date(reservation.check_in)
+    check_out_str = fmt_date(reservation.check_out)
+    nights_str    = tr["nights_label"].replace("{nights}", str(reservation.nights))
+    greeting_line1 = tr["greeting_line1"].replace("{first_name}", user.first_name)
+
+    html = f"""<!DOCTYPE html>
+<html lang="{tr["html_lang"]}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{tr["header"]}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Noto Sans TC',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);max-width:600px;">
+          <tr>
+            <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
+              <div style="font-size:36px;margin-bottom:8px;">❌</div>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">
+                <a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
+                <span style="color:#c0392b;"> {tr["header"]}</span>
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 28px;">
+              <p style="font-size:15px;font-weight:700;margin:0 0 4px;">{greeting_line1}</p>
+              <p style="font-size:13px;margin:0 0 4px;color:#c0392b;font-weight:600;">{tr["body"]}</p>
+              <p style="font-size:13px;color:#444;margin:0 0 20px;">{tr["body2"]}</p>
+              <hr style="border:none;border-top:1px solid #f0ebe3;margin:0 0 20px;" />
+              <p style="font-size:14px;font-weight:700;color:#1a1a1a;margin:0 0 12px;">{tr["stay_info"]}</p>
+              <p style="font-size:13px;margin:0 0 10px;">
+                <span style="color:#888;">{tr["order_no_label"]}</span>
+                <span style="font-family:monospace;background:#f4f4f4;border-radius:4px;padding:2px 8px;letter-spacing:0.05em;font-weight:700;font-size:20px;">{order_number}</span>
+              </p>
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
+                <tr>
+                  <td style="font-size:12px;color:#888;">{tr["check_in_label"]}</td>
+                  <td style="padding:0 12px;font-size:13px;color:#888;">→</td>
+                  <td style="font-size:12px;color:#888;">{tr["check_out_label"]}</td>
+                  <td style="padding-left:20px;font-size:13px;font-weight:600;color:#888;white-space:nowrap;">{nights_str}</td>
+                </tr>
+                <tr>
+                  <td style="font-size:15px;font-weight:700;color:#888;text-decoration:line-through;">{check_in_str}</td>
+                  <td></td>
+                  <td style="font-size:15px;font-weight:700;color:#888;text-decoration:line-through;">{check_out_str}</td>
+                  <td></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 28px 28px;border-top:1px solid #f0f0f0;font-size:12px;color:#888;text-align:center;">
+              {tr["footer"]}
+              <a href="mailto:qsa8647332@gmail.com" style="color:#c9a96e;text-decoration:none;">qsa8647332@gmail.com</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    resend_domain_verified = os.getenv("RESEND_DOMAIN_VERIFIED", "false").lower() == "true"
+    to = [user.email] if resend_domain_verified else [OWNER_EMAIL]
+    cc = [OWNER_EMAIL] if resend_domain_verified else []
+    params = {"from": from_email, "to": to, "subject": subject, "html": html}
+    if cc:
+        params["cc"] = cc
+
+    try:
+        time.sleep(1)
+        resend.api_key = resend_api_key
+        resend.Emails.send(params)
+        print(f"Reservation cancelled by admin notification sent to={to}: {subject[:60]}")
+    except Exception as e:
+        print(f"Reservation cancelled by admin email sending failed: {e}")
