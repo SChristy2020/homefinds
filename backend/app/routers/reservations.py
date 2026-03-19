@@ -13,6 +13,7 @@ from app.services.email_service import (
     send_deposit_confirmed_notification,
     send_reservation_cancelled_overlap_notification,
     send_reservation_cancelled_by_admin_notification,
+    send_pending_deposit_admin_reminder,
 )
 
 ORDER_STATUSES = ['待付訂金', '待入住', '已入住', '已退房', '已取消']
@@ -40,6 +41,7 @@ def create_reservation(body: ReservationCreate, db: Session = Depends(get_db)):
     db.refresh(reservation)
 
     _user_id, _reservation_id = user.id, reservation.id
+
     def _send_email():
         new_db = SessionLocal()
         try:
@@ -49,6 +51,17 @@ def create_reservation(body: ReservationCreate, db: Session = Depends(get_db)):
         finally:
             new_db.close()
     threading.Thread(target=_send_email, daemon=True).start()
+
+    def _check_pending_after_1h():
+        new_db = SessionLocal()
+        try:
+            res = new_db.query(Reservation).filter(Reservation.id == _reservation_id).first()
+            if res and res.order_status == '待付訂金':
+                send_pending_deposit_admin_reminder(res, new_db)
+        finally:
+            new_db.close()
+    threading.Timer(3600, _check_pending_after_1h).start()
+    # threading.Timer(3600, _check_pending_after_1h).start()
 
     return reservation
 

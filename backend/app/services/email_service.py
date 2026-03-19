@@ -2691,3 +2691,90 @@ def send_reservation_cancelled_by_admin_notification(user, reservation, db):
         print(f"Reservation cancelled by admin notification sent to={to}: {subject[:60]}")
     except Exception as e:
         print(f"Reservation cancelled by admin email sending failed: {e}")
+
+
+def send_pending_deposit_admin_reminder(reservation, db):
+    """訂單建立後 1 小時狀態仍為「待付訂金」時，寄信提醒 admin。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    order_number = reservation.order_number or ""
+    subject = f"【待確認】訂單 {order_number} 建立逾1小時仍為「待付訂金」"
+
+    def fmt_date(d):
+        return f"{d.month:02d}/{d.day:02d}/{d.year}"
+
+    check_in_str  = fmt_date(reservation.check_in)
+    check_out_str = fmt_date(reservation.check_out)
+
+    html = f"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>{subject}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Noto Sans TC',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);max-width:600px;">
+          <tr>
+            <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
+              <div style="font-size:36px;margin-bottom:8px;">⏰</div>
+              <h1 style="margin:0;font-size:20px;font-weight:700;color:#c0392b;">待確認訂單提醒</h1>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;"><a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a> 系統通知</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 28px;">
+              <p style="font-size:14px;color:#1a1a1a;margin:0 0 16px;">
+                以下訂單自建立起已超過 <strong>1 小時</strong>，狀態仍為「待付訂金」，請盡速確認是否已完成付款。
+              </p>
+              <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#888;width:120px;">訂單編號</td>
+                  <td style="padding:6px 0;font-size:15px;font-weight:700;font-family:monospace;">{order_number}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#888;">入住日期</td>
+                  <td style="padding:6px 0;font-size:13px;color:#1a1a1a;">{check_in_str}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#888;">退房日期</td>
+                  <td style="padding:6px 0;font-size:13px;color:#1a1a1a;">{check_out_str}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#888;">住宿晚數</td>
+                  <td style="padding:6px 0;font-size:13px;color:#1a1a1a;">{reservation.nights} 晚</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#888;">目前狀態</td>
+                  <td style="padding:6px 0;font-size:13px;font-weight:700;color:#c0392b;">待付訂金</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 28px 28px;border-top:1px solid #f0f0f0;font-size:12px;color:#888;text-align:center;">
+              此為系統自動通知，請登入後台確認訂單狀態。
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    params = {"from": from_email, "to": [OWNER_EMAIL], "subject": subject, "html": html}
+
+    try:
+        resend.api_key = resend_api_key
+        resend.Emails.send(params)
+        print(f"Pending deposit admin reminder sent: {subject}")
+    except Exception as e:
+        print(f"Pending deposit admin reminder email failed: {e}")

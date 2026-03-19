@@ -258,7 +258,7 @@
       <!-- Deposit amount -->
       <div class="deposit-row">
         <span class="deposit-label">{{ i18n.t('rentConfirm.depositAmountLabel') }}</span>
-        <span class="deposit-amount">USD {{ depositAmount }}</span>
+        <span class="deposit-amount">USD {{ depositAmount }} <span class="deposit-note">{{ i18n.t('rentConfirm.depositAmountNote') }}</span></span>
       </div>
 
       <p class="auto-cancel-note">{{ i18n.t('rentConfirm.autoCancelNote') }}</p>
