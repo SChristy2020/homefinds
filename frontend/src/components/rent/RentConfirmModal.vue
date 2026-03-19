@@ -211,7 +211,7 @@
         <ul>
           <li>{{ i18n.t('rentConfirm.zellePhone') }}</li>
           <li>{{ i18n.t('rentConfirm.zelleName') }}</li>
-          <li>{{ i18n.t('rentConfirm.zelleMemo') }}</li>
+          <li v-html="i18n.t('rentConfirm.zelleMemo')"></li>
         </ul>
       </div>
 
@@ -259,7 +259,6 @@
       <div class="deposit-row">
         <span class="deposit-label">{{ i18n.t('rentConfirm.depositAmountLabel') }}</span>
         <span class="deposit-amount">USD {{ depositAmount }}</span>
-        <span class="deposit-note">{{ i18n.t('rentConfirm.depositAmountNote') }}</span>
       </div>
 
       <p class="auto-cancel-note">{{ i18n.t('rentConfirm.autoCancelNote') }}</p>
@@ -304,9 +303,9 @@
 
       <!-- Greeting -->
       <p class="receipt-greeting">
-        {{ i18n.t('rentConfirm.receiptGreeting', { name: form.firstName }) }}<br>
-        {{ i18n.t('rentConfirm.receiptNote1') }}<br>
-        {{ i18n.t('rentConfirm.receiptNote2') }}
+        <span v-html="i18n.t('rentConfirm.receiptGreeting', { name: form.firstName })"></span><br>
+        <span v-html="i18n.t('rentConfirm.receiptNote1')"></span><br>
+        <span v-html="i18n.t('rentConfirm.receiptNote2')"></span>
       </p>
 
       <hr class="divider" />
@@ -350,7 +349,6 @@
       <div class="deposit-row">
         <span class="deposit-label">{{ i18n.t('rentConfirm.depositAmountLabel') }}</span>
         <span class="deposit-amount">USD {{ depositAmount }}</span>
-        <span class="deposit-note">{{ i18n.t('rentConfirm.depositAmountNote') }}</span>
       </div>
 
       <hr class="divider" />
@@ -579,7 +577,7 @@ async function handleNotify() {
 .early-bird-line { color: #c0392b; }
 .early-bird-label { font-weight: 600; color: #c0392b; }
 .early-bird-price { font-size: 1.4rem; font-weight: 800; color: #c0392b; }
-.early-bird-note { font-size: 0.85rem; font-weight: 500; color: #c0392b; }
+.early-bird-note { font-weight: 500; color: #c0392b; }
 
 .divider { border: none; border-top: 1.5px solid var(--border); margin: 12px 0; }
 
