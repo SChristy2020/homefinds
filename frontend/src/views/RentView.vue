@@ -181,9 +181,25 @@ onMounted(async () => {
         map[t.locale] = { description: t.description || '', booking_description: t.booking_description || '' }
       }
       roomTranslations.value = map
-      // 預設選取全部租期
+      // 預設選取日期區間
       if (rentStart.value && rentEnd.value) {
-        selection.value = { start: rentStart.value, end: rentEnd.value }
+        const parsed = (blocked || []).map(r => ({
+          checkIn:  new Date(r.check_in  + 'T00:00:00'),
+          checkOut: new Date(r.check_out + 'T00:00:00'),
+        }))
+        const isBlockedDay = (d) => parsed.some(r => d >= r.checkIn && d < r.checkOut)
+        // 找第一個未封鎖的入住日
+        let defaultStart = new Date(rentStart.value)
+        while (defaultStart < rentEnd.value && isBlockedDay(defaultStart)) {
+          defaultStart.setDate(defaultStart.getDate() + 1)
+        }
+        // 退房日為 defaultStart 之後最近的已訂訂單入住日（若無則為 rentEnd）
+        const nextCheckIn = parsed
+          .map(r => r.checkIn)
+          .filter(d => d > defaultStart)
+          .sort((a, b) => a - b)[0]
+        const defaultEnd = nextCheckIn && nextCheckIn <= rentEnd.value ? nextCheckIn : rentEnd.value
+        selection.value = { start: defaultStart, end: defaultEnd }
       }
     }
   } catch {}
