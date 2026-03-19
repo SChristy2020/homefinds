@@ -82,6 +82,11 @@ function isBlocked(d) {
   return parsedBlockedRanges.value.some(r => d >= r.checkIn && d < r.checkOut)
 }
 
+// 選退房日時的封鎖判斷：r.checkIn 當天可作為退房日（我退＝對方入住，不衝突）
+function isBlockedForCheckOut(d) {
+  return parsedBlockedRanges.value.some(r => d > r.checkIn && d < r.checkOut)
+}
+
 // 判斷 [start, end] 範圍是否與任何 blocked range 重疊
 function rangeOverlapsBlocked(start, end) {
   return parsedBlockedRanges.value.some(r => start < r.checkOut && end > r.checkIn)
@@ -91,7 +96,8 @@ function getDayClass(day) {
   if (!day) return 'empty'
   const d = day.full
   if (!props.rentStart || !props.rentEnd || d < props.rentStart || d > props.rentEnd) return 'disabled'
-  if (isBlocked(d)) return 'blocked'
+  const selectingEnd = !!(props.selection.start && !props.selection.end)
+  if (selectingEnd ? isBlockedForCheckOut(d) : isBlocked(d)) return 'blocked'
   const { start, end } = props.selection
   const today = new Date(); today.setHours(0,0,0,0)
   if (start && d.toDateString() === start.toDateString()) return 'selected-start'
@@ -105,8 +111,9 @@ function selectDay(day) {
   if (!day) return
   const d = day.full
   if (!props.rentStart || !props.rentEnd || d < props.rentStart || d > props.rentEnd) return
-  if (isBlocked(d)) return
   const { start, end } = props.selection
+  const selectingEnd = !!(start && !end)
+  if (selectingEnd ? isBlockedForCheckOut(d) : isBlocked(d)) return
   if (!start || (start && end) || d < start) {
     emit('update:selection', { start: d, end: null })
   } else if (d.toDateString() !== start.toDateString()) {
