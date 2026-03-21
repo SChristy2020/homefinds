@@ -348,6 +348,16 @@ def revert_paid_order(order_id: int, body: RevertPaidBody, db: Session = Depends
 
     return _build_out(order, db)
 
+@router.put("/{order_id}/picked_up", response_model=OrderOut)
+def mark_order_picked_up(order_id: int, db: Session = Depends(get_db)):
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    order.order_status = "picked_up"
+    db.commit()
+    db.refresh(order)
+    return _build_out(order, db)
+
 @router.put("/{order_id}/unpaid", response_model=OrderOut)
 def mark_order_unpaid(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()

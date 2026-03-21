@@ -116,6 +116,7 @@ export default {
     pickupTimeLabel: 'Pickup Time',
     paid: 'Paid',
     pending_payment: 'Pending Payment',
+    picked_up: 'Picked Up',
     cancelled: 'Cancelled',
     savePickup: 'Save',
     savePickupToast: 'Pickup time updated',

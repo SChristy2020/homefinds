@@ -116,6 +116,7 @@ export default {
     pickupTimeLabel: '取货时间',
     paid: '已付款',
     pending_payment: '待付款',
+    picked_up: '已取货',
     cancelled: '已取消',
     savePickup: '储存',
     savePickupToast: '取货时间已更新',

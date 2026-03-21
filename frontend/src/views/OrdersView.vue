@@ -42,6 +42,7 @@
             <button :class="['dt-filter-btn', statusFilter === 'all' ? 'active' : '']" @click="statusFilter = 'all'">{{ i18n.t('orders.filterAll') }}</button>
             <button :class="['dt-filter-btn', statusFilter === 'pending_payment' ? 'active' : '']" @click="statusFilter = 'pending_payment'">{{ i18n.t('orders.pending_payment') }}</button>
             <button :class="['dt-filter-btn', statusFilter === 'paid' ? 'active' : '']" @click="statusFilter = 'paid'">{{ i18n.t('orders.paid') }}</button>
+            <button :class="['dt-filter-btn', statusFilter === 'picked_up' ? 'active' : '']" @click="statusFilter = 'picked_up'">{{ i18n.t('orders.picked_up') }}</button>
             <button :class="['dt-filter-btn', statusFilter === 'cancelled' ? 'active' : '']" @click="statusFilter = 'cancelled'">{{ i18n.t('orders.cancelled') }}</button>
           </div>
           <input v-model="searchQuery" class="dt-search" :placeholder="i18n.t('orders.dtSearch')" />
@@ -105,8 +106,9 @@
                   <template v-else>
                     <div class="status-edit-wrap" @click.stop>
                       <select v-model="editingStatusValue" class="status-select">
-                        <option value="paid">{{ i18n.t('orders.paid') }}</option>
                         <option value="pending_payment">{{ i18n.t('orders.pending_payment') }}</option>
+                        <option value="paid">{{ i18n.t('orders.paid') }}</option>
+                        <option value="picked_up">{{ i18n.t('orders.picked_up') }}</option>
                         <option value="cancelled">{{ i18n.t('orders.cancelled') }}</option>
                       </select>
                       <div class="pickup-edit-actions">
@@ -447,7 +449,7 @@ const filteredOrders = computed(() => {
     if (sortColumn.value === 'id')     { aVal = a.id; bVal = b.id }
     else if (sortColumn.value === 'items')  { aVal = activeItemCount(a); bVal = activeItemCount(b) }
     else if (sortColumn.value === 'total')  { aVal = parseFloat(orderTotal(a)); bVal = parseFloat(orderTotal(b)) }
-    else if (sortColumn.value === 'paid')   { const rank = { paid: 2, pending_payment: 1, cancelled: 0 }; aVal = rank[a.order_status] ?? 0; bVal = rank[b.order_status] ?? 0 }
+    else if (sortColumn.value === 'paid')   { const rank = { picked_up: 3, paid: 2, pending_payment: 1, cancelled: 0 }; aVal = rank[a.order_status] ?? 0; bVal = rank[b.order_status] ?? 0 }
     else if (sortColumn.value === 'pickup') {
       const nullVal = sortDirection.value === 'asc' ? Infinity : -Infinity
       aVal = (a.order_status !== 'cancelled' && a.pickup_time) ? new Date(a.pickup_time).getTime() : nullVal
@@ -608,7 +610,7 @@ async function savePickupTime(order) {
 
 function startEditStatus(order) {
   editingStatusOrderId.value = order.id
-  editingStatusValue.value = order.order_status === 'paid' ? 'paid' : 'pending_payment'
+  editingStatusValue.value = ['paid', 'picked_up'].includes(order.order_status) ? order.order_status : 'pending_payment'
 }
 
 function cancelEditStatus() {
@@ -760,12 +762,13 @@ function reset() {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function statusLabel(order) {
-  const map = { paid: i18n.t('orders.paid'), pending_payment: i18n.t('orders.pending_payment'), cancelled: i18n.t('orders.cancelled') }
+  const map = { paid: i18n.t('orders.paid'), pending_payment: i18n.t('orders.pending_payment'), picked_up: i18n.t('orders.picked_up'), cancelled: i18n.t('orders.cancelled') }
   return map[order.order_status] || order.order_status
 }
 
 function statusClass(order) {
   if (order.order_status === 'paid') return 'status-paid'
+  if (order.order_status === 'picked_up') return 'status-paid'
   if (order.order_status === 'cancelled') return 'status-cancelled'
   return 'status-unpaid'
 }

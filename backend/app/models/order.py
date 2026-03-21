@@ -7,7 +7,7 @@ class Order(Base):
     id           = Column(Integer, primary_key=True, autoincrement=True)
     order_number = Column(String(20), unique=True, nullable=True)
     user_id      = Column(Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
-    order_status = Column(Enum("pending_payment", "paid", "cancelled"), nullable=False, default="pending_payment")
+    order_status = Column(Enum("pending_payment", "paid", "picked_up", "cancelled"), nullable=False, default="pending_payment")
     paid_at      = Column(DateTime, nullable=True)
     pickup_time  = Column(DateTime, nullable=True)
     admin_notes  = Column(Text, nullable=True)
