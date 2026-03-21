@@ -579,6 +579,7 @@ async function saveStatus(order) {
     await ordersStore.revertPaidOrder(order.id, editingStatusValue.value)
   } else {
     await ordersStore.updateOrderStatus(order.id, editingStatusValue.value)
+    await ordersStore.fetchAllOrders()
   }
   toast.show(i18n.t('orders.payStatusToast'))
   editingStatusOrderId.value = null
@@ -628,6 +629,7 @@ function startEditResStatus(res) {
 async function saveResStatus(res) {
   if (editingStatusValue.value && editingStatusValue.value !== res.order_status) {
     await reservationsStore.updateOrderStatus(res.id, editingStatusValue.value)
+    await reservationsStore.fetchAllReservations()
     toast.show(i18n.t('reservations.statusUpdatedToast'))
   }
   editingStatusResId.value = null
