@@ -2693,6 +2693,127 @@ def send_reservation_cancelled_by_admin_notification(user, reservation, db):
         print(f"Reservation cancelled by admin email sending failed: {e}")
 
 
+DATES_AVAILABLE_AGAIN_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "好消息！您心儀的入住時段已重新開放預訂！",
+        "header": "入住時段重新開放！",
+        "greeting_line1": "Hi {first_name}，",
+        "body": "我們注意到您之前感興趣的入住時段（{check_in} - {check_out}）現在已經重新開放預訂了！",
+        "body2": "由於該時段非常熱門，為了避免再次錯過，建議您立即行動，優先鎖定您的專屬房源。",
+        "book_now": "立即預訂",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "好消息！您心仪的入住时段已重新开放预订！",
+        "header": "入住时段重新开放！",
+        "greeting_line1": "Hi {first_name}，",
+        "body": "我们注意到您之前感兴趣的入住时段（{check_in} - {check_out}）现在已经重新开放预订了！",
+        "body2": "由于该时段非常热门，为了避免再次错过，建议您立即行动，优先锁定您的专属房源。",
+        "book_now": "立即预订",
+        "footer": "💡 有任何问题？欢迎联系 Christy:",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "Good news! Your preferred dates are available again!",
+        "header": "Your Preferred Dates Are Available Again!",
+        "greeting_line1": "Hi {first_name},",
+        "body": "The dates you previously selected ({check_in} - {check_out}) are now open for booking again. Don't miss out a second time—complete your reservation now to secure your spot!",
+        "body2": "",
+        "book_now": "Book Now",
+        "footer": "💡 Any questions? Feel free to contact Christy:",
+    },
+}
+
+
+def send_dates_available_again_notification(user, cancelled_reservation, db):
+    """當原本佔用時段的「待入住」訂單被取消，通知其他已取消（時段包含）訂單的 user 時段已重新開放。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
+    tr = DATES_AVAILABLE_AGAIN_TRANSLATIONS.get(locale, DATES_AVAILABLE_AGAIN_TRANSLATIONS["zh-TW"])
+
+    def fmt_date(d):
+        return f"{d.month:02d}/{d.day:02d}/{d.year}"
+
+    check_in_str  = fmt_date(cancelled_reservation.check_in)
+    check_out_str = fmt_date(cancelled_reservation.check_out)
+
+    greeting_line1 = tr["greeting_line1"].replace("{first_name}", user.first_name)
+    body = tr["body"].replace("{check_in}", check_in_str).replace("{check_out}", check_out_str)
+
+    booking_url = "https://schristy2020.github.io/homefinds/"
+
+    html = f"""<!DOCTYPE html>
+<html lang="{tr["html_lang"]}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{tr["header"]}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Noto Sans TC',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);max-width:600px;">
+          <tr>
+            <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
+              <div style="font-size:36px;margin-bottom:8px;">🎉</div>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">
+                <a href="{booking_url}" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
+                <span> {tr["header"]}</span>
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 28px;">
+              <p style="font-size:15px;font-weight:700;margin:0 0 12px;">{greeting_line1}</p>
+              <p style="font-size:13px;color:#444;margin:0 0 10px;">{body}</p>
+              {"" if not tr["body2"] else f'<p style="font-size:13px;color:#444;margin:0 0 20px;">{tr["body2"]}</p>'}
+              <div style="text-align:center;margin:24px 0;">
+                <a href="{booking_url}"
+                   style="display:inline-block;background:#c9a96e;color:#ffffff;text-decoration:none;
+                          font-size:15px;font-weight:700;padding:12px 32px;border-radius:6px;">
+                  {tr["book_now"]}
+                </a>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 28px 28px;border-top:1px solid #f0f0f0;font-size:12px;color:#888;text-align:center;">
+              {tr["footer"]}
+              <a href="mailto:qsa8647332@gmail.com" style="color:#c9a96e;text-decoration:none;">qsa8647332@gmail.com</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    resend_domain_verified = os.getenv("RESEND_DOMAIN_VERIFIED", "false").lower() == "true"
+    to = [user.email] if resend_domain_verified else [OWNER_EMAIL]
+    cc = [OWNER_EMAIL] if resend_domain_verified else []
+    params = {"from": from_email, "to": to, "subject": tr["subject"], "html": html}
+    if cc:
+        params["cc"] = cc
+
+    try:
+        time.sleep(1)
+        resend.api_key = resend_api_key
+        resend.Emails.send(params)
+        print(f"Dates available again notification sent to={to}: {tr['subject'][:60]}")
+    except Exception as e:
+        print(f"Dates available again email sending failed: {e}")
+
+
 def send_pending_deposit_admin_reminder(reservation, db):
     """訂單建立後 1 小時狀態仍為「待付訂金」時，寄信提醒 admin。"""
     resend_api_key = os.getenv("RESEND_API_KEY", "")

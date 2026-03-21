@@ -14,6 +14,7 @@ from app.services.email_service import (
     send_reservation_cancelled_overlap_notification,
     send_reservation_cancelled_by_admin_notification,
     send_pending_deposit_admin_reminder,
+    send_dates_available_again_notification,
 )
 
 ORDER_STATUSES = ['待付訂金', '待入住', '已入住', '已退房', '已取消']
@@ -151,7 +152,47 @@ def update_order_status(reservation_id: int, body: OrderStatusUpdate, db: Sessio
                 new_db.close()
         threading.Thread(target=_send_cancel_email, daemon=True).start()
 
+    # 當 admin 將狀態從「待入住」改為「已取消」時，通知 user 並通知時段重疊的已取消訂單 user
+    if body.order_status == '已取消' and old_status == '待入住':
+        _handle_checkin_status_cancelled(r, db)
+
     return r
+
+
+def _handle_checkin_status_cancelled(cancelled_res: Reservation, db: Session):
+    """處理「待入住」訂單被取消後的流程：通知該訂單 user、並通知其他時段重疊的已取消訂單 user。"""
+    # 1. 通知被取消訂單的 user
+    _cancelled_user_id = cancelled_res.user_id
+    _cancelled_res_id = cancelled_res.id
+
+    # 2. 找出所有時段完全包含在被取消時段內的其他已取消訂單
+    overlapping_cancelled = db.query(Reservation).filter(
+        Reservation.id != cancelled_res.id,
+        Reservation.order_status == '已取消',
+        Reservation.check_in >= cancelled_res.check_in,
+        Reservation.check_out <= cancelled_res.check_out,
+    ).all()
+    overlap_pairs = [(res.user_id, res.id) for res in overlapping_cancelled]
+
+    def _send_emails():
+        new_db = SessionLocal()
+        try:
+            # 通知該訂單 user 訂單已取消
+            cancelled_user = new_db.query(User).filter(User.id == _cancelled_user_id).first()
+            cancelled_reservation = new_db.query(Reservation).filter(Reservation.id == _cancelled_res_id).first()
+            if cancelled_user and cancelled_reservation:
+                send_reservation_cancelled_by_admin_notification(cancelled_user, cancelled_reservation, new_db)
+
+            # 通知時段重疊的已取消訂單 user：時段重新開放
+            for user_id, res_id in overlap_pairs:
+                overlap_user = new_db.query(User).filter(User.id == user_id).first()
+                overlap_res = new_db.query(Reservation).filter(Reservation.id == res_id).first()
+                if overlap_user and overlap_res:
+                    send_dates_available_again_notification(overlap_user, overlap_res, new_db)
+        finally:
+            new_db.close()
+
+    threading.Thread(target=_send_emails, daemon=True).start()
 
 
 def _handle_deposit_confirmed(confirmed_res: Reservation, db: Session):
