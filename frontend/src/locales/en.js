@@ -132,6 +132,7 @@ export default {
     markPaid: 'Mark Paid',
     markUnpaid: 'Mark Unpaid',
     payStatusToast: 'Payment status updated',
+    filterAll: 'All',
     dtSearch: 'Search orders…',
     dtShowing: 'Showing {from}–{to} of {total} entries',
     soldAt: 'Sold',

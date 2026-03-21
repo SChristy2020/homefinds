@@ -132,6 +132,7 @@ export default {
     markPaid: '标记已付款',
     markUnpaid: '标记未付款',
     payStatusToast: '付款状态已更新',
+    filterAll: '全部',
     dtSearch: '搜索订单…',
     dtShowing: '显示第 {from}–{to} 条，共 {total} 条',
     soldAt: '已售出',

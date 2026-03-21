@@ -38,6 +38,12 @@
           <div class="dt-info">
             {{ i18n.t('orders.dtShowing', { from: dtFrom, to: dtTo, total: filteredOrders.length }) }}
           </div>
+          <div v-if="isAdmin" class="dt-status-filters">
+            <button :class="['dt-filter-btn', statusFilter === 'all' ? 'active' : '']" @click="statusFilter = 'all'">{{ i18n.t('orders.filterAll') }}</button>
+            <button :class="['dt-filter-btn', statusFilter === 'pending_payment' ? 'active' : '']" @click="statusFilter = 'pending_payment'">{{ i18n.t('orders.pending_payment') }}</button>
+            <button :class="['dt-filter-btn', statusFilter === 'paid' ? 'active' : '']" @click="statusFilter = 'paid'">{{ i18n.t('orders.paid') }}</button>
+            <button :class="['dt-filter-btn', statusFilter === 'cancelled' ? 'active' : '']" @click="statusFilter = 'cancelled'">{{ i18n.t('orders.cancelled') }}</button>
+          </div>
           <input v-model="searchQuery" class="dt-search" :placeholder="i18n.t('orders.dtSearch')" />
         </div>
 
@@ -207,6 +213,18 @@
       <!-- 租屋訂單 -->
       <div class="reservations-section">
         <h2 class="orders-section-title reservations-section-title">{{ i18n.t('reservations.sectionTitle') }}</h2>
+
+        <!-- Reservations toolbar -->
+        <div class="dt-toolbar">
+          <div class="dt-info">
+            {{ i18n.t('orders.dtShowing', { from: resDtFrom, to: resDtTo, total: filteredReservations.length }) }}
+          </div>
+          <div v-if="isAdmin" class="dt-status-filters">
+            <button :class="['dt-filter-btn', resStatusFilter === 'all' ? 'active' : '']" @click="resStatusFilter = 'all'">{{ i18n.t('orders.filterAll') }}</button>
+            <button v-for="s in ORDER_STATUSES" :key="s" :class="['dt-filter-btn', resStatusFilter === s ? 'active' : '']" @click="resStatusFilter = s">{{ resStatusLabel(s) }}</button>
+          </div>
+        </div>
+
         <table class="orders-table reservations-table">
           <thead>
             <tr>
@@ -226,12 +244,12 @@
               <th v-if="isAdmin">{{ i18n.t('reservations.updatedAt') }}</th>
             </tr>
           </thead>
-          <tbody v-if="reservationsStore.reservations.length === 0">
+          <tbody v-if="filteredReservations.length === 0">
             <tr>
               <td :colspan="isAdmin ? 12 : 8" class="td-empty">{{ i18n.t('reservations.noReservations') }}</td>
             </tr>
           </tbody>
-          <tbody v-for="res in reservationsStore.reservations" v-else :key="res.id">
+          <tbody v-for="res in resPaginatedReservations" v-else :key="res.id">
             <tr class="order-row" :class="{ expanded: expandedResId === res.id }" @click="toggleExpandRes(res.id)">
               <td class="td-order-no">{{ res.order_number || res.id }}</td>
               <td>{{ formatDate(res.check_in) }}</td>
@@ -318,6 +336,21 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Reservations Pagination -->
+        <div v-if="resTotalPages > 1" class="dt-pagination">
+          <button class="dt-page-btn" :disabled="resCurrentPage === 1" @click="resCurrentPage = 1">«</button>
+          <button class="dt-page-btn" :disabled="resCurrentPage === 1" @click="resCurrentPage--">‹</button>
+          <button
+            v-for="p in resPageNumbers"
+            :key="p"
+            class="dt-page-btn"
+            :class="{ active: p === resCurrentPage }"
+            @click="resCurrentPage = p"
+          >{{ p }}</button>
+          <button class="dt-page-btn" :disabled="resCurrentPage === resTotalPages" @click="resCurrentPage++">›</button>
+          <button class="dt-page-btn" :disabled="resCurrentPage === resTotalPages" @click="resCurrentPage = resTotalPages">»</button>
+        </div>
       </div>
 
       <!-- 購物須知 -->
@@ -390,6 +423,7 @@ const expandedResId = ref(null)
 
 // ── DataTable state ───────────────────────────────────────────────────────────
 const searchQuery = ref('')
+const statusFilter = ref('all')
 const currentPage = ref(1)
 const pageSize = 10
 const sortColumn = ref('id')
@@ -397,6 +431,9 @@ const sortDirection = ref('desc')
 
 const filteredOrders = computed(() => {
   let orders = ordersStore.orders
+  if (statusFilter.value !== 'all') {
+    orders = orders.filter(o => o.order_status === statusFilter.value)
+  }
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     orders = orders.filter(o =>
@@ -410,7 +447,11 @@ const filteredOrders = computed(() => {
     else if (sortColumn.value === 'items')  { aVal = activeItemCount(a); bVal = activeItemCount(b) }
     else if (sortColumn.value === 'total')  { aVal = parseFloat(orderTotal(a)); bVal = parseFloat(orderTotal(b)) }
     else if (sortColumn.value === 'paid')   { const rank = { paid: 2, pending_payment: 1, cancelled: 0 }; aVal = rank[a.order_status] ?? 0; bVal = rank[b.order_status] ?? 0 }
-    else if (sortColumn.value === 'pickup') { aVal = a.pickup_time || ''; bVal = b.pickup_time || '' }
+    else if (sortColumn.value === 'pickup') {
+      const nullVal = sortDirection.value === 'asc' ? Infinity : -Infinity
+      aVal = (a.order_status !== 'cancelled' && a.pickup_time) ? new Date(a.pickup_time).getTime() : nullVal
+      bVal = (b.order_status !== 'cancelled' && b.pickup_time) ? new Date(b.pickup_time).getTime() : nullVal
+    }
     else if (sortColumn.value === 'created') { aVal = a.created_at || ''; bVal = b.created_at || '' }
     else if (sortColumn.value === 'updated') { aVal = a.updated_at || ''; bVal = b.updated_at || '' }
     else if (sortColumn.value === 'buyer') { aVal = (a.buyer_last_name || '') + (a.buyer_first_name || ''); bVal = (b.buyer_last_name || '') + (b.buyer_first_name || '') }
@@ -438,6 +479,7 @@ const pageNumbers = computed(() => {
 })
 
 watch(searchQuery, () => { currentPage.value = 1 })
+watch(statusFilter, () => { currentPage.value = 1 })
 
 function toggleSort(col) {
   if (sortColumn.value === col) {
@@ -613,6 +655,32 @@ function resStatusLabel(status) {
 }
 
 const editingStatusResId = ref(null)
+
+// ── Reservations filter & pagination ─────────────────────────────────────────
+const resStatusFilter = ref('all')
+const resCurrentPage = ref(1)
+const resPageSize = 10
+
+const filteredReservations = computed(() => {
+  if (resStatusFilter.value === 'all') return reservationsStore.reservations
+  return reservationsStore.reservations.filter(r => r.order_status === resStatusFilter.value)
+})
+const resTotalPages = computed(() => Math.ceil(filteredReservations.value.length / resPageSize))
+const resPaginatedReservations = computed(() => {
+  const start = (resCurrentPage.value - 1) * resPageSize
+  return filteredReservations.value.slice(start, start + resPageSize)
+})
+const resDtFrom = computed(() => filteredReservations.value.length === 0 ? 0 : (resCurrentPage.value - 1) * resPageSize + 1)
+const resDtTo = computed(() => Math.min(resCurrentPage.value * resPageSize, filteredReservations.value.length))
+const resPageNumbers = computed(() => {
+  const total = resTotalPages.value
+  const cur = resCurrentPage.value
+  const range = []
+  for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) range.push(i)
+  return range
+})
+
+watch(resStatusFilter, () => { resCurrentPage.value = 1 })
 
 function orderStatusClass(status) {
   if (status === '已取消') return 'status-cancelled'
@@ -998,6 +1066,16 @@ function fromPickerFormat(str) {
   outline: none; min-width: 180px;
 }
 .dt-search:focus { border-color: var(--charcoal); }
+.dt-status-filters {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.dt-filter-btn {
+  padding: 4px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 0.78rem; cursor: pointer; background: #fff; color: var(--charcoal);
+  transition: background 0.15s, border-color 0.15s;
+}
+.dt-filter-btn:hover { border-color: var(--charcoal); }
+.dt-filter-btn.active { background: var(--charcoal); color: #fff; border-color: var(--charcoal); }
 
 /* ── Sortable headers ────────────────────────────────────────────────────── */
 .orders-table th.sortable {

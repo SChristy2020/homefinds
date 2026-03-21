@@ -132,6 +132,7 @@ export default {
     markPaid: '標記已付款',
     markUnpaid: '標記未付款',
     payStatusToast: '付款狀態已更新',
+    filterAll: '全部',
     dtSearch: '搜尋訂單…',
     dtShowing: '顯示第 {from}–{to} 筆，共 {total} 筆',
     soldAt: '已售出',
