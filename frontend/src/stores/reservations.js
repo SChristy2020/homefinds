@@ -33,10 +33,16 @@ export const useReservationsStore = defineStore('reservations', () => {
     return result
   }
 
+  async function updateAdminNote(reservationId, adminNote) {
+    const result = await api.patch(`/api/reservations/${reservationId}/admin-note`, { admin_note: adminNote })
+    mergeResult(reservationId, result)
+    return result
+  }
+
   function clearReservations() {
     reservations.value = []
     sessionStorage.removeItem(RESERVATIONS_KEY)
   }
 
-  return { reservations, fetchReservationsByUser, fetchAllReservations, updateOrderStatus, clearReservations }
+  return { reservations, fetchReservationsByUser, fetchAllReservations, updateOrderStatus, updateAdminNote, clearReservations }
 })

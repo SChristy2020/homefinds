@@ -38,6 +38,7 @@ class ReservationOut(BaseModel):
     has_guests_or_pets:      int
     guests_pets_description: Optional[str]
     special_requests:        Optional[str]
+    admin_note:              Optional[str]
     created_at:              datetime
     updated_at:              datetime
 

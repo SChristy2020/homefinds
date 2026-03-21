@@ -334,6 +334,22 @@
                     <span class="res-detail-label">{{ i18n.t('reservations.detailSpecialRequests') }}</span>
                     <span class="res-detail-value">{{ res.special_requests || '—' }}</span>
                   </div>
+                  <div v-if="isAdmin" class="res-detail-cell res-detail-cell--span3">
+                    <span class="res-detail-label">{{ i18n.t('reservations.detailAdminNote') }}</span>
+                    <template v-if="editingAdminNoteResId !== res.id">
+                      <span class="res-detail-value">{{ res.admin_note || '—' }}</span>
+                      <button class="btn-edit-icon" @click.stop="startEditAdminNote(res)" title="編輯備註"><Pencil :size="12" /></button>
+                    </template>
+                    <template v-else>
+                      <div class="admin-note-edit-wrap" @click.stop>
+                        <textarea v-model="editingAdminNoteValue" class="admin-note-textarea" rows="3" />
+                        <div class="pickup-edit-actions">
+                          <button class="btn-save-pickup" @click.stop="saveAdminNote(res)">{{ i18n.t('orders.savePickup') }}</button>
+                          <button class="btn-cancel-pickup" @click.stop="cancelEditAdminNote">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -658,6 +674,8 @@ function resStatusLabel(status) {
 }
 
 const editingStatusResId = ref(null)
+const editingAdminNoteResId = ref(null)
+const editingAdminNoteValue = ref('')
 
 // ── Reservations filter, sort & pagination ────────────────────────────────────
 const resStatusFilter = ref('all')
@@ -747,6 +765,20 @@ async function saveResStatus(res) {
     toast.show(i18n.t('reservations.statusUpdatedToast'))
   }
   editingStatusResId.value = null
+}
+
+function startEditAdminNote(res) {
+  editingAdminNoteResId.value = res.id
+  editingAdminNoteValue.value = res.admin_note || ''
+}
+function cancelEditAdminNote() {
+  editingAdminNoteResId.value = null
+  editingAdminNoteValue.value = ''
+}
+async function saveAdminNote(res) {
+  await reservationsStore.updateAdminNote(res.id, editingAdminNoteValue.value)
+  editingAdminNoteResId.value = null
+  editingAdminNoteValue.value = ''
 }
 
 function reset() {

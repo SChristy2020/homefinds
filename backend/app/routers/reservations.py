@@ -24,6 +24,9 @@ CONFIRMED_STATUSES = {'待入住', '已入住'}
 class OrderStatusUpdate(BaseModel):
     order_status: str
 
+class AdminNoteUpdate(BaseModel):
+    admin_note: str
+
 router = APIRouter()
 
 @router.post("", response_model=ReservationOut, status_code=201)
@@ -120,6 +123,16 @@ def notify_deposit_paid(reservation_id: int, db: Session = Depends(get_db)):
             new_db.close()
     threading.Thread(target=_send_email, daemon=True).start()
     return {"ok": True}
+
+@router.patch("/{reservation_id}/admin-note", response_model=ReservationOut)
+def update_admin_note(reservation_id: int, body: AdminNoteUpdate, db: Session = Depends(get_db)):
+    r = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    r.admin_note = body.admin_note
+    db.commit()
+    db.refresh(r)
+    return r
 
 @router.put("/{reservation_id}/status", response_model=ReservationOut)
 def update_order_status(reservation_id: int, body: OrderStatusUpdate, db: Session = Depends(get_db)):

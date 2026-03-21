@@ -293,5 +293,6 @@ export default {
     detailGuestsPetsNo:  '否',
     detailGuestsPetsDesc: '请简单描述总入住人数、同住成员身份或宠物',
     detailSpecialRequests: '需求备注',
+    detailAdminNote: '备注（仅 admin 可见）',
   },
 }

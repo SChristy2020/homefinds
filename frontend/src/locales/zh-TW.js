@@ -354,5 +354,6 @@ export default {
     detailGuestsPetsNo:  '否',
     detailGuestsPetsDesc: '請簡單描述總入住人數、同住成員身分或寵物',
     detailSpecialRequests: '需求備註',
+    detailAdminNote: '備註（僅 admin 可見）',
   },
 }

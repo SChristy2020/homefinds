@@ -293,5 +293,6 @@ export default {
     detailGuestsPetsNo:  'No',
     detailGuestsPetsDesc: 'Occupants / Pets Details',
     detailSpecialRequests: 'Special Requests',
+    detailAdminNote: 'Note (admin only)',
   },
 }

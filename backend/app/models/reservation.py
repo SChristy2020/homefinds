@@ -23,5 +23,6 @@ class Reservation(Base):
     has_guests_or_pets       = Column(TINYINT(1),    nullable=False, default=0)
     guests_pets_description  = Column(Text,          nullable=True)
     special_requests         = Column(Text,          nullable=True)
+    admin_note               = Column(Text,          nullable=True)
     created_at               = Column(DateTime,      nullable=False, server_default=func.now())
     updated_at               = Column(DateTime,      nullable=False, server_default=func.now(), onupdate=func.now())
