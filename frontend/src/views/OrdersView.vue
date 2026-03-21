@@ -223,25 +223,26 @@
             <button :class="['dt-filter-btn', resStatusFilter === 'all' ? 'active' : '']" @click="resStatusFilter = 'all'">{{ i18n.t('orders.filterAll') }}</button>
             <button v-for="s in ORDER_STATUSES" :key="s" :class="['dt-filter-btn', resStatusFilter === s ? 'active' : '']" @click="resStatusFilter = s">{{ resStatusLabel(s) }}</button>
           </div>
+          <input v-model="resSearchQuery" class="dt-search" :placeholder="i18n.t('reservations.dtSearch')" />
         </div>
 
         <table class="orders-table reservations-table">
           <thead>
             <tr>
-              <th>{{ i18n.t('reservations.resNo') }}</th>
-              <th>{{ i18n.t('reservations.checkIn') }}</th>
-              <th>{{ i18n.t('reservations.checkOut') }}</th>
-              <th>{{ i18n.t('reservations.nights') }}</th>
-              <th>{{ i18n.t('reservations.depositAmount') }}</th>
-              <th>{{ i18n.t('reservations.totalPrice') }}</th>
-              <th>{{ i18n.t('reservations.orderStatus') }}</th>
+              <th class="sortable" @click="toggleResSort('id')">{{ i18n.t('reservations.resNo') }}<SortIcon col="id" :active="resSortColumn" :dir="resSortDirection" /></th>
+              <th class="sortable" @click="toggleResSort('check_in')">{{ i18n.t('reservations.checkIn') }}<SortIcon col="check_in" :active="resSortColumn" :dir="resSortDirection" /></th>
+              <th class="sortable" @click="toggleResSort('check_out')">{{ i18n.t('reservations.checkOut') }}<SortIcon col="check_out" :active="resSortColumn" :dir="resSortDirection" /></th>
+              <th class="sortable" @click="toggleResSort('nights')">{{ i18n.t('reservations.nights') }}<SortIcon col="nights" :active="resSortColumn" :dir="resSortDirection" /></th>
+              <th class="sortable" @click="toggleResSort('deposit')">{{ i18n.t('reservations.depositAmount') }}<SortIcon col="deposit" :active="resSortColumn" :dir="resSortDirection" /></th>
+              <th class="sortable" @click="toggleResSort('total')">{{ i18n.t('reservations.totalPrice') }}<SortIcon col="total" :active="resSortColumn" :dir="resSortDirection" /></th>
+              <th class="sortable" @click="toggleResSort('status')">{{ i18n.t('reservations.orderStatus') }}<SortIcon col="status" :active="resSortColumn" :dir="resSortDirection" /></th>
               <template v-if="isAdmin">
-                <th>{{ i18n.t('reservations.buyer') }}</th>
+                <th class="sortable" @click="toggleResSort('buyer')">{{ i18n.t('reservations.buyer') }}<SortIcon col="buyer" :active="resSortColumn" :dir="resSortDirection" /></th>
                 <th>{{ i18n.t('reservations.buyerEmail') }}</th>
                 <th>{{ i18n.t('reservations.buyerPhone') }}</th>
               </template>
-              <th>{{ i18n.t('reservations.createdAt') }}</th>
-              <th v-if="isAdmin">{{ i18n.t('reservations.updatedAt') }}</th>
+              <th class="sortable" @click="toggleResSort('created')">{{ i18n.t('reservations.createdAt') }}<SortIcon col="created" :active="resSortColumn" :dir="resSortDirection" /></th>
+              <th v-if="isAdmin" class="sortable" @click="toggleResSort('updated')">{{ i18n.t('reservations.updatedAt') }}<SortIcon col="updated" :active="resSortColumn" :dir="resSortDirection" /></th>
             </tr>
           </thead>
           <tbody v-if="filteredReservations.length === 0">
@@ -656,14 +657,56 @@ function resStatusLabel(status) {
 
 const editingStatusResId = ref(null)
 
-// ── Reservations filter & pagination ─────────────────────────────────────────
+// ── Reservations filter, sort & pagination ────────────────────────────────────
 const resStatusFilter = ref('all')
+const resSearchQuery = ref('')
 const resCurrentPage = ref(1)
 const resPageSize = 10
+const resSortColumn = ref('id')
+const resSortDirection = ref('desc')
+
+function toggleResSort(col) {
+  if (resSortColumn.value === col) {
+    resSortDirection.value = resSortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    resSortColumn.value = col
+    resSortDirection.value = 'asc'
+  }
+  resCurrentPage.value = 1
+}
 
 const filteredReservations = computed(() => {
-  if (resStatusFilter.value === 'all') return reservationsStore.reservations
-  return reservationsStore.reservations.filter(r => r.order_status === resStatusFilter.value)
+  let list = reservationsStore.reservations
+  if (resStatusFilter.value !== 'all') {
+    list = list.filter(r => r.order_status === resStatusFilter.value)
+  }
+  if (resSearchQuery.value) {
+    const q = resSearchQuery.value.toLowerCase()
+    list = list.filter(r =>
+      (r.order_number || String(r.id)).toLowerCase().includes(q) ||
+      (r.buyer_last_name || '').toLowerCase().includes(q) ||
+      (r.buyer_first_name || '').toLowerCase().includes(q) ||
+      (r.buyer_email || '').toLowerCase().includes(q)
+    )
+  }
+  return [...list].sort((a, b) => {
+    let aVal, bVal
+    const dir = resSortDirection.value
+    if (resSortColumn.value === 'id')        { aVal = a.id; bVal = b.id }
+    else if (resSortColumn.value === 'check_in')  { aVal = a.check_in || ''; bVal = b.check_in || '' }
+    else if (resSortColumn.value === 'check_out') { aVal = a.check_out || ''; bVal = b.check_out || '' }
+    else if (resSortColumn.value === 'nights')    { aVal = a.nights ?? 0; bVal = b.nights ?? 0 }
+    else if (resSortColumn.value === 'deposit')   { aVal = parseFloat(a.deposit_amount) || 0; bVal = parseFloat(b.deposit_amount) || 0 }
+    else if (resSortColumn.value === 'total')     { aVal = parseFloat(a.total_price) || 0; bVal = parseFloat(b.total_price) || 0 }
+    else if (resSortColumn.value === 'status')    { const rank = { '待付訂金': 0, '待入住': 1, '已入住': 2, '已退房': 3, '已取消': 4 }; aVal = rank[a.order_status] ?? 99; bVal = rank[b.order_status] ?? 99 }
+    else if (resSortColumn.value === 'buyer')     { aVal = (a.buyer_last_name || '') + (a.buyer_first_name || ''); bVal = (b.buyer_last_name || '') + (b.buyer_first_name || '') }
+    else if (resSortColumn.value === 'created')   { aVal = a.created_at || ''; bVal = b.created_at || '' }
+    else if (resSortColumn.value === 'updated')   { aVal = a.updated_at || ''; bVal = b.updated_at || '' }
+    else { aVal = a.id; bVal = b.id }
+    if (aVal < bVal) return dir === 'asc' ? -1 : 1
+    if (aVal > bVal) return dir === 'asc' ? 1 : -1
+    return 0
+  })
 })
 const resTotalPages = computed(() => Math.ceil(filteredReservations.value.length / resPageSize))
 const resPaginatedReservations = computed(() => {
@@ -681,6 +724,7 @@ const resPageNumbers = computed(() => {
 })
 
 watch(resStatusFilter, () => { resCurrentPage.value = 1 })
+watch(resSearchQuery, () => { resCurrentPage.value = 1 })
 
 function orderStatusClass(status) {
   if (status === '已取消') return 'status-cancelled'

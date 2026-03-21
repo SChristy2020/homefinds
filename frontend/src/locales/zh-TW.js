@@ -340,6 +340,7 @@ export default {
     createdAt:        '建立時間',
     updatedAt:        '更新時間',
     noReservations:   '目前沒有任何租屋訂單',
+    dtSearch:         '搜尋租屋訂單…',
     statusUpdatedToast: '訂單狀態已更新',
     detailFirstName:    '名字',
     detailLastName:     '姓氏',

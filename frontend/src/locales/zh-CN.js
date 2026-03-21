@@ -279,6 +279,7 @@ export default {
     createdAt:        '建立时间',
     updatedAt:        '更新时间',
     noReservations:   '目前没有任何租屋订单',
+    dtSearch:         '搜索租屋订单…',
     statusUpdatedToast: '订单状态已更新',
     detailFirstName:    '名字',
     detailLastName:     '姓氏',

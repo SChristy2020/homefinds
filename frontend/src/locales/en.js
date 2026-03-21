@@ -279,6 +279,7 @@ export default {
     createdAt:        'Created At',
     updatedAt:        'Updated At',
     noReservations:   'No rental orders yet',
+    dtSearch:         'Search reservations…',
     statusUpdatedToast: 'Order status updated',
     detailFirstName:    'First Name',
     detailLastName:     'Last Name',
