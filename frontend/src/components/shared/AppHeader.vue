@@ -13,7 +13,7 @@
       <RouterLink class="nav-tab" :class="{ active: route.name === 'orders' }" to="/orders">
         {{ i18n.t('nav.orders') }}
       </RouterLink>
-      <RouterLink class="nav-tab" :class="{ active: route.name === 'admin' }" to="/admin">
+      <RouterLink v-if="isAdmin" class="nav-tab" :class="{ active: route.name === 'admin' }" to="/admin">
         {{ i18n.t('nav.admin') }}
       </RouterLink>
     </nav>
@@ -21,11 +21,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18nStore } from '@/stores/i18n'
+import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
 const i18n = useI18nStore()
+const userStore = useUserStore()
+const isAdmin = computed(() => userStore.currentUser?.is_admin === 1)
 </script>
 
 <style scoped>
