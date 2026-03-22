@@ -896,7 +896,6 @@ onMounted(() => {
 
 /* Section */
 .admin-section {
-  background: var(--warm-white);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   padding: 24px 28px;

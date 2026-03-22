@@ -129,7 +129,7 @@ body::before {
   border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 0.85rem;
-  background: rgb(248 253 251);
+  background: var(--accent-light);
   outline: none;
   transition: border-color 0.15s;
 }

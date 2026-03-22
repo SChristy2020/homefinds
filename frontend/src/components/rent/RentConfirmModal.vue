@@ -577,7 +577,7 @@ async function handleNotify() {
 .confirm-icon { text-align: center; margin: 8px 0 4px; }
 
 /* Date row */
-.date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
 .date-col { display: flex; flex-direction: column; gap: 1px; }
 .date-label { font-size: 0.75rem;  }
 .date-value { font-size: 0.95rem; font-weight: 600; color: var(--charcoal); }
@@ -585,7 +585,7 @@ async function handleNotify() {
 .nights-badge { margin-left: auto; font-size: 0.9rem; font-weight: 600; color: var(--charcoal); white-space: nowrap; }
 
 /* Price section */
-.price-section { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+.price-section { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
 .price-line { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .price-label { font-size: 0.9rem; color: var(--charcoal); min-width: 5em; }
 .price-value { font-size: 1rem; }
@@ -598,7 +598,7 @@ async function handleNotify() {
 
 .divider { border: none; border-top: 1.5px solid var(--border); margin: 12px 0; }
 
-.section-title { font-weight: 600; font-size: 1rem; margin-bottom: 10px; color: var(--charcoal); }
+.section-title { font-weight: 600; font-size: 1.2rem; margin-bottom: 10px; color: var(--accent); }
 
 /* Form */
 .form-row { display: flex; gap: 12px; }
@@ -608,7 +608,7 @@ async function handleNotify() {
 .form-group input, .form-group textarea {
   border: 1px solid var(--border); border-radius: 6px;
   padding: 8px 10px; font-size: 0.9rem; width: 100%; box-sizing: border-box;
-  background: var(--surface, #fafafa);
+  background: var(--accent-light, #fafafa);
 }
 .form-group input[type="number"] { -moz-appearance: textfield; }
 .form-group input[type="number"]::-webkit-outer-spin-button,
@@ -659,7 +659,7 @@ async function handleNotify() {
 
 /* Payment block */
 .pay-warning {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--charcoal);
   margin-bottom: 4px;
   display: flex;
@@ -668,7 +668,7 @@ async function handleNotify() {
   font-weight: 700;
 }
 .warn-icon { flex-shrink: 0; }
-.pay-note { font-size: 0.88rem; margin-bottom: 8px; }
+.pay-note { font-size: 1rem; margin-bottom: 8px; }
 
 .zelle-block {
   background: var(--surface, #fafafa);
@@ -676,7 +676,7 @@ async function handleNotify() {
   border-radius: 8px;
   padding: 10px 14px;
   margin-bottom: 4px;
-  font-size: 0.88rem;
+  font-size: 1rem;
 }
 .zelle-title { font-weight: 600; color: var(--charcoal); margin-bottom: 4px; }
 .zelle-block ul { list-style: disc; padding-left: 1.4em; margin: 0; }
@@ -695,7 +695,7 @@ async function handleNotify() {
 .deposit-note { font-size: 0.82rem; color: #c0392b; font-weight: 500; }
 
 .receipt-greeting {
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.6;
   color: var(--charcoal);
   margin-bottom: 4px;
