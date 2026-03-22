@@ -52,7 +52,8 @@
 </template>
 
 <script setup>
-import { ref, computed, provide, onMounted } from 'vue'
+import { ref, computed, provide, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { Search, ArrowUpDown } from 'lucide-vue-next'
 import { useProductsStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
@@ -118,6 +119,20 @@ function openProduct(product) {
   selectedProduct.value = product
   showDetailModal.value = true
 }
+
+// 從 URL query ?product=ID 自動開啟商品跳窗
+const route = useRoute()
+watch(
+  () => productsStore.products,
+  (list) => {
+    if (!list.length) return
+    const pid = Number(route.query.product)
+    if (!pid) return
+    const found = list.find(p => p.id === pid)
+    if (found) openProduct(found)
+  },
+  { immediate: true }
+)
 
 function toggleSort() {
   sortAsc.value = !sortAsc.value

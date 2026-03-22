@@ -69,6 +69,7 @@ export default {
     anytime: '隨時',
     alreadyReservedItem: '*你已預訂過該商品',
     alreadyReservedBtn: '*您已預訂過某商品，請移除後繼續',
+    subscribeMarketing: '若有新品或促銷請通知我',
   },
   orderSuccess: {
     title: '預訂成功!',

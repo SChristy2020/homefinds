@@ -442,6 +442,216 @@ ORDER_STATUS_REVERTED_TRANSLATIONS = {
     },
 }
 
+# ── Marketing / new arrivals email translations ────────────────────────────────
+MARKETING_EMAIL_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "只有一件! 本週嚴選寶藏清單✨ - Christy's HomeFinds",
+        "greeting": "Hi! {first_name}，",
+        "body": "Christy's HomeFinds 新上架/精選了幾件充滿生活感的居家單品。它們正等待著下一個懂它的主人，透過「再利用」，我們不僅省下荷包，更能一起減少浪費、愛護地球！ ♻️",
+        "section_title": "👇 本週嚴選寶藏：",
+        "cta_text": "查看所有好物",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+        "anytime": "隨時",
+        "col_price": "價錢",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "只有一件! 本周严选宝藏清单✨ - Christy's HomeFinds",
+        "greeting": "Hi! {first_name}，",
+        "body": "Christy's HomeFinds 新上架/精选了几件充满生活感的家居单品。它们正等待着下一个懂它的主人，通过「再利用」，我们不仅节省了开销，更能一起减少浪费、爱护地球！ ♻️",
+        "section_title": "👇 本周严选宝藏：",
+        "cta_text": "查看所有好物",
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+        "anytime": "随时",
+        "col_price": "价格",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "This week's hidden gems! Grab them before they're gone ✨ - Christy's HomeFinds",
+        "greeting": "Hi {first_name},",
+        "body": "Christy's HomeFinds' latest drop is here! We've picked out several unique pieces to elevate your living space. Give these treasures a second life—it's a win-win for your budget and the planet! ♻️",
+        "section_title": "👇 This Week's Curated Finds:",
+        "cta_text": "Shop All Finds",
+        "footer": "💡 Questions? Contact Christy:",
+        "anytime": "Anytime",
+        "col_price": "Price",
+    },
+}
+
+
+def send_marketing_email(user, product_ids, db):
+    """發送促銷通知給訂閱行銷的用戶。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
+    tr = MARKETING_EMAIL_TRANSLATIONS.get(locale, MARKETING_EMAIL_TRANSLATIONS["zh-TW"])
+    db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
+
+    products_data = []
+    for pid in product_ids:
+        product = db.query(Product).filter(Product.id == pid).first()
+        if not product:
+            continue
+        translation = db.query(ProductTranslation).filter(
+            ProductTranslation.product_id == pid,
+            ProductTranslation.locale == db_locale,
+        ).first()
+        if not translation and db_locale != "zh-TW":
+            translation = db.query(ProductTranslation).filter(
+                ProductTranslation.product_id == pid,
+                ProductTranslation.locale == "zh-TW",
+            ).first()
+        image = (
+            db.query(ProductImage)
+            .filter(ProductImage.product_id == pid)
+            .order_by(ProductImage.sort_order)
+            .first()
+        )
+        name = translation.name if translation else (product.code if product else str(pid))
+        img_url = image.url if image else ""
+        price = float(product.price)
+        original_price = float(product.original_price) if product.original_price else None
+        products_data.append({
+            "id": pid,
+            "name": name,
+            "img_url": img_url,
+            "price": price,
+            "original_price": original_price,
+        })
+
+    if not products_data:
+        return
+
+    greeting = tr["greeting"].replace("{first_name}", user.first_name)
+    shop_url = "https://schristy2020.github.io/homefinds/"
+    shop_hash_url = "https://schristy2020.github.io/homefinds/#/"
+
+    # Build product cards (2 per row for better mobile readability)
+    COLS = 2
+    rows_html = ""
+    for i in range(0, len(products_data), COLS):
+        chunk = products_data[i:i + COLS]
+        cells = ""
+        for item in chunk:
+            product_url = f"{shop_hash_url}?product={item['id']}"
+            thumb = (
+                f'<div style="width:100%;height:200px;overflow:hidden;border-radius:8px;background:#f0ebe3;">'
+                f'<img src="{item["img_url"]}" width="220" height="200" '
+                f'style="width:100%;height:200px;object-fit:cover;display:block;" /></div>'
+                if item["img_url"]
+                else '<div style="width:100%;height:200px;background:#f0ebe3;border-radius:8px;"></div>'
+            )
+            original_str = (
+                f'<span style="text-decoration:line-through;color:#aaa;font-size:13px;margin-right:4px;">'
+                f'${_format_price(item["original_price"])}</span>'
+                if item["original_price"] is not None else ""
+            )
+            cells += f"""
+            <td class="prod-cell" style="width:50%;padding:8px;vertical-align:top;">
+              <a href="{product_url}" style="text-decoration:none;display:block;height:100%;">
+                <div style="border:1px solid #f0ebe3;border-radius:10px;padding:12px;text-align:center;background:#fafaf8;height:100%;box-sizing:border-box;">
+                  {thumb}
+                  <p style="margin:10px 0 5px;font-size:14px;color:#333;line-height:1.5;height:2.1em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{item["name"]}</p>
+                  <p style="margin:0;font-size:16px;font-weight:700;color:#1a1a1a;">{original_str}${_format_price(item["price"])}</p>
+                </div>
+              </a>
+            </td>"""
+        if len(chunk) < COLS:
+            cells += '<td style="width:50%;padding:8px;"></td>'
+        rows_html += f'<tr>{cells}</tr>'
+
+    cta_btn = (
+        f'<a href="{shop_url}" '
+        f'style="display:inline-block;background:#c9a96e;color:#fff;text-decoration:none;'
+        f'font-size:16px;font-weight:700;padding:14px 40px;border-radius:8px;">'
+        f'{tr["cta_text"]}</a>'
+    )
+
+    html = f"""<!DOCTYPE html>
+<html lang="{tr["html_lang"]}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{tr["subject"]}</title>
+  <style>
+    @media only screen and (max-width: 480px) {{
+      .email-wrap {{ width: 100% !important; }}
+      .email-body {{ padding: 16px !important; }}
+      .prod-cell {{ width: 50% !important; padding: 5px !important; }}
+      .greeting {{ font-size: 17px !important; }}
+      .body-text {{ font-size: 15px !important; }}
+      .section-title {{ font-size: 16px !important; }}
+    }}
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Noto Sans TC',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table class="email-wrap" width="600" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);max-width:600px;width:100%;">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding:28px 24px 16px;border-bottom:1px solid #f0ebe3;">
+              <div style="font-size:36px;margin-bottom:6px;">🏠</div>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#c9a96e;">
+                <a href="{shop_url}" style="color:#c9a96e;text-decoration:none;">Christy's HomeFinds</a>
+              </h1>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td class="email-body" style="padding:24px 28px;">
+              <p class="greeting" style="font-size:16px;font-weight:700;margin:0 0 10px;color:#1a1a1a;">{greeting}</p>
+              <p class="body-text" style="font-size:14px;color:#444;margin:0 0 22px;line-height:1.8;">{tr["body"]}</p>
+              <p class="section-title" style="font-size:15px;font-weight:700;color:#1a1a1a;margin:0 0 16px;">{tr["section_title"]}</p>
+              <!-- Product grid -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                {rows_html}
+              </table>
+              <!-- CTA -->
+              <div style="text-align:center;margin:32px 0 8px;">
+                {cta_btn}
+              </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 28px;border-top:1px solid #f0ebe3;background:#fafaf8;">
+              <p style="font-size:13px;color:#888;margin:0;">
+                {tr["footer"]}
+                <a href="mailto:{OWNER_EMAIL}" style="color:#c9a96e;">{OWNER_EMAIL}</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    resend.api_key = resend_api_key
+    to = [user.email]
+    if OWNER_EMAIL not in to:
+        to.append(OWNER_EMAIL)
+    try:
+        resend.Emails.send({
+            "from": from_email,
+            "to": to,
+            "subject": tr["subject"],
+            "html": html,
+        })
+        time.sleep(0.3)
+    except Exception as e:
+        print(f"Failed to send marketing email to {user.email}: {e}")
+
+
 # Map frontend locale codes to DB ProductTranslation locale codes
 _LOCALE_TO_DB = {
     "zh-TW": "zh-TW",

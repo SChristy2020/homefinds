@@ -55,7 +55,11 @@
     <!-- ===== 商品管理 ===== -->
     <section class="admin-section">
       <div class="section-header">
-        <h2 class="section-title">商品管理 <button class="icon-btn section-add-btn" @click="openAddProd" title="新增商品"><PlusCircle :size="16"/></button></h2>
+        <h2 class="section-title">
+          商品管理
+          <button class="icon-btn section-add-btn" @click="openAddProd" title="新增商品"><PlusCircle :size="16"/></button>
+          <button class="icon-btn section-add-btn" @click="openMarketingModal" title="發送促銷通知"><Mail :size="16"/></button>
+        </h2>
         <div class="table-controls">
           <button class="icon-btn" @click="prodSearchOpen = !prodSearchOpen" title="搜尋"><Search :size="16"/></button>
           <button class="icon-btn" @click="prodSortAsc = !prodSortAsc" title="排序"><ArrowUpDown :size="16"/></button>
@@ -321,12 +325,56 @@
 
     <input ref="prodFileInput" type="file" accept="image/*" multiple style="display:none" @change="onProdFileChange" />
     <input ref="roomFileInput" type="file" accept="image/*" multiple style="display:none" @change="onRoomFileChange" />
+
+    <!-- ===== Marketing Email Modal ===== -->
+    <BaseModal v-model="showMarketingModal" size="xl" no-backdrop-close>
+      <h3 class="modal-title">發送促銷通知</h3>
+      <p class="marketing-hint">勾選要推薦的商品（僅顯示未售出的商品）：</p>
+
+      <div class="marketing-product-list">
+        <label
+          v-for="prod in unsoldProducts"
+          :key="prod.id"
+          class="marketing-product-item"
+          :class="{ selected: marketingSelectedIds.includes(prod.id) }"
+        >
+          <input
+            type="checkbox"
+            :value="prod.id"
+            v-model="marketingSelectedIds"
+            class="marketing-checkbox"
+          />
+          <img
+            v-if="prod.images && prod.images.length"
+            :src="prod.images[0].url"
+            class="marketing-thumb"
+          />
+          <div v-else class="marketing-thumb-placeholder"></div>
+          <div class="marketing-prod-info">
+            <span class="marketing-prod-name">{{ getProdName(prod, 'zh-TW') }}</span>
+            <span class="marketing-prod-price">${{ prod.price }}</span>
+          </div>
+        </label>
+        <p v-if="unsoldProducts.length === 0" class="empty-row">目前沒有未售出的商品</p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" @click="showMarketingModal = false">取消</button>
+        <button
+          class="btn-primary"
+          :disabled="marketingSelectedIds.length === 0 || marketingSending"
+          @click="sendMarketingEmail"
+        >
+          {{ marketingSending ? '發送中...' : `發送通知 (${marketingSelectedIds.length} 件商品)` }}
+        </button>
+      </div>
+    </BaseModal>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, reactive, watch } from 'vue'
-import { Search, ArrowUpDown, Pencil, Trash2, PlusCircle } from 'lucide-vue-next'
+import { Search, ArrowUpDown, Pencil, Trash2, PlusCircle, Mail } from 'lucide-vue-next'
 import { api } from '@/utils/api'
 import { useToastStore } from '@/stores/toast'
 import BaseModal from '@/components/shared/BaseModal.vue'
@@ -784,6 +832,41 @@ async function saveRoom() {
   }
 }
 
+// ========== MARKETING ==========
+const showMarketingModal = ref(false)
+const marketingSelectedIds = ref([])
+const marketingSending = ref(false)
+
+const unsoldProducts = computed(() =>
+  products.value.filter(p => p.status !== 'sold')
+)
+
+function openMarketingModal() {
+  marketingSelectedIds.value = []
+  showMarketingModal.value = true
+}
+
+async function sendMarketingEmail() {
+  if (marketingSelectedIds.value.length === 0) return
+  const { useUserStore } = await import('@/stores/user')
+  const userStore = useUserStore()
+  const adminId = userStore.currentUser?.id
+  if (!adminId) return toast.show('無法取得管理員身份')
+  marketingSending.value = true
+  try {
+    await api.post('/api/marketing/send', {
+      product_ids: marketingSelectedIds.value,
+      admin_id: adminId,
+    })
+    showMarketingModal.value = false
+    alert('寄件成功！')
+  } catch (e) {
+    toast.show('發送失敗: ' + (e.detail || e))
+  } finally {
+    marketingSending.value = false
+  }
+}
+
 onMounted(() => {
   loadCategories()
   loadProducts()
@@ -1019,4 +1102,48 @@ onMounted(() => {
   .prices-grid { grid-template-columns: 1fr; }
   .desc-grid { grid-template-columns: 1fr; }
 }
+
+/* Marketing Modal */
+.marketing-hint {
+  font-size: 0.85rem; color: var(--mid); margin: 0 0 14px;
+}
+.marketing-product-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  max-height: 480px; overflow-y: auto;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 10px;
+}
+@media (max-width: 600px) {
+  .marketing-product-list { grid-template-columns: 1fr; }
+}
+.marketing-product-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius);
+  cursor: pointer; transition: background 0.12s;
+  border: 1.5px solid transparent;
+}
+.marketing-product-item:hover { background: var(--bg); }
+.marketing-product-item.selected {
+  background: #fdf6ec;
+  border-color: var(--gold, #c9a96e);
+}
+.marketing-checkbox {
+  width: 15px; height: 15px; flex-shrink: 0;
+  accent-color: var(--gold, #c9a96e); cursor: pointer;
+}
+.marketing-thumb {
+  width: 44px; height: 44px; object-fit: cover;
+  border-radius: 4px; flex-shrink: 0;
+}
+.marketing-thumb-placeholder {
+  width: 44px; height: 44px; border-radius: 4px;
+  background: var(--border); flex-shrink: 0;
+}
+.marketing-prod-info {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.marketing-prod-name { font-size: 0.85rem; color: var(--charcoal); }
+.marketing-prod-price { font-size: 0.8rem; color: var(--mid); }
 </style>

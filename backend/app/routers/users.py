@@ -23,6 +23,8 @@ def create_user(body: UserCreate, response: Response, db: Session = Depends(get_
             existing.has_reservation = 1
         if body.has_purchase:
             existing.has_purchase = 1
+        if body.is_subscribed_marketing:
+            existing.is_subscribed_marketing = 1
         db.commit()
         db.refresh(existing)
         response.status_code = 200

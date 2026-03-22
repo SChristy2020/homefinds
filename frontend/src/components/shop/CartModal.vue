@@ -60,6 +60,14 @@
     <!-- Checkout Form -->
     <UserInfoForm v-model="form" :pickupWarningDate="pickupWarningDate" />
 
+    <!-- Subscribe Marketing -->
+    <div class="subscribe-row">
+      <label class="subscribe-label">
+        <input type="checkbox" v-model="subscribeMarketing" class="subscribe-checkbox" />
+        {{ i18n.t('cart.subscribeMarketing') }}
+      </label>
+    </div>
+
     <!-- Reserve Button -->
     <div class="action-row">
       <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('cart.reserve') }}</button>
@@ -115,6 +123,7 @@ const form = ref({
   zelleRefundOther: saved.zelleRefundOther || '',
 })
 const duplicateProductIds = ref([])
+const subscribeMarketing = ref(true)
 
 // 當 modal 開啟時，從 localStorage / userStore 補填空白欄位
 watch(() => props.modelValue, (open) => {
@@ -198,7 +207,7 @@ async function handleConfirm() {
   const formSnapshot = { ...form.value }
   let order
   try {
-    order = await ordersStore.createOrder(formSnapshot, cart.items)
+    order = await ordersStore.createOrder(formSnapshot, cart.items, subscribeMarketing.value)
   } catch (err) {
     if (err.message === 'duplicate' && err.duplicateProductIds) {
       duplicateProductIds.value = err.duplicateProductIds
@@ -330,6 +339,26 @@ async function handleConfirm() {
   font-size: 0.82rem;
   color: #c0392b;
   margin-top: 6px;
+}
+
+.subscribe-row {
+  margin-top: 14px;
+}
+.subscribe-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #555;
+  cursor: pointer;
+  user-select: none;
+}
+.subscribe-checkbox {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: var(--gold, #c9a96e);
+  flex-shrink: 0;
 }
 
 </style>

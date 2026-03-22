@@ -9,30 +9,21 @@ const ORDERS_KEY = 'homefinds_orders'
 export const useOrdersStore = defineStore('orders', () => {
   const orders = ref(JSON.parse(sessionStorage.getItem(ORDERS_KEY)) || [])
 
-  async function createOrder(formData, cartItems) {
+  async function createOrder(formData, cartItems, subscribeMarketing = false) {
     const i18n = useI18nStore()
 
-    // 1. 查找現有 user，若無則建立
-    let user
-    try {
-      const params = new URLSearchParams({
-        last_name: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-      })
-      user = await api.get(`/api/users/lookup?${params}`)
-    } catch {
-      user = await api.post('/api/users', {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        salutation: formData.salutation,
-        email: formData.email,
-        phone: formData.phone,
-        zelle_refund: formData.zelleRefund,
-        zelle_refund_other: formData.zelleRefundOther || null,
-        locale: i18n.locale,
-      })
-    }
+    // 1. 建立或更新 user（upsert）
+    const user = await api.post('/api/users', {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      salutation: formData.salutation,
+      email: formData.email,
+      phone: formData.phone,
+      zelle_refund: formData.zelleRefund,
+      zelle_refund_other: formData.zelleRefundOther || null,
+      is_subscribed_marketing: subscribeMarketing ? 1 : 0,
+      locale: i18n.locale,
+    })
 
     // 2. 解析取貨時間
     let pickupTime = null

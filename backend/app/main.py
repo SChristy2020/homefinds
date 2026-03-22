@@ -4,7 +4,7 @@ import cloudinary.uploader
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import users, products, orders, waiting_list, reservations, room, categories
+from app.routers import users, products, orders, waiting_list, reservations, room, categories, marketing
 
 from pathlib import Path
 load_dotenv(Path(__file__).parent.parent / ".env")
@@ -31,6 +31,7 @@ app.include_router(waiting_list.router,prefix="/api/waiting-list", tags=["Waitin
 app.include_router(reservations.router,prefix="/api/reservations", tags=["Reservations"])
 app.include_router(room.router,        prefix="/api/room",         tags=["Room"])
 app.include_router(categories.router,  prefix="/api/categories",   tags=["Categories"])
+app.include_router(marketing.router,   prefix="/api/marketing",    tags=["Marketing"])
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
