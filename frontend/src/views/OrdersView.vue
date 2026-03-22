@@ -48,6 +48,7 @@
           <input v-model="searchQuery" class="dt-search" :placeholder="i18n.t('orders.dtSearch')" />
         </div>
 
+        <div class="table-scroll-wrap">
         <table class="orders-table">
           <thead>
             <tr>
@@ -197,6 +198,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
 
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="dt-pagination">
@@ -230,6 +232,7 @@
           <input v-model="resSearchQuery" class="dt-search" :placeholder="i18n.t('reservations.dtSearch')" />
         </div>
 
+        <div class="table-scroll-wrap">
         <table class="orders-table reservations-table">
           <thead>
             <tr>
@@ -361,6 +364,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
 
         <!-- Reservations Pagination -->
         <div v-if="resTotalPages > 1" class="dt-pagination">
@@ -1196,6 +1200,9 @@ const calCells = computed(() => {
 
 /* ── Orders table ────────────────────────────────────────────────────────── */
 .orders-table-wrap {
+  width: 100%;
+}
+.table-scroll-wrap {
   width: 100%; overflow-x: auto;
 }
 .orders-table {
@@ -1338,7 +1345,7 @@ const calCells = computed(() => {
 
 /* ── Reservations section ────────────────────────────────────────────────── */
 .reservations-section {
-  width: 100%; overflow-x: auto; margin-top: 32px;
+  width: 100%; margin-top: 32px;
 }
 .reservations-section-title {
   margin-top: 0;
