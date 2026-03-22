@@ -63,6 +63,7 @@
               <th class="sortable" @click="toggleSort('paid')">
                 {{ i18n.t('orders.payStatus') }}<SortIcon col="paid" :active="sortColumn" :dir="sortDirection" />
               </th>
+              <th v-if="isAdmin">{{ i18n.t('orders.adminNotes') }}</th>
               <th class="sortable" @click="toggleSort('pickup')">
                 {{ i18n.t('orders.pickupTimeLabel') }}<SortIcon col="pickup" :active="sortColumn" :dir="sortDirection" />
               </th>
@@ -72,7 +73,6 @@
                 </th>
                 <th>{{ i18n.t('orders.buyerEmail') }}</th>
                 <th>{{ i18n.t('orders.buyerPhone') }}</th>
-                <th>{{ i18n.t('orders.adminNotes') }}</th>
               </template>
               <th class="sortable" @click="toggleSort('created')">
                 {{ i18n.t('orders.createdAt') }}<SortIcon col="created" :active="sortColumn" :dir="sortDirection" />
@@ -122,6 +122,25 @@
                   {{ statusLabel(order) }}
                 </template>
               </td>
+              <td v-if="isAdmin" class="td-admin-notes" @click.stop>
+                <template v-if="editingNotesOrderId !== order.id">
+                  <span class="notes-display">
+                    <span class="notes-text">{{ order.admin_notes || '—' }}</span>
+                    <button class="btn-edit-icon" @click.stop="startEditNotes(order)" title="編輯">
+                      <Pencil :size="12" />
+                    </button>
+                  </span>
+                </template>
+                <template v-else>
+                  <div class="notes-edit-wrap">
+                    <textarea v-model="editingNotesValue" class="notes-textarea" rows="2" @click.stop />
+                    <div class="pickup-edit-actions">
+                      <button class="btn-save-pickup" @click.stop="saveAdminNotes(order)">{{ i18n.t('orders.savePickup') }}</button>
+                      <button class="btn-cancel-pickup" @click.stop="cancelEditNotes">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                    </div>
+                  </div>
+                </template>
+              </td>
               <td class="td-pickup">
                 <template v-if="order.order_status === 'cancelled'">
                   <span class="no-pickup-text">{{ i18n.t('orders.noPickup') }}</span>
@@ -146,25 +165,6 @@
                 <td class="td-buyer">{{ order.buyer_last_name }} {{ order.buyer_first_name }}</td>
                 <td class="td-buyer-info">{{ order.buyer_email }}</td>
                 <td class="td-buyer-info">{{ order.buyer_phone }}</td>
-                <td class="td-admin-notes" @click.stop>
-                  <template v-if="editingNotesOrderId !== order.id">
-                    <span class="notes-display">
-                      <span class="notes-text">{{ order.admin_notes || '—' }}</span>
-                      <button class="btn-edit-icon" @click.stop="startEditNotes(order)" title="編輯">
-                        <Pencil :size="12" />
-                      </button>
-                    </span>
-                  </template>
-                  <template v-else>
-                    <div class="notes-edit-wrap">
-                      <textarea v-model="editingNotesValue" class="notes-textarea" rows="2" @click.stop />
-                      <div class="pickup-edit-actions">
-                        <button class="btn-save-pickup" @click.stop="saveAdminNotes(order)">{{ i18n.t('orders.savePickup') }}</button>
-                        <button class="btn-cancel-pickup" @click.stop="cancelEditNotes">{{ i18n.t('orders.cancelPickupEdit') }}</button>
-                      </div>
-                    </div>
-                  </template>
-                </td>
               </template>
               <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
               <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
@@ -238,6 +238,7 @@
               <th class="sortable" @click="toggleResSort('deposit')">{{ i18n.t('reservations.depositAmount') }}<SortIcon col="deposit" :active="resSortColumn" :dir="resSortDirection" /></th>
               <th class="sortable" @click="toggleResSort('total')">{{ i18n.t('reservations.totalPrice') }}<SortIcon col="total" :active="resSortColumn" :dir="resSortDirection" /></th>
               <th class="sortable" @click="toggleResSort('status')">{{ i18n.t('reservations.orderStatus') }}<SortIcon col="status" :active="resSortColumn" :dir="resSortDirection" /></th>
+              <th v-if="isAdmin">{{ i18n.t('reservations.detailAdminNote') }}</th>
               <template v-if="isAdmin">
                 <th class="sortable" @click="toggleResSort('buyer')">{{ i18n.t('reservations.buyer') }}<SortIcon col="buyer" :active="resSortColumn" :dir="resSortDirection" /></th>
                 <th>{{ i18n.t('reservations.buyerEmail') }}</th>
@@ -249,7 +250,7 @@
           </thead>
           <tbody v-if="filteredReservations.length === 0">
             <tr>
-              <td :colspan="isAdmin ? 12 : 8" class="td-empty">{{ i18n.t('reservations.noReservations') }}</td>
+              <td :colspan="isAdmin ? 13 : 8" class="td-empty">{{ i18n.t('reservations.noReservations') }}</td>
             </tr>
           </tbody>
           <tbody v-for="res in resPaginatedReservations" v-else :key="res.id">
@@ -281,6 +282,23 @@
                   </div>
                 </template>
               </td>
+              <td v-if="isAdmin" class="td-admin-notes" @click.stop>
+                <template v-if="editingAdminNoteResId !== res.id">
+                  <span class="notes-display">
+                    <span class="notes-text">{{ res.admin_note || '—' }}</span>
+                    <button class="btn-edit-icon" @click.stop="startEditAdminNote(res)" title="編輯備註"><Pencil :size="12" /></button>
+                  </span>
+                </template>
+                <template v-else>
+                  <div class="notes-edit-wrap" @click.stop>
+                    <textarea v-model="editingAdminNoteValue" class="notes-textarea" rows="2" @click.stop />
+                    <div class="pickup-edit-actions">
+                      <button class="btn-save-pickup" @click.stop="saveAdminNote(res)">{{ i18n.t('orders.savePickup') }}</button>
+                      <button class="btn-cancel-pickup" @click.stop="cancelEditAdminNote">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                    </div>
+                  </div>
+                </template>
+              </td>
               <template v-if="isAdmin">
                 <td class="td-buyer">{{ res.buyer_last_name }} {{ res.buyer_first_name }}</td>
                 <td class="td-buyer-info">{{ res.buyer_email }}</td>
@@ -292,7 +310,7 @@
 
             <!-- Expanded reservation details row -->
             <tr v-if="expandedResId === res.id" class="expand-row">
-              <td :colspan="isAdmin ? 12 : 8">
+              <td :colspan="isAdmin ? 13 : 8">
                 <div class="res-expand-grid">
                   <div class="res-detail-cell">
                     <span class="res-detail-label">{{ i18n.t('reservations.detailFirstName') }}</span>
@@ -333,22 +351,6 @@
                   <div class="res-detail-cell res-detail-cell--span3">
                     <span class="res-detail-label">{{ i18n.t('reservations.detailSpecialRequests') }}</span>
                     <span class="res-detail-value">{{ res.special_requests || '—' }}</span>
-                  </div>
-                  <div v-if="isAdmin" class="res-detail-cell res-detail-cell--span3">
-                    <span class="res-detail-label">{{ i18n.t('reservations.detailAdminNote') }}</span>
-                    <template v-if="editingAdminNoteResId !== res.id">
-                      <span class="res-detail-value">{{ res.admin_note || '—' }}</span>
-                      <button class="btn-edit-icon" @click.stop="startEditAdminNote(res)" title="編輯備註"><Pencil :size="12" /></button>
-                    </template>
-                    <template v-else>
-                      <div class="admin-note-edit-wrap" @click.stop>
-                        <textarea v-model="editingAdminNoteValue" class="admin-note-textarea" rows="3" />
-                        <div class="pickup-edit-actions">
-                          <button class="btn-save-pickup" @click.stop="saveAdminNote(res)">{{ i18n.t('orders.savePickup') }}</button>
-                          <button class="btn-cancel-pickup" @click.stop="cancelEditAdminNote">{{ i18n.t('orders.cancelPickupEdit') }}</button>
-                        </div>
-                      </div>
-                    </template>
                   </div>
                 </div>
               </td>
