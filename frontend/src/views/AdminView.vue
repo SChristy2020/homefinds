@@ -1,6 +1,70 @@
 <template>
   <div class="admin-view">
 
+    <!-- ===== 商品管理 ===== -->
+    <section class="admin-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          商品管理
+          <button class="icon-btn section-add-btn" @click="openAddProd" title="新增商品"><PlusCircle :size="16"/></button>
+          <button class="icon-btn section-add-btn" @click="openMarketingModal" title="發送促銷通知"><Mail :size="16"/></button>
+        </h2>
+        <div class="table-controls">
+          <button class="icon-btn" @click="prodSearchOpen = !prodSearchOpen" title="搜尋"><Search :size="16"/></button>
+          <button class="icon-btn" @click="prodSortAsc = !prodSortAsc" title="排序"><ArrowUpDown :size="16"/></button>
+        </div>
+      </div>
+      <Transition name="slide-down">
+        <div v-if="prodSearchOpen" class="search-bar">
+          <Search :size="14" class="search-icon"/>
+          <input v-model="prodSearch" placeholder="搜尋商品..." autofocus />
+        </div>
+      </Transition>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>zh名稱</th>
+              <th>代號</th>
+              <th>類別</th>
+              <th>原價</th>
+              <th>定價</th>
+              <th>狀態</th>
+              <th>可取貨時間</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="filteredProducts.length === 0">
+              <td colspan="9" class="empty-row">無資料</td>
+            </tr>
+            <tr v-for="prod in pagedProducts" :key="prod.id">
+              <td>{{ prod.id }}</td>
+              <td>{{ getProdName(prod, 'zh-TW') }}</td>
+              <td>{{ prod.code }}</td>
+              <td>{{ prod.category }}</td>
+              <td>{{ prod.original_price != null ? '$' + prod.original_price : '-' }}</td>
+              <td>${{ prod.price }}</td>
+              <td><span class="status-badge" :class="prod.status">{{ prod.status }}</span></td>
+              <td>{{ prod.pickup_available_time ? fmtDate(prod.pickup_available_time) : '隨時' }}</td>
+              <td><div class="row-actions">
+                <button class="action-btn edit" @click="openEditProd(prod)" title="編輯"><Pencil :size="14"/></button>
+                <button class="action-btn delete" @click="deleteProduct(prod.id)" title="刪除"><Trash2 :size="14"/></button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div v-if="prodTotalPages > 1" class="pagination">
+        <button class="page-btn" :disabled="prodPage === 1" @click="prodPage = 1">«</button>
+        <button class="page-btn" :disabled="prodPage === 1" @click="prodPage--">‹</button>
+        <span class="page-info">{{ prodPage }} / {{ prodTotalPages }}</span>
+        <button class="page-btn" :disabled="prodPage === prodTotalPages" @click="prodPage++">›</button>
+        <button class="page-btn" :disabled="prodPage === prodTotalPages" @click="prodPage = prodTotalPages">»</button>
+      </div>
+    </section>
+
     <!-- ===== 商品類別管理 ===== -->
     <section class="admin-section">
       <div class="section-header">
@@ -45,63 +109,6 @@
               <td><div class="row-actions">
                 <button class="action-btn edit" @click="openEditCat(cat)" title="編輯"><Pencil :size="14"/></button>
                 <button class="action-btn delete" @click="deleteCategory(cat.id)" title="刪除"><Trash2 :size="14"/></button>
-              </div></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ===== 商品管理 ===== -->
-    <section class="admin-section">
-      <div class="section-header">
-        <h2 class="section-title">
-          商品管理
-          <button class="icon-btn section-add-btn" @click="openAddProd" title="新增商品"><PlusCircle :size="16"/></button>
-          <button class="icon-btn section-add-btn" @click="openMarketingModal" title="發送促銷通知"><Mail :size="16"/></button>
-        </h2>
-        <div class="table-controls">
-          <button class="icon-btn" @click="prodSearchOpen = !prodSearchOpen" title="搜尋"><Search :size="16"/></button>
-          <button class="icon-btn" @click="prodSortAsc = !prodSortAsc" title="排序"><ArrowUpDown :size="16"/></button>
-        </div>
-      </div>
-      <Transition name="slide-down">
-        <div v-if="prodSearchOpen" class="search-bar">
-          <Search :size="14" class="search-icon"/>
-          <input v-model="prodSearch" placeholder="搜尋商品..." autofocus />
-        </div>
-      </Transition>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>id</th>
-              <th>zh名稱</th>
-              <th>代號</th>
-              <th>類別</th>
-              <th>原價</th>
-              <th>定價</th>
-              <th>狀態</th>
-              <th>可取貨時間</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="filteredProducts.length === 0">
-              <td colspan="9" class="empty-row">無資料</td>
-            </tr>
-            <tr v-for="prod in filteredProducts" :key="prod.id">
-              <td>{{ prod.id }}</td>
-              <td>{{ getProdName(prod, 'zh-TW') }}</td>
-              <td>{{ prod.code }}</td>
-              <td>{{ prod.category }}</td>
-              <td>{{ prod.original_price != null ? '$' + prod.original_price : '-' }}</td>
-              <td>${{ prod.price }}</td>
-              <td><span class="status-badge" :class="prod.status">{{ prod.status }}</span></td>
-              <td>{{ prod.pickup_available_time ? fmtDate(prod.pickup_available_time) : '隨時' }}</td>
-              <td><div class="row-actions">
-                <button class="action-btn edit" @click="openEditProd(prod)" title="編輯"><Pencil :size="14"/></button>
-                <button class="action-btn delete" @click="deleteProduct(prod.id)" title="刪除"><Trash2 :size="14"/></button>
               </div></td>
             </tr>
           </tbody>
@@ -493,6 +500,8 @@ const products = ref([])
 const prodSearch = ref('')
 const prodSearchOpen = ref(false)
 const prodSortAsc = ref(true)
+const prodPage = ref(1)
+const prodPageSize = 10
 const showProdModal = ref(false)
 const editingProdId = ref(null)
 const prodSaving = ref(false)
@@ -530,6 +539,14 @@ const filteredProducts = computed(() => {
     ? list.sort((a, b) => a.id - b.id)
     : list.sort((a, b) => b.id - a.id)
 })
+
+const prodTotalPages = computed(() => Math.max(1, Math.ceil(filteredProducts.value.length / prodPageSize)))
+const pagedProducts = computed(() => {
+  const start = (prodPage.value - 1) * prodPageSize
+  return filteredProducts.value.slice(start, start + prodPageSize)
+})
+
+watch(filteredProducts, () => { prodPage.value = 1 })
 
 function autoGenerateProdCode(categoryEnName) {
   const cat = categories.value.find(c => getCatName(c, 'en') === categoryEnName)
@@ -1096,6 +1113,20 @@ onMounted(() => {
 /* Transitions */
 .slide-down-enter-active, .slide-down-leave-active { transition: all 0.2s ease; }
 .slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-6px); }
+
+/* Pagination */
+.pagination {
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; margin-top: 12px;
+}
+.page-btn {
+  background: none; border: 1px solid var(--border); border-radius: 4px;
+  padding: 3px 9px; cursor: pointer; font-size: 0.85rem; color: var(--charcoal);
+  transition: background 0.15s;
+}
+.page-btn:hover:not(:disabled) { background: #f5f5f5; }
+.page-btn:disabled { opacity: 0.35; cursor: default; }
+.page-info { font-size: 0.85rem; color: var(--mid); min-width: 60px; text-align: center; }
 
 /* Responsive */
 @media (max-width: 700px) {
