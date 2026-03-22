@@ -372,6 +372,178 @@
         </div>
       </div>
 
+      <!-- 取貨與租屋行事曆 (admin only) -->
+      <div v-if="isAdmin" class="pickup-calendar-section">
+        <h2 class="orders-section-title">取貨與租屋行事曆</h2>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" @click="calPrevMonth">‹</button>
+          <span class="cal-month-label">{{ calMonthLabel }}</span>
+          <button class="cal-nav-btn" @click="calNextMonth">›</button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-day-header" v-for="d in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']" :key="d">{{ d }}</div>
+          <div
+            v-for="cell in calCells"
+            :key="cell.key"
+            class="cal-day"
+            :class="{ 'cal-day--other': !cell.inMonth, 'cal-day--today': cell.isToday }"
+          >
+            <div class="cal-day-num" :class="{ 'cal-day-num--today': cell.isToday }">{{ cell.day }}</div>
+            <div
+              v-for="event in cell.events"
+              :key="event.id"
+              class="cal-event"
+              :class="[
+                event.type === 'reservation' ? 'cal-event--reservation' : '',
+                event.spanPos ? `cal-event--span-${event.spanPos}` : '',
+                event.type === 'reservation' && calHoverResId === event.data.id ? 'cal-event--res-hovered' : ''
+              ]"
+              :title="event.fullLabel"
+              @mouseenter="event.type === 'reservation' && (calHoverResId = event.data.id)"
+              @mouseleave="calHoverResId = null"
+              @click.stop="calSelectedItem = event"
+            >{{ event.label }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendar item detail modal -->
+      <Teleport to="body">
+        <div v-if="calSelectedItem" class="cal-modal-backdrop" @click.self="calSelectedItem = null">
+          <div class="cal-modal">
+            <div class="cal-modal-header">
+              <span class="cal-modal-title">{{ calSelectedItem.data.order_number || calSelectedItem.data.id }}</span>
+              <button class="cal-modal-close" @click="calSelectedItem = null">✕</button>
+            </div>
+            <div class="cal-modal-body">
+
+              <!-- 購物訂單 -->
+              <template v-if="calSelectedItem.type === 'order'">
+                <div class="cal-modal-grid">
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('orders.payStatus') }}</span>
+                    <span :class="statusClass(calSelectedItem.data)">{{ statusLabel(calSelectedItem.data) }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('orders.pickupTimeLabel') }}</span>
+                    <span>{{ formatDateTime(calSelectedItem.data.pickup_time) }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('orders.buyer') }}</span>
+                    <span>{{ calSelectedItem.data.buyer_last_name }} {{ calSelectedItem.data.buyer_first_name }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('orders.buyerEmail') }}</span>
+                    <span>{{ calSelectedItem.data.buyer_email || '—' }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('orders.buyerPhone') }}</span>
+                    <span>{{ calSelectedItem.data.buyer_phone || '—' }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('orders.orderTotal') }}</span>
+                    <span>${{ orderTotal(calSelectedItem.data) }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('orders.createdAt') }}</span>
+                    <span>{{ formatDateTime(calSelectedItem.data.created_at) }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('orders.updatedAt') }}</span>
+                    <span>{{ formatDateTime(calSelectedItem.data.updated_at) }}</span>
+                  </div>
+                  <div class="cal-modal-field cal-modal-field--full">
+                    <span class="cal-modal-label">{{ i18n.t('orders.adminNotes') }}</span>
+                    <span class="cal-modal-notes">{{ calSelectedItem.data.admin_notes || '—' }}</span>
+                  </div>
+                </div>
+                <div class="cal-modal-items-title">{{ i18n.t('orders.itemCount') }}</div>
+                <OrderItemList
+                  :items="calSelectedItem.data.items.filter(i => i.status !== 'cancelled')"
+                  :orderStatus="calSelectedItem.data.order_status"
+                  @cancel="() => {}"
+                />
+              </template>
+
+              <!-- 租屋訂單 -->
+              <template v-else>
+                <div class="cal-modal-grid">
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.orderStatus') }}</span>
+                    <span :class="orderStatusClass(calSelectedItem.data.order_status)">{{ resStatusLabel(calSelectedItem.data.order_status) }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.nights') }}</span>
+                    <span>{{ calSelectedItem.data.nights }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.checkIn') }}</span>
+                    <span>{{ formatDate(calSelectedItem.data.check_in) }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.checkOut') }}</span>
+                    <span>{{ formatDate(calSelectedItem.data.check_out) }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.depositAmount') }}</span>
+                    <span>${{ calSelectedItem.data.deposit_amount }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.totalPrice') }}</span>
+                    <span>${{ calSelectedItem.data.total_price }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.buyer') }}</span>
+                    <span>{{ calSelectedItem.data.buyer_last_name }} {{ calSelectedItem.data.buyer_first_name }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.buyerEmail') }}</span>
+                    <span>{{ calSelectedItem.data.buyer_email || '—' }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.buyerPhone') }}</span>
+                    <span>{{ calSelectedItem.data.buyer_phone || '—' }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.detailBirthYear') }}</span>
+                    <span>{{ calSelectedItem.data.birth_year || '—' }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.detailOccupation') }}</span>
+                    <span>{{ calSelectedItem.data.occupation || '—' }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.detailGuestsPets') }}</span>
+                    <span>{{ calSelectedItem.data.has_guests_or_pets ? i18n.t('reservations.detailGuestsPetsYes') : i18n.t('reservations.detailGuestsPetsNo') }}</span>
+                  </div>
+                  <div class="cal-modal-field cal-modal-field--full">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.detailGuestsPetsDesc') }}</span>
+                    <span class="cal-modal-notes">{{ calSelectedItem.data.guests_pets_description || '—' }}</span>
+                  </div>
+                  <div class="cal-modal-field cal-modal-field--full">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.detailSpecialRequests') }}</span>
+                    <span class="cal-modal-notes">{{ calSelectedItem.data.special_requests || '—' }}</span>
+                  </div>
+                  <div class="cal-modal-field cal-modal-field--full">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.detailAdminNote') }}</span>
+                    <span class="cal-modal-notes">{{ calSelectedItem.data.admin_note || '—' }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.createdAt') }}</span>
+                    <span>{{ formatDateTime(calSelectedItem.data.created_at) }}</span>
+                  </div>
+                  <div class="cal-modal-field">
+                    <span class="cal-modal-label">{{ i18n.t('reservations.updatedAt') }}</span>
+                    <span>{{ formatDateTime(calSelectedItem.data.updated_at) }}</span>
+                  </div>
+                </div>
+              </template>
+
+            </div>
+          </div>
+        </div>
+      </Teleport>
+
       <!-- 購物須知 -->
       <div class="shopping-guide-wrap">
         <button class="guide-toggle-btn" @click="shoppingGuideOpen = !shoppingGuideOpen">
@@ -871,6 +1043,99 @@ function fromPickerFormat(str) {
   if (!parts) return null
   return new Date(+parts[3], +parts[1] - 1, +parts[2], +parts[4], +parts[5]).toISOString()
 }
+
+// ── Pickup/Rental Calendar ────────────────────────────────────────────────────
+const calSelectedItem = ref(null)
+const calHoverResId = ref(null)
+const calYear = ref(new Date().getFullYear())
+const calMonth = ref(new Date().getMonth())
+
+const calMonthLabel = computed(() => {
+  const d = new Date(calYear.value, calMonth.value, 1)
+  return d.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+})
+
+function calPrevMonth() {
+  if (calMonth.value === 0) { calMonth.value = 11; calYear.value-- }
+  else calMonth.value--
+}
+
+function calNextMonth() {
+  if (calMonth.value === 11) { calMonth.value = 0; calYear.value++ }
+  else calMonth.value++
+}
+
+function calFormatTime(isoStr) {
+  const d = new Date(isoStr)
+  const h = d.getHours()
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  const min = d.getMinutes()
+  return min === 0 ? `${h12}${ampm}` : `${h12}:${String(min).padStart(2, '0')}${ampm}`
+}
+
+const calCells = computed(() => {
+  const year = calYear.value
+  const month = calMonth.value
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const prevMonthDays = new Date(year, month, 0).getDate()
+  const today = new Date()
+  const paidOrders = ordersStore.orders.filter(o => o.order_status === 'paid' && o.pickup_time)
+  const activeReservations = reservationsStore.reservations.filter(r =>
+    ['待入住', '已入住', '已退房'].includes(r.order_status) && r.check_in && r.check_out
+  )
+  const cells = []
+
+  for (let i = firstDay - 1; i >= 0; i--) {
+    cells.push({ key: `prev-${i}`, day: prevMonthDays - i, inMonth: false, isToday: false, events: [] })
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d
+    const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+
+    const orderEvents = paidOrders
+      .filter(o => {
+        const pt = new Date(o.pickup_time)
+        return pt.getFullYear() === year && pt.getMonth() === month && pt.getDate() === d
+      })
+      .sort((a, b) => new Date(a.pickup_time) - new Date(b.pickup_time))
+      .map(o => {
+        const timeStr = calFormatTime(o.pickup_time)
+        const buyerName = `${o.buyer_last_name || ''} ${o.buyer_first_name || ''}`.trim()
+        const fullLabel = `${timeStr}-${o.order_number}-${buyerName}`
+        return { id: `order-${o.id}`, label: fullLabel, fullLabel, type: 'order', data: o }
+      })
+
+    const dayOfWeek = (firstDay + d - 1) % 7  // 0=Sun, 6=Sat
+    const resEvents = activeReservations
+      .filter(r => cellDateStr >= r.check_in && cellDateStr <= r.check_out)
+      .map(r => {
+        const isStart = cellDateStr === r.check_in
+        const isEnd = cellDateStr === r.check_out
+        const visualStart = isStart || dayOfWeek === 0
+        const visualEnd = isEnd || dayOfWeek === 6
+        let spanPos
+        if (visualStart && visualEnd) spanPos = 'only'
+        else if (visualStart) spanPos = 'start'
+        else if (visualEnd) spanPos = 'end'
+        else spanPos = 'mid'
+        const buyerName = `${r.buyer_last_name || ''} ${r.buyer_first_name || ''}`.trim()
+        const fullLabel = `${r.order_number || r.id}-${buyerName}`
+        return { id: `res-${r.id}`, label: isStart ? fullLabel : '', fullLabel, type: 'reservation', data: r, spanPos }
+      })
+
+    cells.push({ key: `day-${d}`, day: d, inMonth: true, isToday, events: [...orderEvents, ...resEvents] })
+  }
+
+  const remaining = (7 - (cells.length % 7)) % 7
+  for (let i = 1; i <= remaining; i++) {
+    cells.push({ key: `next-${i}`, day: i, inMonth: false, isToday: false, events: [] })
+  }
+
+  return cells
+})
 </script>
 
 <style scoped>
@@ -1182,4 +1447,113 @@ function fromPickerFormat(str) {
   background: var(--charcoal); color: #fff; border-color: var(--charcoal);
 }
 .dt-page-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* ── Pickup/Rental Calendar ──────────────────────────────────────────────── */
+.pickup-calendar-section {
+  margin-top: 32px;
+}
+.cal-nav {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 12px;
+}
+.cal-nav-btn {
+  background: none; border: 1px solid var(--border); border-radius: 4px;
+  padding: 2px 12px; cursor: pointer; font-size: 1.1rem; color: var(--charcoal);
+  transition: border-color 0.15s;
+}
+.cal-nav-btn:hover { border-color: var(--charcoal); }
+.cal-month-label { font-weight: 600; font-size: 1rem; color: var(--charcoal); }
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.cal-day-header {
+  background: #f5f3f0; padding: 6px 4px; text-align: center;
+  font-size: 0.75rem; font-weight: 600; color: var(--mid);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.cal-day-header:last-child { border-right: none; }
+.cal-day {
+  min-height: 80px; padding: 4px 5px; border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border); vertical-align: top;
+  background: #fff; overflow: hidden;
+}
+.cal-day:nth-child(7n) { border-right: none; }
+.cal-day--other { background: #faf9f7; }
+.cal-day-num {
+  font-size: 0.75rem; font-weight: 600; color: var(--charcoal);
+  margin-bottom: 3px; width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-day-num--today {
+  background: var(--accent); color: #fff; border-radius: 50%;
+}
+.cal-day--other .cal-day-num { color: var(--mid); }
+.cal-event {
+  background: var(--accent-light); color: var(--charcoal);
+  border-radius: 3px; padding: 2px 5px; margin-bottom: 2px;
+  font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer; max-width: 100%;
+}
+.cal-event:hover { opacity: 0.85; }
+.cal-event--reservation:hover { opacity: 1; }
+.cal-event--res-hovered { background: #a8cfa3 !important; color: #1a4016 !important; }
+.cal-event--reservation {
+  background: #d4e8d0; color: #2e5e28;
+  min-height: 1.5rem; text-align: center; align-items: center;
+}
+.cal-event--span-start { border-radius: 10px 0 0 10px; }
+.cal-event--span-mid   { border-radius: 0; }
+.cal-event--span-end   { border-radius: 0 10px 10px 0; }
+.cal-event--span-only  { border-radius: 3px; }
+
+/* ── Calendar order modal ────────────────────────────────────────────────── */
+.cal-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.cal-modal {
+  background: #fff; border-radius: 8px; width: 100%; max-width: 620px;
+  max-height: 85vh; display: flex; flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.cal-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.cal-modal-title {
+  font-size: 1rem; font-weight: 700; color: var(--charcoal);
+}
+.cal-modal-close {
+  background: none; border: none; cursor: pointer; font-size: 1rem;
+  color: var(--mid); padding: 2px 6px; border-radius: 4px;
+  transition: color 0.15s;
+}
+.cal-modal-close:hover { color: var(--charcoal); }
+.cal-modal-body {
+  padding: 16px 20px; overflow-y: auto; flex: 1;
+}
+.cal-modal-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px;
+  margin-bottom: 16px;
+}
+.cal-modal-field {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.cal-modal-field--full {
+  grid-column: span 2;
+}
+.cal-modal-label {
+  font-size: 0.72rem; color: var(--mid); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.cal-modal-notes {
+  white-space: pre-wrap; word-break: break-word; font-size: 0.88rem;
+}
+.cal-modal-items-title {
+  font-size: 0.82rem; font-weight: 600; color: var(--mid);
+  margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
 </style>
