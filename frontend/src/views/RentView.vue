@@ -208,7 +208,7 @@ onMounted(async () => {
 
 <style scoped>
 .rent-page { display: flex; flex-direction: column; gap: 16px; }
-.rent-title { font-size: 1.3rem; font-weight: 700; text-align: center; color: var(--charcoal); margin: 0 0 4px; }
+.rent-title { font-size: 1.2rem; font-weight: 700; text-align: center; color: var(--charcoal); margin: 0 0 4px; }
 .room-layout { display: flex; gap: 28px; flex-wrap: wrap; }
 .booking-panel { flex: 1; min-width: 280px; }
 

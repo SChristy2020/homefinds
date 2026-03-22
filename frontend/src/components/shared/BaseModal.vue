@@ -1,3 +1,11 @@
+<!--
+ * @Author: Christy qsa8647332@gmail.com
+ * @Date: 2026-03-21 23:47:06
+ * @LastEditors: Christy qsa8647332@gmail.com
+ * @LastEditTime: 2026-03-22 14:25:06
+ * @FilePath: \homefinds\frontend\src\components\shared\BaseModal.vue
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
 <template>
   <Teleport to="body">
     <Transition name="modal">
@@ -33,7 +41,7 @@ defineEmits(['update:modelValue'])
   border-radius: 6px;
   padding: 32px;
   max-width: 520px; width: 100%;
-  max-height: 90vh; overflow-y: auto;
+  max-height: 80vh; overflow-y: auto;
   box-shadow: var(--shadow-lg);
   position: relative;
 }
