@@ -630,6 +630,7 @@ async function handleNotify() {
 
 .radio-group { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.9rem; }
 .radio-group label { display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap; }
+.radio-group input[type="radio"] { margin: 0; width: 16px; height: 16px; flex-shrink: 0; }
 
 .btn-block { width: 100%; }
 
