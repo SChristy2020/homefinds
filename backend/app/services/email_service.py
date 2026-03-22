@@ -598,9 +598,9 @@ def send_marketing_email(user, product_ids, db):
           <!-- Header -->
           <tr>
             <td align="center" style="padding:28px 24px 16px;border-bottom:1px solid #f0ebe3;">
-              <div style="font-size:36px;margin-bottom:6px;">🏠</div>
+              <img src="https://schristy2020.github.io/homefinds/logo.png" alt="Christy's HomeFinds" style="height:48px;width:auto;margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;" />
               <h1 style="margin:0;font-size:22px;font-weight:700;color:#c9a96e;">
-                <a href="{shop_url}" style="color:#c9a96e;text-decoration:none;">Christy's HomeFinds</a>
+                <a href="{shop_url}" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
               </h1>
             </td>
           </tr>
@@ -1751,7 +1751,7 @@ def send_reservation_confirmation(user, reservation, db):
           <!-- Header -->
           <tr>
             <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
-              <div style="font-size:36px;margin-bottom:8px;">🏠</div>
+              <img src="https://schristy2020.github.io/homefinds/logo.png" alt="Christy's HomeFinds" style="height:48px;width:auto;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;" />
               <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">
                 <a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
               </h1>
@@ -2123,7 +2123,7 @@ def send_deposit_notification(user, reservation, db):
           <!-- Header -->
           <tr>
             <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
-              <div style="font-size:36px;margin-bottom:8px;">🏠</div>
+              <img src="https://schristy2020.github.io/homefinds/logo.png" alt="Christy's HomeFinds" style="height:48px;width:auto;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;" />
               <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">
                 <a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
                 <span style="color:#1a1a1a;"> {tr["header"]}</span>
@@ -2473,7 +2473,7 @@ def send_deposit_confirmed_notification(user, reservation, db):
           <!-- Header -->
           <tr>
             <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
-              <div style="font-size:36px;margin-bottom:8px;">🏠</div>
+              <img src="https://schristy2020.github.io/homefinds/logo.png" alt="Christy's HomeFinds" style="height:48px;width:auto;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;" />
               <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">
                 <a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
               </h1>

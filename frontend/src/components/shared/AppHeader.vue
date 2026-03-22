@@ -2,14 +2,14 @@
  * @Author: Christy qsa8647332@gmail.com
  * @Date: 2026-03-21 21:55:35
  * @LastEditors: Christy qsa8647332@gmail.com
- * @LastEditTime: 2026-03-22 16:11:19
+ * @LastEditTime: 2026-03-22 18:01:57
  * @FilePath: \homefinds\frontend\src\components\shared\AppHeader.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <template>
   <header class="site-header">
     <div class="header-top">
-      <h1 class="site-title">Christy's Home Finds</h1>
+      <h1 class="site-title"><img src="/logo.png" class="site-logo" alt="logo" />Christy's Home Finds</h1>
     </div>
     <div class="nav-row">
       <nav class="nav-tabs">
@@ -52,6 +52,13 @@ const isAdmin = computed(() => userStore.currentUser?.is_admin === 1)
 .header-top {
   display: flex; align-items: center; justify-content: center;
   position: relative; margin-bottom: 4px;
+}
+.site-logo {
+  height: 1.4rem;
+  width: auto;
+  vertical-align: middle;
+  margin-right: 6px;
+  margin-bottom: 5px;
 }
 .site-title {
   font-family: var(--font-display);

@@ -153,7 +153,8 @@
 
       <!-- Home icon -->
       <div class="confirm-icon">
-        <Home :size="40" color="#C4956A" />
+        <img src="/logo.png" alt="logo" style="height:40px;width:auto;" />
+        <div class="confirm-icon-title">Christy's HomeFinds</div>
       </div>
 
       <hr class="divider" />
@@ -298,8 +299,11 @@
 
       <!-- Home icon -->
       <div class="confirm-icon">
-        <Home :size="40" color="#C4956A" />
+        <img src="/logo.png" alt="logo" style="height:40px;width:auto;" />
+        <div class="confirm-icon-title">Christy's HomeFinds</div>
       </div>
+      
+      <hr class="divider" />
 
       <!-- Greeting -->
       <p class="receipt-greeting">
@@ -410,7 +414,6 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-import { Home } from 'lucide-vue-next'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import { useI18nStore } from '@/stores/i18n'
 import { api } from '@/utils/api'
@@ -575,6 +578,12 @@ async function handleNotify() {
 .title-en { font-size: 1rem; font-weight: 400; color: var(--mid); margin-left: 6px; }
 
 .confirm-icon { text-align: center; margin: 8px 0 4px; }
+.confirm-icon-title {font-size: 1.2rem;
+    font-weight: 700;
+    color: #c9a96e;
+    text-align: center;
+    margin-top: -10px;
+}
 
 /* Date row */
 .date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
