@@ -556,7 +556,7 @@ def send_marketing_email(user, product_ids, db):
               <a href="{product_url}" style="text-decoration:none;display:block;height:100%;">
                 <div style="border:1px solid #f0ebe3;border-radius:10px;padding:12px;text-align:center;background:#fafaf8;height:100%;box-sizing:border-box;">
                   {thumb}
-                  <p style="margin:10px 0 5px;font-size:14px;color:#333;line-height:1.5;height:2.1em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{item["name"]}</p>
+                  <p style="margin:10px 0 5px;font-size:14px;color:#333;line-height:1.5;height:3em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-align:center;">{item["name"]}</p>
                   <p style="margin:0;font-size:16px;font-weight:700;color:#1a1a1a;">{original_str}${_format_price(item["price"])}</p>
                 </div>
               </a>
