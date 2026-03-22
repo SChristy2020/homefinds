@@ -83,8 +83,13 @@ function isBlocked(d) {
 }
 
 // 選退房日時的封鎖判斷：r.checkIn 當天可作為退房日（我退＝對方入住，不衝突）
+// 但若該天同時也是另一筆訂單的 check_out，代表夾在兩段連續訂單之間，不可選
 function isBlockedForCheckOut(d) {
-  return parsedBlockedRanges.value.some(r => d > r.checkIn && d < r.checkOut)
+  const ranges = parsedBlockedRanges.value
+  const isACheckIn  = ranges.some(r => d.getTime() === r.checkIn.getTime())
+  const isACheckOut = ranges.some(r => d.getTime() === r.checkOut.getTime())
+  if (isACheckIn && isACheckOut) return true
+  return ranges.some(r => d > r.checkIn && d < r.checkOut)
 }
 
 // 判斷 [start, end] 範圍是否與任何 blocked range 重疊
