@@ -1373,7 +1373,7 @@ const calCells = computed(() => {
 .res-detail-label {
   color: var(--mid);
   font-size: 0.75rem;
-  white-space: nowrap;
+  word-break: break-word;
 }
 .res-detail-value {
   color: var(--charcoal);
