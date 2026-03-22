@@ -296,7 +296,7 @@ async function handleConfirm() {
 .col-num { width: 24px; color: #999; font-size: 0.8rem; text-align: center; }
 .col-thumb { width: 52px; }
 .col-name { min-width: 120px; }
-.col-pickup { color: #666; }
+.col-pickup { min-width: 120px; color: #666; }
 .col-price { white-space: nowrap; font-weight: 600; text-align: right; }
 .cart-table thead th.col-price { text-align: right; }
 .col-delete { width: 32px; text-align: center; }
