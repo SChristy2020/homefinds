@@ -25,18 +25,24 @@
 body {
   font-family: var(--font-body);
   background-color: var(--cream);
-  background-image: url('./bg_pc.jpg');
-  background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   color: var(--charcoal);
   min-height: 100vh;
   line-height: 1.6;
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('./bg_pc.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
 @media (max-width: 768px) {
-  body {
+  body::before {
     background-image: url('./bg_m.jpg');
   }
 }
