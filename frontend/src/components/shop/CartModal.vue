@@ -99,12 +99,15 @@ const userStore = useUserStore()
 const onOrderSuccess = inject('onOrderSuccess')
 const i18n = useI18nStore()
 
+const VALID_SALUTATIONS = ['Mr.', 'Ms.']
+const resolveSalutation = (val) => VALID_SALUTATIONS.includes(val) ? val : 'Mr.'
+
 const saved = loadSavedUser()
 const cu = userStore.currentUser
 const form = ref({
   firstName:        cu?.first_name   || saved.firstName   || '',
   lastName:         cu?.last_name    || saved.lastName    || '',
-  salutation:       cu?.salutation   || saved.salutation  || 'Mr.',
+  salutation:       resolveSalutation(cu?.salutation || saved.salutation),
   email:            cu?.email        || saved.email       || '',
   phone:            cu?.phone        || saved.phone       || '',
   estimatedPickup:  '',
@@ -121,8 +124,7 @@ watch(() => props.modelValue, (open) => {
   const f = form.value
   if (!f.firstName)        f.firstName        = cu?.first_name   || s.firstName   || ''
   if (!f.lastName)         f.lastName         = cu?.last_name    || s.lastName    || ''
-  if (f.salutation === 'Mr.' && (cu?.salutation || s.salutation))
-                           f.salutation       = cu?.salutation   || s.salutation
+  f.salutation = resolveSalutation(cu?.salutation || s.salutation || f.salutation)
   if (!f.email)            f.email            = cu?.email        || s.email       || ''
   if (!f.phone)            f.phone            = cu?.phone        || s.phone       || ''
   if (!f.zelleRefundOther) f.zelleRefundOther = s.zelleRefundOther || ''
