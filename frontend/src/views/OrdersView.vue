@@ -39,11 +39,11 @@
             {{ i18n.t('orders.dtShowing', { from: dtFrom, to: dtTo, total: filteredOrders.length }) }}
           </div>
           <div v-if="isAdmin" class="dt-status-filters">
-            <button :class="['dt-filter-btn', statusFilter === 'all' ? 'active' : '']" @click="statusFilter = 'all'">{{ i18n.t('orders.filterAll') }}</button>
-            <button :class="['dt-filter-btn', statusFilter === 'pending_payment' ? 'active' : '']" @click="statusFilter = 'pending_payment'">{{ i18n.t('orders.pending_payment') }}</button>
-            <button :class="['dt-filter-btn', statusFilter === 'paid' ? 'active' : '']" @click="statusFilter = 'paid'">{{ i18n.t('orders.paid') }}</button>
-            <button :class="['dt-filter-btn', statusFilter === 'picked_up' ? 'active' : '']" @click="statusFilter = 'picked_up'">{{ i18n.t('orders.picked_up') }}</button>
-            <button :class="['dt-filter-btn', statusFilter === 'cancelled' ? 'active' : '']" @click="statusFilter = 'cancelled'">{{ i18n.t('orders.cancelled') }}</button>
+            <button :class="['dt-filter-btn', statusFilter.length === 0 ? 'active' : '']" @click="statusFilter = []">{{ i18n.t('orders.filterAll') }}</button>
+            <button :class="['dt-filter-btn', statusFilter.includes('pending_payment') ? 'active' : '']" @click="toggleStatusFilter('pending_payment')">{{ i18n.t('orders.pending_payment') }}</button>
+            <button :class="['dt-filter-btn', statusFilter.includes('paid') ? 'active' : '']" @click="toggleStatusFilter('paid')">{{ i18n.t('orders.paid') }}</button>
+            <button :class="['dt-filter-btn', statusFilter.includes('picked_up') ? 'active' : '']" @click="toggleStatusFilter('picked_up')">{{ i18n.t('orders.picked_up') }}</button>
+            <button :class="['dt-filter-btn', statusFilter.includes('cancelled') ? 'active' : '']" @click="toggleStatusFilter('cancelled')">{{ i18n.t('orders.cancelled') }}</button>
           </div>
           <input v-model="searchQuery" class="dt-search" :placeholder="i18n.t('orders.dtSearch')" />
         </div>
@@ -222,8 +222,8 @@
             {{ i18n.t('orders.dtShowing', { from: resDtFrom, to: resDtTo, total: filteredReservations.length }) }}
           </div>
           <div v-if="isAdmin" class="dt-status-filters">
-            <button :class="['dt-filter-btn', resStatusFilter === 'all' ? 'active' : '']" @click="resStatusFilter = 'all'">{{ i18n.t('orders.filterAll') }}</button>
-            <button v-for="s in ORDER_STATUSES" :key="s" :class="['dt-filter-btn', resStatusFilter === s ? 'active' : '']" @click="resStatusFilter = s">{{ resStatusLabel(s) }}</button>
+            <button :class="['dt-filter-btn', resStatusFilter.length === 0 ? 'active' : '']" @click="resStatusFilter = []">{{ i18n.t('orders.filterAll') }}</button>
+            <button v-for="s in ORDER_STATUSES" :key="s" :class="['dt-filter-btn', resStatusFilter.includes(s) ? 'active' : '']" @click="toggleResStatusFilter(s)">{{ resStatusLabel(s) }}</button>
           </div>
           <input v-model="resSearchQuery" class="dt-search" :placeholder="i18n.t('reservations.dtSearch')" />
         </div>
@@ -614,7 +614,7 @@ const expandedResId = ref(null)
 
 // ── DataTable state ───────────────────────────────────────────────────────────
 const searchQuery = ref('')
-const statusFilter = ref('all')
+const statusFilter = ref([])
 const currentPage = ref(1)
 const pageSize = 10
 const sortColumn = ref('id')
@@ -622,8 +622,8 @@ const sortDirection = ref('desc')
 
 const filteredOrders = computed(() => {
   let orders = ordersStore.orders
-  if (statusFilter.value !== 'all') {
-    orders = orders.filter(o => o.order_status === statusFilter.value)
+  if (statusFilter.value.length > 0) {
+    orders = orders.filter(o => statusFilter.value.includes(o.order_status))
   }
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
@@ -670,7 +670,14 @@ const pageNumbers = computed(() => {
 })
 
 watch(searchQuery, () => { currentPage.value = 1 })
-watch(statusFilter, () => { currentPage.value = 1 })
+watch(statusFilter, () => { currentPage.value = 1 }, { deep: true })
+
+function toggleStatusFilter(s) {
+  const idx = statusFilter.value.indexOf(s)
+  statusFilter.value = idx === -1
+    ? [...statusFilter.value, s]
+    : statusFilter.value.filter(x => x !== s)
+}
 
 function toggleSort(col) {
   if (sortColumn.value === col) {
@@ -850,7 +857,7 @@ const editingAdminNoteResId = ref(null)
 const editingAdminNoteValue = ref('')
 
 // ── Reservations filter, sort & pagination ────────────────────────────────────
-const resStatusFilter = ref('all')
+const resStatusFilter = ref([])
 const resSearchQuery = ref('')
 const resCurrentPage = ref(1)
 const resPageSize = 10
@@ -869,8 +876,8 @@ function toggleResSort(col) {
 
 const filteredReservations = computed(() => {
   let list = reservationsStore.reservations
-  if (resStatusFilter.value !== 'all') {
-    list = list.filter(r => r.order_status === resStatusFilter.value)
+  if (resStatusFilter.value.length > 0) {
+    list = list.filter(r => resStatusFilter.value.includes(r.order_status))
   }
   if (resSearchQuery.value) {
     const q = resSearchQuery.value.toLowerCase()
@@ -915,8 +922,15 @@ const resPageNumbers = computed(() => {
   return range
 })
 
-watch(resStatusFilter, () => { resCurrentPage.value = 1 })
+watch(resStatusFilter, () => { resCurrentPage.value = 1 }, { deep: true })
 watch(resSearchQuery, () => { resCurrentPage.value = 1 })
+
+function toggleResStatusFilter(s) {
+  const idx = resStatusFilter.value.indexOf(s)
+  resStatusFilter.value = idx === -1
+    ? [...resStatusFilter.value, s]
+    : resStatusFilter.value.filter(x => x !== s)
+}
 
 function orderStatusClass(status) {
   if (status === '已取消') return 'status-cancelled'
