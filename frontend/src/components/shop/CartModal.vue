@@ -4,6 +4,7 @@
 
     <!-- Cart Items Table (only when not empty) -->
     <template v-if="cart.items.length > 0">
+      <div class="cart-table-wrapper">
       <table class="cart-table">
         <thead>
           <tr>
@@ -38,6 +39,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
 
       <!-- Total Summary -->
       <div class="total-summary">
@@ -265,10 +267,14 @@ async function handleConfirm() {
 }
 
 /* Cart Table */
+.cart-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 12px;
+}
 .cart-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 12px;
   font-size: 0.88rem;
 }
 .cart-table thead th {
@@ -289,6 +295,7 @@ async function handleConfirm() {
 }
 .col-num { width: 24px; color: #999; font-size: 0.8rem; text-align: center; }
 .col-thumb { width: 52px; }
+.col-name { min-width: 120px; }
 .col-pickup { color: #666; }
 .col-price { white-space: nowrap; font-weight: 600; text-align: right; }
 .cart-table thead th.col-price { text-align: right; }
@@ -357,7 +364,7 @@ async function handleConfirm() {
   width: 15px;
   height: 15px;
   cursor: pointer;
-  accent-color: var(--gold, #c9a96e);
+  accent-color: var(--light);
   flex-shrink: 0;
 }
 

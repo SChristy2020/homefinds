@@ -54,7 +54,7 @@ onUnmounted(() => document.removeEventListener('click', close))
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--charcoal);
+  background: var(--button);
   color: #fff;
   display: flex;
   align-items: center;

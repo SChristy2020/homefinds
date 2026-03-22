@@ -29,7 +29,7 @@ export default {
     status_reserved: '预定中',
     status_sold: '已售出',
     waitingList: '预定排序名单',
-    noWaiting: '目前还没有人预定喔，快预定成为第一顺位',
+    noWaiting: '目前还没有人预定！快预定成为第一顺位！',
     mechanism: [
       '<strong>递补机制</strong>：若第一顺位取消，系统将依序通知下一位候补者。',
       '<strong>即时认购</strong>：只要预约后<strong>直接完成汇款，不论目前的排序，您就能直接获得这项宝物！</strong>',

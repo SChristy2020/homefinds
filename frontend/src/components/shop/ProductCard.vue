@@ -53,12 +53,12 @@ function next() {
 
 <style scoped>
 .product-card {
-  background: var(--warm-white);
-  border: 1.5px solid var(--border);
+  background: var(--white);
   border-radius: var(--radius);
   overflow: hidden;
   cursor: pointer;
   transition: box-shadow 0.2s, transform 0.18s;
+  box-shadow: 1px 1px 5px #cccc;
 }
 .product-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
 .product-card.sold-out { opacity: 0.5; pointer-events: none; }
@@ -104,11 +104,11 @@ function next() {
 }
 .img-dot.active { background: #fff; }
 .product-info  { padding: 10px 10px 12px; }
-.product-name  { font-size: 0.78rem; color: var(--mid); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.product-name  { font-size: .95rem; color: var(--accent); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;}
 .product-price-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-.price-original { font-size: 0.73rem; color: var(--light); text-decoration: line-through; }
-.price-current  { font-size: 0.95rem; font-weight: 600; color: var(--charcoal); }
-.product-date   { font-size: 0.7rem; color: var(--light); margin-top: 2px; }
+.price-original { font-size: 1rem; color: var(--accent); text-decoration: line-through; }
+.price-current  { font-size: 1.2rem; font-weight: 600; color: var(--charcoal); }
+.product-date   { font-size: 0.8rem; color: var(--charcoal); margin-top: 2px; }
 .sold-badge {
   display: inline-block; font-size: 0.65rem;
   background: var(--red); color: #fff;

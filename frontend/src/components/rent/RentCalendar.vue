@@ -146,12 +146,12 @@ function selectDay(day) {
   transition: all 0.15s; font-size: 0.8rem;
   border: 1.5px solid transparent;
 }
-.cal-day:hover:not(.disabled):not(.empty):not(.blocked) { background: var(--accent-light); }
+.cal-day:hover:not(.disabled):not(.empty):not(.blocked) { background: var(--button); }
 .cal-day.empty    { cursor: default; }
-.cal-day.disabled { color: var(--light); cursor: not-allowed; text-decoration: line-through; }
-.cal-day.blocked  { color: var(--light); cursor: not-allowed; background: #f0e8e8; text-decoration: line-through; }
-.cal-day.in-range { background: var(--accent-light); }
+.cal-day.disabled { color: var(--button); cursor: not-allowed; text-decoration: line-through; }
+.cal-day.blocked  { color: var(--button); cursor: not-allowed; background: var(--accent-light); text-decoration: line-through; }
+.cal-day.in-range { background: var(--light); }
 .cal-day.selected-start,
-.cal-day.selected-end    { background: var(--charcoal); color: #fff; }
+.cal-day.selected-end    { background: var(--accent); color: #fff; }
 .cal-day.today    { border-color: var(--accent); font-weight: 600; }
 </style>

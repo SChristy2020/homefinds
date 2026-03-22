@@ -61,22 +61,22 @@ const i18n = useI18nStore()
 </script>
 
 <style scoped>
-.guide-content { font-size: 0.83rem; }
+.guide-content { font-size: .9rem; }
 .guide-content-title {
-  font-size: 0.92rem; font-weight: 700;
+  font-size: 1.2rem; font-weight: 700;
   color: var(--charcoal); margin: 0 0 12px;
 }
 .guide-step { margin-bottom: 12px; }
 .guide-step h4 {
-  font-size: 0.88rem; font-weight: 700;
+  font-size: 1rem; font-weight: 700;
   color: var(--accent, #c9a96e); margin: 0 0 6px;
 }
-.guide-step p { font-size: 0.82rem; color: #555; margin: 0 0 4px; }
+.guide-step p { font-size: 0.9rem; color: #555; margin: 0 0 4px; }
 .guide-step ul {
   margin: 0; padding-left: 18px;
   display: flex; flex-direction: column; gap: 4px;
 }
-.guide-step li { font-size: 0.82rem; color: #444; line-height: 1.5; }
+.guide-step li { font-size: 0.9rem; color: #444; line-height: 1.5; }
 .guide-step li.warning {
   color: #c0392b; font-weight: 600;
   list-style: none; margin-left: -18px;
@@ -88,7 +88,7 @@ const i18n = useI18nStore()
   font-weight: 600; color: var(--charcoal);
 }
 .guide-contact {
-  font-size: 0.82rem; color: #555;
+  font-size: 0.9rem; color: #555;
   margin: 8px 0 0; padding-top: 10px;
   border-top: 1px solid #dde5ef;
 }

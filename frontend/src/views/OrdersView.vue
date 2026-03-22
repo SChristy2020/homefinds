@@ -1392,7 +1392,7 @@ const calCells = computed(() => {
   background: #edf4f4;
 }
 .guide-collapse-body { margin-top: 12px; }
-.rent-guide-content { font-size: 0.83rem; color: #444; line-height: 1.6; }
+.rent-guide-content { font-size: .9rem; color: #444; line-height: 1.6; }
 .rent-guide-content :deep(ul), .rent-guide-content :deep(ol) { padding-left: 1.5em; }
 .rent-guide-content :deep(ul) { list-style-type: disc; }
 .rent-guide-content :deep(ol) { list-style-type: decimal; }

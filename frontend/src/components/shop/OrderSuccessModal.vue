@@ -48,6 +48,7 @@
       </p>
 
       <!-- Items Table -->
+      <div class="items-table-wrapper">
       <table class="items-table">
         <thead>
           <tr>
@@ -79,6 +80,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
 
       <!-- Total Summary -->
       <div class="total-summary">
@@ -181,9 +183,9 @@ const orderNumber = computed(() => props.order?.order_number ?? '')
 .success-icon { display: flex; justify-content: center; color: var(--accent); margin-bottom: 16px; }
 
 /* Greeting */
-.greeting-block { margin-bottom: 12px; font-size: 0.88rem; }
+.greeting-block { margin-bottom: 12px; font-size: 0.9rem; }
 .greeting-line { margin-bottom: 4px; }
-.pickup-line { color: var(--mid); margin-bottom: 6px; }
+.pickup-line { color: var(--charcoal); margin-bottom: 6px; }
 .pickup-line em { font-style: italic; }
 .orders-link { color: var(--accent); text-decoration: underline; font-style: normal; }
 .orders-link:hover { opacity: 0.8; }
@@ -197,7 +199,7 @@ const orderNumber = computed(() => props.order?.order_number ?? '')
   border-radius: var(--radius);
   padding: 10px 14px;
   margin-bottom: 12px;
-  font-size: 0.83rem;
+  font-size: 0.9rem;
 }
 .payment-title {
   font-weight: 700;
@@ -211,7 +213,7 @@ const orderNumber = computed(() => props.order?.order_number ?? '')
 /* Zelle Block */
 .zelle-block {
   margin-bottom: 10px;
-  font-size: 0.83rem;
+  font-size: 0.9rem;
 }
 .zelle-title { font-weight: 700; margin-bottom: 6px; }
 .zelle-block ul { list-style: disc; padding-left: 20px; margin: 0; }
@@ -219,7 +221,7 @@ const orderNumber = computed(() => props.order?.order_number ?? '')
 
 /* Order Number */
 .order-number-label {
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 700;
   margin-bottom: 12px;
 }
@@ -233,10 +235,14 @@ const orderNumber = computed(() => props.order?.order_number ?? '')
 }
 
 /* Items Table */
+.items-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 12px;
+}
 .items-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 10px;
   font-size: 0.85rem;
 }
 .items-table thead th {
@@ -252,6 +258,7 @@ const orderNumber = computed(() => props.order?.order_number ?? '')
 .items-table tbody td { padding: 7px 6px; vertical-align: middle; }
 .col-num { width: 22px; color: #999; font-size: 0.78rem; text-align: center; }
 .col-thumb { width: 50px; }
+.col-name { min-width: 120px; }
 .col-pickup { color: #666; }
 .col-price { white-space: nowrap; font-weight: 600; text-align: right; }
 .items-table thead th.col-price { text-align: right; }

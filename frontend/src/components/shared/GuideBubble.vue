@@ -84,7 +84,7 @@ onMounted(async () => {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--charcoal);
+  background: var(--button);
   color: #fff;
   display: flex;
   align-items: center;
@@ -157,21 +157,21 @@ onMounted(async () => {
   display: flex;
   border-bottom: 1.5px solid #f0ede8;
   flex-shrink: 0;
-  padding: 0 24px;
-  gap: 4px;
 }
 .guide-tab {
+  flex: 1;
   background: none;
   border: none;
   border-bottom: 2.5px solid transparent;
   margin-bottom: -1.5px;
   padding: 10px 12px;
-  font-size: 0.82rem;
+  font-size: .9rem;
   font-weight: 600;
   color: var(--mid);
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
   white-space: nowrap;
+  text-align: center;
 }
 .guide-tab:hover { color: var(--charcoal); }
 .guide-tab.active {
@@ -184,7 +184,7 @@ onMounted(async () => {
   padding: 20px 24px 24px;
 }
 
-.rent-guide-content { font-size: 0.83rem; color: #444; line-height: 1.6; }
+.rent-guide-content { font-size: .9rem; color: #444; line-height: 1.6; }
 .rent-guide-content :deep(ul), .rent-guide-content :deep(ol) { padding-left: 1.5em; }
 .rent-guide-content :deep(ul) { list-style-type: disc; }
 .rent-guide-content :deep(ol) { list-style-type: decimal; }

@@ -5,16 +5,18 @@
 
 :root {
   --cream:        #FAF7F2;
+  --white:        #ffffff;
   --warm-white:   #FFFDF9;
-  --charcoal:     #1C1C1C;
+  --charcoal:     #010a07;
+  --button:       #6f9f90;
   --dark:         #2A2A2A;
   --mid:          #6B6B6B;
-  --light:        #B8B0A4;
+  --light:        #b1d3c5;
   --border:       #E2DDD7;
-  --accent:       #C4956A;
-  --accent-light: #EDD9C2;
+  --accent:       #507f70;
+  --accent-light: #f8fdfb;
   --green:        #5A7A5A;
-  --red:          #8B3A3A;
+  --red:          #7f0404;
   --shadow:       0 2px 20px rgba(0,0,0,0.08);
   --shadow-lg:    0 8px 40px rgba(0,0,0,0.14);
   --radius:       4px;
@@ -67,7 +69,7 @@ body::before {
 /* ─── Shared Button Styles ──────────────────────────────────────────── */
 .btn-primary {
   padding: 10px 28px;
-  background: var(--charcoal);
+  background: var(--button);
   color: #fff;
   border: none;
   border-radius: var(--radius);
@@ -77,6 +79,7 @@ body::before {
   cursor: pointer;
   transition: background 0.18s;
   letter-spacing: 0.04em;
+  width: 100%;
 }
 .btn-primary:hover   { background: var(--accent); }
 .btn-primary:disabled { background: var(--light); cursor: not-allowed; }
@@ -126,7 +129,7 @@ body::before {
   border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 0.85rem;
-  background: var(--cream);
+  background: rgb(248 253 251);
   outline: none;
   transition: border-color 0.15s;
 }
@@ -138,6 +141,13 @@ body::before {
   gap: 14px;
 }
 .form-row .form-group { flex: 1; }
+
+@media (max-width: 480px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
 
 .radio-group {
   display: flex;

@@ -150,9 +150,9 @@ function toggleSort() {
   border: 1.5px solid var(--charcoal); background: transparent;
   border-radius: 999px; cursor: pointer;
   transition: all 0.18s; font-family: var(--font-body);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.02em; color: var(--charcoal);
 }
-.pill.active { background: var(--charcoal); color: #fff; }
+.pill.active { background: var(--button); border: 1.5px solid var(--button); color: #fff; }
 .pill:hover:not(.active) { background: var(--border); }
 .shop-actions { display: flex; gap: 12px; align-items: center; }
 .icon-btn {

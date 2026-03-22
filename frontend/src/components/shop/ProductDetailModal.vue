@@ -31,7 +31,7 @@
     <!-- Category + Code -->
     <div class="badge-row">
       <span v-if="categoryLabel" class="category-badge">{{ categoryLabel }}</span>
-      <span v-if="product.code" class="code-badge">{{ product.code }}</span>
+      <span v-if="product.code" class="code-badge">#{{ product.code }}</span>
     </div>
 
     <!-- Status + Pickup time -->
@@ -209,9 +209,11 @@ function maskEmail(email) {
   margin-bottom: 10px;
 }
 .category-badge {
-  font-size: 0.75rem; padding: 3px 12px;
-  border: 1.5px solid var(--charcoal);
-  border-radius: 999px; color: var(--charcoal);
+  font-size: .9rem;
+  padding: 3px 12px;
+  border-radius: 999px;
+  color: var(--white);
+  background: var(--button)
 }
 .code-badge {
   font-size: 0.75rem; padding: 3px 10px;
@@ -222,7 +224,7 @@ function maskEmail(email) {
 /* Status + Pickup time */
 .status-row {
   display: flex; align-items: center; gap: 6px;
-  font-size: 0.78rem; margin-bottom: 8px;
+  font-size: 1rem; margin-bottom: 8px; padding: 0 0 0 4px;
 }
 .status-dot {
   display: inline-block; width: 8px; height: 8px;
@@ -231,8 +233,8 @@ function maskEmail(email) {
 .dot-available { background: #4caf50; }
 .dot-reserved  { background: #ff9800; }
 .dot-sold      { background: #f44336; }
-.status-label  { color: var(--mid); }
-.pickup-time   { margin-left: auto; color: var(--mid); font-size: 0.78rem; }
+.status-label  { color: var(--charcoal); }
+.pickup-time   { margin-left: auto; color: var(--charcoal); font-size: 1rem; }
 
 /* Price */
 .price-row {
@@ -240,7 +242,7 @@ function maskEmail(email) {
   margin-bottom: 12px;
 }
 .price-original {
-  font-size: 0.9rem; color: var(--light);
+  font-size: 1.2rem; color: var(--accent);
   text-decoration: line-through;
 }
 .price-current {
@@ -250,7 +252,7 @@ function maskEmail(email) {
 /* Add to cart button */
 .btn-add-cart {
   width: 100%; padding: 12px;
-  background: var(--charcoal); color: #fff;
+  background: var(--accent); color: #fff;
   border: none; border-radius: var(--radius);
   font-size: 0.9rem; font-family: var(--font-body);
   cursor: pointer; margin-bottom: 14px;
@@ -261,7 +263,7 @@ function maskEmail(email) {
 
 /* Description */
 .description-box {
-  font-size: 0.82rem; color: var(--mid);
+  font-size: 0.9rem; color: var(--charcoal);
   margin-bottom: 8px;
   line-height: 1.55;
   white-space: pre-wrap;
@@ -269,7 +271,7 @@ function maskEmail(email) {
 
 /* Listed date */
 .listed-date {
-  font-size: 0.75rem; color: var(--light);
+  font-size: 0.75rem; color: var(--accent);
   margin-bottom: 16px;
 }
 
@@ -291,7 +293,9 @@ function maskEmail(email) {
 }
 .mechanism-list {
   margin: 10px 0 0 0; padding-left: 18px;
-  font-size: 0.8rem; color: var(--mid); line-height: 1.7;
+  font-size: 0.9rem; color: var(--charcoal); line-height: 1.7;
+  border-top: 1.5px solid var(--border);
+  padding-top: 10px;
 }
 .mechanism-list li { margin-bottom: 2px; }
 </style>

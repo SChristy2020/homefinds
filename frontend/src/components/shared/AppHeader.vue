@@ -2,7 +2,7 @@
  * @Author: Christy qsa8647332@gmail.com
  * @Date: 2026-03-21 21:55:35
  * @LastEditors: Christy qsa8647332@gmail.com
- * @LastEditTime: 2026-03-22 14:47:51
+ * @LastEditTime: 2026-03-22 16:11:19
  * @FilePath: \homefinds\frontend\src\components\shared\AppHeader.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -68,7 +68,7 @@ const isAdmin = computed(() => userStore.currentUser?.is_admin === 1)
   font-family: var(--font-body);
   font-size: 0.85rem;
   font-weight: 500;
-  padding: 2px 12px 0px 12px;
+  padding: 3px 12px 0px 12px;
   background: hsl(161 20% 53% / 1);
   color: white;
   cursor: pointer;
@@ -79,7 +79,7 @@ const isAdmin = computed(() => userStore.currentUser?.is_admin === 1)
 }
 .nav-tab.active {
   color: #fff;
-  border-bottom: 2px solid white;
+  border-bottom: 3px solid white;
 }
 .nav-tab:hover:not(.active) {  background: hsl(161deg 20% 53% / 17%); color: black; }
 
