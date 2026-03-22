@@ -46,8 +46,10 @@ class ReservationOut(BaseModel):
         from_attributes = True
 
 class ReservationWithUser(ReservationOut):
-    buyer_first_name:  str
-    buyer_last_name:   str
-    buyer_email:       str
-    buyer_phone:       str
-    buyer_salutation:  Optional[str] = None
+    buyer_first_name:         str
+    buyer_last_name:          str
+    buyer_email:              str
+    buyer_phone:              str
+    buyer_salutation:         Optional[str] = None
+    buyer_zelle_refund:       Optional[str] = None
+    buyer_zelle_refund_other: Optional[str] = None

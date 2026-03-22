@@ -80,6 +80,8 @@ def get_all_reservations(db: Session = Depends(get_db)):
             buyer_email=u.email,
             buyer_phone=u.phone,
             buyer_salutation=u.salutation,
+            buyer_zelle_refund=u.zelle_refund,
+            buyer_zelle_refund_other=u.zelle_refund_other,
         )
         for r, u in rows
     ]

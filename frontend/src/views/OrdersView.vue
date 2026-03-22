@@ -73,6 +73,7 @@
                 </th>
                 <th>{{ i18n.t('orders.buyerEmail') }}</th>
                 <th>{{ i18n.t('orders.buyerPhone') }}</th>
+                <th>{{ i18n.t('orders.buyerZelleRefund') }}</th>
               </template>
               <th class="sortable" @click="toggleSort('created')">
                 {{ i18n.t('orders.createdAt') }}<SortIcon col="created" :active="sortColumn" :dir="sortDirection" />
@@ -165,6 +166,7 @@
                 <td class="td-buyer">{{ order.buyer_last_name }} {{ order.buyer_first_name }}</td>
                 <td class="td-buyer-info">{{ order.buyer_email }}</td>
                 <td class="td-buyer-info">{{ order.buyer_phone }}</td>
+                <td class="td-buyer-info">{{ order.buyer_zelle_refund === 'other' ? order.buyer_zelle_refund_other : order.buyer_zelle_refund === 'email' ? 'Email' : '電話' }}</td>
               </template>
               <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
               <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
@@ -172,7 +174,7 @@
 
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
-              <td :colspan="isAdmin ? 11 : 6">
+              <td :colspan="isAdmin ? 12 : 6">
                 <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" :orderStatus="order.order_status" @cancel="handleCancel" />
 
                 <!-- Total summary -->
@@ -243,6 +245,7 @@
                 <th class="sortable" @click="toggleResSort('buyer')">{{ i18n.t('reservations.buyer') }}<SortIcon col="buyer" :active="resSortColumn" :dir="resSortDirection" /></th>
                 <th>{{ i18n.t('reservations.buyerEmail') }}</th>
                 <th>{{ i18n.t('reservations.buyerPhone') }}</th>
+                <th>{{ i18n.t('reservations.buyerZelleRefund') }}</th>
               </template>
               <th class="sortable" @click="toggleResSort('created')">{{ i18n.t('reservations.createdAt') }}<SortIcon col="created" :active="resSortColumn" :dir="resSortDirection" /></th>
               <th v-if="isAdmin" class="sortable" @click="toggleResSort('updated')">{{ i18n.t('reservations.updatedAt') }}<SortIcon col="updated" :active="resSortColumn" :dir="resSortDirection" /></th>
@@ -303,6 +306,7 @@
                 <td class="td-buyer">{{ res.buyer_last_name }} {{ res.buyer_first_name }}</td>
                 <td class="td-buyer-info">{{ res.buyer_email }}</td>
                 <td class="td-buyer-info">{{ res.buyer_phone }}</td>
+                <td class="td-buyer-info">{{ res.buyer_zelle_refund === 'other' ? res.buyer_zelle_refund_other : res.buyer_zelle_refund === 'email' ? 'Email' : '電話' }}</td>
               </template>
               <td class="td-created">{{ formatDateTime(res.created_at) }}</td>
               <td v-if="isAdmin" class="td-created">{{ formatDateTime(res.updated_at) }}</td>
@@ -310,7 +314,7 @@
 
             <!-- Expanded reservation details row -->
             <tr v-if="expandedResId === res.id" class="expand-row">
-              <td :colspan="isAdmin ? 13 : 8">
+              <td :colspan="isAdmin ? 14 : 8">
                 <div class="res-expand-grid">
                   <div class="res-detail-cell">
                     <span class="res-detail-label">{{ i18n.t('reservations.detailFirstName') }}</span>

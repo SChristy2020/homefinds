@@ -25,10 +25,12 @@ def _build_out(order, db):
     out = OrderOut.model_validate(order)
     user = db.query(User).filter(User.id == order.user_id).first()
     if user:
-        out.buyer_first_name = user.first_name
-        out.buyer_last_name  = user.last_name
-        out.buyer_email      = user.email
-        out.buyer_phone      = user.phone
+        out.buyer_first_name        = user.first_name
+        out.buyer_last_name         = user.last_name
+        out.buyer_email             = user.email
+        out.buyer_phone             = user.phone
+        out.buyer_zelle_refund      = user.zelle_refund
+        out.buyer_zelle_refund_other = user.zelle_refund_other
     enriched = []
     for item in items:
         position = (

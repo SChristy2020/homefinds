@@ -55,11 +55,13 @@ class OrderOut(BaseModel):
     created_at:  datetime
     updated_at:  datetime
     items:       list[OrderItemOut] = []
-    buyer_first_name: Optional[str] = None
-    buyer_last_name:  Optional[str] = None
-    buyer_email:      Optional[str] = None
-    buyer_phone:      Optional[str] = None
-    admin_notes:      Optional[str] = None
+    buyer_first_name:        Optional[str] = None
+    buyer_last_name:         Optional[str] = None
+    buyer_email:             Optional[str] = None
+    buyer_phone:             Optional[str] = None
+    buyer_zelle_refund:      Optional[str] = None
+    buyer_zelle_refund_other: Optional[str] = None
+    admin_notes:             Optional[str] = None
 
     class Config:
         from_attributes = True
