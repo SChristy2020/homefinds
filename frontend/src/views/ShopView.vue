@@ -22,7 +22,22 @@
       </div>
       <div class="shop-actions">
         <button class="icon-btn" @click="searchOpen = !searchOpen"><Search :size="17" /></button>
-        <button class="icon-btn" @click="toggleSort"><ArrowUpDown :size="17" /></button>
+        <div class="sort-dropdown" ref="sortRef">
+          <button class="icon-btn" :class="{ active: sortOption !== '' }" @click="sortOpen = !sortOpen">
+            <ArrowUpDown :size="17" />
+          </button>
+          <Transition name="slide-down">
+            <div v-if="sortOpen" class="sort-menu">
+              <button
+                v-for="opt in sortOptions"
+                :key="opt.value"
+                class="sort-item"
+                :class="{ active: sortOption === opt.value }"
+                @click="selectSort(opt.value)"
+              >{{ opt.label }}</button>
+            </div>
+          </Transition>
+        </div>
       </div>
     </div>
 
@@ -52,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, computed, provide, onMounted, watch } from 'vue'
+import { ref, computed, provide, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Search, ArrowUpDown } from 'lucide-vue-next'
 import { useProductsStore } from '@/stores/products'
@@ -74,6 +89,7 @@ onMounted(async () => {
     productsStore.fetchCategories(),
     productsStore.fetchProducts(),
   ])
+  document.addEventListener('click', onClickOutside)
 })
 
 function toggleCategory(enName) {
@@ -93,7 +109,30 @@ function getCatLabel(cat) {
 }
 const searchOpen = ref(false)
 const searchQuery = ref('')
-const sortAsc = ref(true)
+const sortOption = ref('')
+const sortOpen = ref(false)
+const sortRef = ref(null)
+
+const sortOptions = computed(() => [
+  { value: '',           label: i18n.t('shop.sortDefault') },
+  { value: 'price_asc',  label: i18n.t('shop.sortPriceLow') },
+  { value: 'price_desc', label: i18n.t('shop.sortPriceHigh') },
+  { value: 'name_asc',   label: i18n.t('shop.sortNameAsc') },
+  { value: 'name_desc',  label: i18n.t('shop.sortNameDesc') },
+])
+
+function selectSort(value) {
+  sortOption.value = value
+  sortOpen.value = false
+}
+
+function onClickOutside(e) {
+  if (sortRef.value && !sortRef.value.contains(e.target)) sortOpen.value = false
+}
+
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutside)
+})
 
 const selectedProduct = ref(null)
 const showDetailModal = ref(false)
@@ -112,7 +151,11 @@ const filteredProducts = computed(() => {
   if (searchQuery.value.trim()) {
     list = list.filter(p => p.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
   }
-  return sortAsc.value ? [...list].sort((a,b) => a.price - b.price) : [...list].sort((a,b) => b.price - a.price)
+  if (sortOption.value === 'price_asc') return [...list].sort((a, b) => a.price - b.price)
+  if (sortOption.value === 'price_desc') return [...list].sort((a, b) => b.price - a.price)
+  if (sortOption.value === 'name_asc') return [...list].sort((a, b) => a.name.localeCompare(b.name))
+  if (sortOption.value === 'name_desc') return [...list].sort((a, b) => b.name.localeCompare(a.name))
+  return list
 })
 
 function openProduct(product) {
@@ -134,9 +177,6 @@ watch(
   { immediate: true }
 )
 
-function toggleSort() {
-  sortAsc.value = !sortAsc.value
-}
 </script>
 
 <style scoped>
@@ -162,6 +202,23 @@ function toggleSort() {
   transition: color 0.15s;
 }
 .icon-btn:hover { color: var(--accent); }
+.icon-btn.active { color: var(--button); }
+.sort-dropdown { position: relative; }
+.sort-menu {
+  position: absolute; right: 0; top: calc(100% + 6px);
+  background: var(--accent-light); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  min-width: 140px; z-index: 100; overflow: hidden;
+}
+.sort-item {
+  display: block; width: 100%;
+  padding: 8px 14px; text-align: left;
+  font-family: var(--font-body); font-size: 0.8rem; color: var(--charcoal);
+  background: none; border: none; cursor: pointer;
+  transition: background 0.12s;
+}
+.sort-item:hover { background: var(--border); }
+.sort-item.active { color: var(--button); font-weight: 600; }
 .search-bar {
   display: flex; gap: 10px; align-items: center;
   background: var(--light-light); border: 1.5px solid var(--border);

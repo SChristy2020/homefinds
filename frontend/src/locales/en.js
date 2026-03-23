@@ -9,6 +9,11 @@ export default {
     all: 'All',
     searchPlaceholder: 'Search items...',
     itemCount: '{count} treasures total',
+    sortDefault: 'Default',
+    sortPriceLow: 'Price: Low to High',
+    sortPriceHigh: 'Price: High to Low',
+    sortNameAsc: 'Name: A → Z',
+    sortNameDesc: 'Name: Z → A',
     soldOut: 'Sold Out',
     categories: {
       Bedroom: 'Bedroom',

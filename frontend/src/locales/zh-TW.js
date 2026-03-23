@@ -9,6 +9,11 @@ export default {
     all: '全部',
     searchPlaceholder: '搜尋商品...',
     itemCount: '共有 {count} 件寶物',
+    sortDefault: '預設排序',
+    sortPriceLow: '價錢由低到高',
+    sortPriceHigh: '價錢由高到低',
+    sortNameAsc: '名稱 A → Z',
+    sortNameDesc: '名稱 Z → A',
     soldOut: '已售出',
     categories: {
       Bedroom: '臥室',
