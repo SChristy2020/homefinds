@@ -164,7 +164,7 @@ function maskEmail(email) {
 .gallery { margin-bottom: 16px; }
 .gallery-main {
   position: relative;
-  width: 100%; aspect-ratio: 4/3;
+  width: 100%; aspect-ratio: 1/1;
   background: #3a3a3a;
   border-radius: var(--radius);
   overflow: hidden;
