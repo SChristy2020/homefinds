@@ -141,13 +141,13 @@ function toggleSort() {
 
 <style scoped>
 .shop-filters {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 24px; flex-wrap: wrap; gap: 10px;
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 4px; gap: 10px;
 }
-.category-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.category-pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .pill {
   font-size: 0.78rem; padding: 5px 14px;
-  border: 1.5px solid var(--charcoal); background: transparent;
+  border: 1px solid var(--charcoal); background: transparent;
   border-radius: 999px; cursor: pointer;
   transition: all 0.18s; font-family: var(--font-body);
   letter-spacing: 0.02em; color: var(--charcoal);
@@ -164,13 +164,13 @@ function toggleSort() {
 .icon-btn:hover { color: var(--accent); }
 .search-bar {
   display: flex; gap: 10px; align-items: center;
-  background: var(--warm-white); border: 1.5px solid var(--border);
+  background: var(--light-light); border: 1.5px solid var(--border);
   border-radius: var(--radius); padding: 6px 14px; margin-bottom: 20px;
 }
 .search-bar input {
   border: none; background: transparent;
   font-family: var(--font-body); font-size: 0.85rem;
-  outline: none; flex: 1; color: var(--charcoal);
+  outline: none; flex: 1; color: var(--accent);
 }
 .search-bar input::placeholder { color: var(--light); }
 .search-icon { color: var(--mid); flex-shrink: 0; }
