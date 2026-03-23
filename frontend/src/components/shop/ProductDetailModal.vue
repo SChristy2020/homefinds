@@ -176,10 +176,13 @@ function maskEmail(email) {
 }
 .gallery-placeholder { width: 100%; height: 100%; background: #3a3a3a; }
 .gallery-thumbs {
-  display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;
+  display: flex; gap: 6px; margin-top: 8px;
+  overflow-x: auto; flex-wrap: nowrap;
+  scrollbar-width: none;
 }
+.gallery-thumbs::-webkit-scrollbar { display: none; }
 .gallery-thumb {
-  width: 60px; height: 60px;
+  width: 60px; height: 60px; flex-shrink: 0;
   object-fit: cover; border-radius: 4px;
   cursor: pointer; opacity: 0.65;
   transition: opacity 0.15s;
