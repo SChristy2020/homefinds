@@ -14,6 +14,7 @@ export default {
     sortPriceHigh: '价格由高到低',
     sortNameAsc: '名称 A → Z',
     sortNameDesc: '名称 Z → A',
+    hideSold: '隐藏已售出商品',
     soldOut: '已售出',
     categories: {
       Bedroom: '卧室',

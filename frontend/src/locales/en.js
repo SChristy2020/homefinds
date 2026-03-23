@@ -14,6 +14,7 @@ export default {
     sortPriceHigh: 'Price: High to Low',
     sortNameAsc: 'Name: A → Z',
     sortNameDesc: 'Name: Z → A',
+    hideSold: 'In Stock Only',
     soldOut: 'Sold Out',
     categories: {
       Bedroom: 'Bedroom',

@@ -21,6 +21,10 @@
         </button>
       </div>
       <div class="shop-actions">
+        <label class="hide-sold-label">
+          <input type="checkbox" v-model="hideSold" class="hide-sold-checkbox" />
+          {{ i18n.t('shop.hideSold') }}
+        </label>
         <button class="icon-btn" @click="searchOpen = !searchOpen"><Search :size="17" /></button>
         <div class="sort-dropdown" ref="sortRef">
           <button class="icon-btn" :class="{ active: sortOption !== '' }" @click="sortOpen = !sortOpen">
@@ -109,6 +113,7 @@ function getCatLabel(cat) {
 }
 const searchOpen = ref(false)
 const searchQuery = ref('')
+const hideSold = ref(false)
 const sortOption = ref('')
 const sortOpen = ref(false)
 const sortRef = ref(null)
@@ -148,6 +153,9 @@ const filteredProducts = computed(() => {
   let list = selectedCategories.value.length === 0
     ? productsStore.products
     : productsStore.products.filter(p => selectedCategories.value.includes(p.category))
+  if (hideSold.value) {
+    list = list.filter(p => p.status !== 'sold')
+  }
   if (searchQuery.value.trim()) {
     list = list.filter(p => p.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
   }
@@ -195,6 +203,29 @@ watch(
 .pill.active { background: var(--button); border: 1.5px solid var(--button); color: #fff; }
 .pill:hover:not(.active) { background: var(--border); }
 .shop-actions { display: flex; gap: 12px; align-items: center; }
+.hide-sold-label {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.78rem; color: var(--charcoal);
+  cursor: pointer; user-select: none;
+}
+.hide-sold-checkbox {
+  appearance: none; -webkit-appearance: none;
+  width: 14px; height: 14px; flex-shrink: 0;
+  border: 1.5px solid var(--charcoal); border-radius: 3px;
+  background: transparent; cursor: pointer;
+  display: grid; place-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.hide-sold-checkbox:checked {
+  background: var(--button); border-color: var(--button);
+}
+.hide-sold-checkbox:checked::after {
+  content: '';
+  width: 4px; height: 7px;
+  border: 2px solid #fff;
+  border-top: none; border-left: none;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
 .icon-btn {
   background: none; border: none; cursor: pointer;
   color: var(--charcoal); padding: 4px;
