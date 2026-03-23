@@ -20,6 +20,20 @@
           <input v-model="prodSearch" placeholder="搜尋商品..." autofocus />
         </div>
       </Transition>
+      <div class="admin-category-pills">
+        <button
+          class="admin-pill"
+          :class="{ active: prodCategoryFilter.length === 0 }"
+          @click="prodCategoryFilter = []"
+        >全部</button>
+        <button
+          v-for="cat in categories"
+          :key="cat.id"
+          class="admin-pill"
+          :class="{ active: prodCategoryFilter.includes(getCatName(cat, 'en')) }"
+          @click="toggleProdCategory(getCatName(cat, 'en'))"
+        >{{ getCatName(cat, 'zh-TW') || getCatName(cat, 'en') }}</button>
+      </div>
       <div class="table-wrap">
         <table class="data-table">
           <thead>
@@ -518,6 +532,7 @@ async function deleteCategory(id) {
 const products = ref([])
 const prodSearch = ref('')
 const prodSearchOpen = ref(false)
+const prodCategoryFilter = ref([])
 const prodSortAsc = ref(true)
 const prodPage = ref(1)
 const prodPageSize = 10
@@ -550,6 +565,9 @@ async function loadProducts() {
 
 const filteredProducts = computed(() => {
   let list = [...products.value]
+  if (prodCategoryFilter.value.length > 0) {
+    list = list.filter(p => prodCategoryFilter.value.includes(p.category))
+  }
   if (prodSearch.value.trim()) {
     const q = prodSearch.value.toLowerCase()
     list = list.filter(p =>
@@ -562,6 +580,12 @@ const filteredProducts = computed(() => {
     ? list.sort((a, b) => a.id - b.id)
     : list.sort((a, b) => b.id - a.id)
 })
+
+function toggleProdCategory(enName) {
+  const idx = prodCategoryFilter.value.indexOf(enName)
+  if (idx === -1) prodCategoryFilter.value.push(enName)
+  else prodCategoryFilter.value.splice(idx, 1)
+}
 
 const prodTotalPages = computed(() => Math.max(1, Math.ceil(filteredProducts.value.length / prodPageSize)))
 const pagedProducts = computed(() => {
@@ -988,6 +1012,20 @@ onMounted(() => {
 }
 .table-controls { display: flex; gap: 8px; align-items: center; }
 .section-add-btn { color: var(--mid); }
+
+/* Category filter pills */
+.admin-category-pills {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+}
+.admin-pill {
+  padding: 3px 12px; border-radius: 20px; font-size: 0.78rem;
+  font-family: var(--font-body); cursor: pointer;
+  border: 1.5px solid var(--border); background: var(--bg); color: var(--mid);
+  transition: all 0.15s;
+}
+.admin-pill.active, .admin-pill:hover {
+  background: var(--button); color: #fff; border-color: var(--button);
+}
 
 /* Search bar */
 .search-bar {
