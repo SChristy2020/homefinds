@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in cart.items" :key="item.id">
+          <tr v-for="(item, index) in cart.items" :key="item.id" :class="{ 'row-sold-out': soldOutProductIds.includes(item.id) || duplicateProductIds.includes(item.id) }">
             <td class="col-num">{{ index + 1 }}</td>
             <td class="col-thumb">
               <div class="cart-thumb">
@@ -27,6 +27,7 @@
             <td class="col-name">
               {{ getItemName(item) }}
               <div v-if="duplicateProductIds.includes(item.id)" class="duplicate-item-error">{{ i18n.t('cart.alreadyReservedItem') }}</div>
+              <div v-if="soldOutProductIds.includes(item.id)" class="duplicate-item-error">{{ i18n.t('cart.soldOutItem') }}</div>
             </td>
             <td class="col-pickup">{{ formatPickupDate(item.pickupTime) }}</td>
             <td class="col-price">
@@ -34,7 +35,7 @@
               ${{ item.price }}
             </td>
             <td class="col-delete">
-              <button class="btn-delete" @click="cart.remove(item.id)"><Trash2 :size="15" /></button>
+              <button class="btn-delete" :class="{ 'btn-delete--alert': soldOutProductIds.includes(item.id) || duplicateProductIds.includes(item.id) }" @click="cart.remove(item.id)"><Trash2 :size="15" /></button>
             </td>
           </tr>
         </tbody>
@@ -73,6 +74,7 @@
     <!-- Reserve Button -->
     <div class="action-row">
       <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('cart.reserve') }}</button>
+      <div v-if="soldOutProductIds.length" class="duplicate-btn-error">{{ i18n.t('cart.soldOutBtn') }}</div>
       <div v-if="duplicateProductIds.length" class="duplicate-btn-error">{{ i18n.t('cart.alreadyReservedBtn') }}</div>
     </div>
 
@@ -91,6 +93,7 @@ import UserInfoForm from '@/components/shared/UserInfoForm.vue'
 import ShoppingGuideContent from '@/components/shared/ShoppingGuideContent.vue'
 import { useCartStore } from '@/stores/cart'
 import { useOrdersStore } from '@/stores/orders'
+import { useProductsStore } from '@/stores/products'
 import { useUserStore } from '@/stores/user'
 import { useI18nStore } from '@/stores/i18n'
 
@@ -105,6 +108,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const cart = useCartStore()
 const ordersStore = useOrdersStore()
+const productsStore = useProductsStore()
 const userStore = useUserStore()
 const onOrderSuccess = inject('onOrderSuccess')
 const i18n = useI18nStore()
@@ -125,6 +129,7 @@ const form = ref({
   zelleRefundOther: saved.zelleRefundOther || '',
 })
 const duplicateProductIds = ref([])
+const soldOutProductIds = ref([])
 const subscribeMarketing = ref(true)
 
 // 當 modal 開啟時，從 localStorage / userStore 補填空白欄位
@@ -144,6 +149,7 @@ watch(() => props.modelValue, (open) => {
 // 當 user 身份欄位變動時清除重複錯誤
 watch(() => [form.value.lastName, form.value.email, form.value.phone], () => {
   duplicateProductIds.value = []
+  soldOutProductIds.value = []
 })
 
 const totalOriginal = computed(() =>
@@ -205,6 +211,19 @@ function getItemName(item) {
 async function handleConfirm() {
   if (!isValid.value) return
   duplicateProductIds.value = []
+  soldOutProductIds.value = []
+
+  // 檢查購物車商品是否已被設為 sold out
+  const soldIds = cart.items
+    .filter(item => {
+      const p = productsStore.products.find(p => p.id === item.id)
+      return p?.soldOut
+    })
+    .map(item => item.id)
+  if (soldIds.length) {
+    soldOutProductIds.value = soldIds
+    return
+  }
   const cartSnapshot = [...cart.items]
   const formSnapshot = { ...form.value }
   let order
@@ -307,6 +326,9 @@ async function handleConfirm() {
   transition: color 0.15s;
 }
 .btn-delete:hover { color: #c0392b; }
+.btn-delete--alert { color: #c0392b; }
+
+.row-sold-out { background-color: #f2f2f2; }
 
 .cart-thumb {
   width: 40px; height: 40px;

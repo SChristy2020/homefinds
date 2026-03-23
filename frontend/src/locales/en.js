@@ -77,6 +77,8 @@ export default {
     anytime: 'Anytime',
     alreadyReservedItem: '*You have already reserved this item',
     alreadyReservedBtn: '*You have already reserved an item. Please remove it to continue.',
+    soldOutItem: '*This item just sold out.',
+    soldOutBtn: '*An item in your cart is sold out. Please remove it to continue.',
     subscribeMarketing: 'Keep me updated on new arrivals & exclusive offers',
   },
   orderSuccess: {
