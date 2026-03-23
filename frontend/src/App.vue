@@ -15,6 +15,9 @@
   <GuideBubble />
   <LanguageBubble />
   <ToastNotification />
+  <footer class="site-footer">
+    <p>Copyright &copy; 2026 CHRISTY'S HOME FINDS All Rights Reserved.</p>
+  </footer>
 </template>
 
 <script setup>
@@ -33,5 +36,12 @@ const route = useRoute()
   max-width: 1100px;
   margin: 0 auto;
   padding: 20px 24px;
+}
+
+.site-footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 12px;
+  color: #888;
 }
 </style>
