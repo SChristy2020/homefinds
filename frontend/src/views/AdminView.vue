@@ -264,13 +264,15 @@
       </div>
 
       <!-- Fields -->
-      <div class="form-row">
-        <label class="form-label">代號</label>
-        <input v-model="prodForm.code" class="form-input" readonly style="background:#f5f5f5;cursor:default;" />
-      </div>
-      <div v-if="!editingProdId" class="form-row">
-        <label class="form-label">上架日期</label>
-        <input type="date" v-model="prodForm.listed_date" class="form-input date-input" />
+      <div class="form-row-pair">
+        <div class="form-row">
+          <label class="form-label">代號</label>
+          <input v-model="prodForm.code" class="form-input" readonly style="background:#f5f5f5;cursor:default;" />
+        </div>
+        <div v-if="!editingProdId" class="form-row">
+          <label class="form-label">上架日期</label>
+          <input type="date" v-model="prodForm.listed_date" class="form-input date-input" />
+        </div>
       </div>
       <div class="form-row">
         <label class="form-label">類別</label>
@@ -280,13 +282,15 @@
           </option>
         </select>
       </div>
-      <div class="form-row">
-        <label class="form-label">原價</label>
-        <input type="number" v-model.number="prodForm.original_price" class="form-input" placeholder="無則留空" />
-      </div>
-      <div class="form-row">
-        <label class="form-label">定價</label>
-        <input type="number" v-model.number="prodForm.price" class="form-input" />
+      <div class="form-row-pair">
+        <div class="form-row">
+          <label class="form-label">原價</label>
+          <input type="number" v-model.number="prodForm.original_price" class="form-input" placeholder="無則留空" />
+        </div>
+        <div class="form-row">
+          <label class="form-label">定價</label>
+          <input type="number" v-model.number="prodForm.price" class="form-input" />
+        </div>
       </div>
       <div class="form-row">
         <label class="form-label">狀態</label>
@@ -305,7 +309,7 @@
           <label class="radio-option">
             <input type="radio" v-model="pickupMode" value="date" /> 指定日期起
           </label>
-          <input v-if="pickupMode === 'date'" type="date" v-model="prodForm.pickup_available_time" class="form-input date-input" style="margin-top:6px;" />
+          <input v-if="pickupMode === 'date'" type="date" v-model="prodForm.pickup_available_time" class="form-input date-input" />
         </div>
       </div>
 
@@ -982,7 +986,7 @@ onMounted(() => {
 /* Room form */
 .room-form { display: flex; flex-direction: column; gap: 18px; }
 .form-row {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  display: flex; align-items: baseline; gap: 2px; flex-wrap: wrap; padding-bottom: 18px;
 }
 .form-label {
   font-size: 0.82rem; font-weight: 500;
@@ -995,11 +999,15 @@ onMounted(() => {
   padding: 6px 10px; color: var(--charcoal);
   background: var(--bg); outline: none;
   transition: border-color 0.15s;
+  width: -webkit-fill-available;
 }
 .form-input:focus { border-color: var(--charcoal); }
 .form-input:disabled { opacity: 0.5; cursor: not-allowed; }
 .date-input { width: 150px; }
-.pickup-radio-group { display: flex; flex-direction: column; gap: 6px; }
+.pickup-radio-group { display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 12px; }
+.form-row-pair { display: flex; gap: 16px; flex-wrap: wrap; }
+.form-row-pair > .form-row { flex: 1; min-width: 120px; flex-direction: column; align-items: flex-start; padding-bottom: 18px; }
+.form-row-pair .form-input { width: 100%; box-sizing: border-box; }
 .radio-option { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; cursor: pointer; }
 .price-input { width: 120px; }
 .form-sep { color: var(--mid); font-size: 0.82rem; }
@@ -1131,6 +1139,7 @@ onMounted(() => {
 @media (max-width: 700px) {
   .prices-grid { grid-template-columns: 1fr; }
   .desc-grid { grid-template-columns: 1fr; }
+  .pickup-radio-group { flex-wrap: wrap; }
 }
 
 /* Marketing Modal */
