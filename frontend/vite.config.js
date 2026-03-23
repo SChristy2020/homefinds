@@ -11,7 +11,7 @@ import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
-  base: '/homefinds/',
+  base: '/',
   plugins: [vue()],
   resolve: {
     alias: {
