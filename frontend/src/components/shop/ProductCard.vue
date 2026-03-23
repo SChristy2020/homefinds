@@ -1,8 +1,8 @@
 <template>
-  <div class="product-card" :class="{ 'sold-out': product.soldOut }">
-    <div class="product-img" @click.stop>
+  <div class="product-card" :class="{ 'sold-out': product.soldOut }" @click="onCardClick">
+    <div class="product-img">
       <template v-if="images.length">
-        <Carousel v-model="current" :wrap-around="true" snap-align="center" class="img-carousel" @click="$emit('open')">
+        <Carousel v-model="current" :wrap-around="true" snap-align="center" class="img-carousel" @slide-start="sliding = true" @slide-end="sliding = false">
           <Slide v-for="(img, i) in images" :key="i">
             <img :src="img.url" :alt="product.name" class="product-img-photo" />
           </Slide>
@@ -11,9 +11,9 @@
           <span v-for="(_, i) in images" :key="i" class="img-dot" :class="{ active: i === current }" @click.stop="current = i" />
         </div>
       </template>
-      <div v-else class="product-img-placeholder" @click="$emit('open')"><Home :size="28" /></div>
+      <div v-else class="product-img-placeholder"><Home :size="28" /></div>
     </div>
-    <div class="product-info" @click="$emit('open')">
+    <div class="product-info">
       <div class="product-name">{{ product.name }}</div>
       <div class="product-price-row">
         <span v-if="product.originalPrice" class="price-original">${{ product.originalPrice }}</span>
@@ -33,11 +33,17 @@ import { Carousel, Slide } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 
 const props = defineProps({ product: Object })
-defineEmits(['open'])
+const emit = defineEmits(['open'])
 const i18n = useI18nStore()
 
 const images = computed(() => props.product.images || [])
 const current = ref(0)
+const sliding = ref(false)
+
+function onCardClick() {
+  if (sliding.value) return
+  emit('open')
+}
 
 const formattedDate = computed(() => {
   const d = props.product.pickup_available_time
