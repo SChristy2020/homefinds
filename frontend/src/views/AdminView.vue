@@ -31,7 +31,7 @@
               <th>原價</th>
               <th>定價</th>
               <th>狀態</th>
-              <th>可取貨時間</th>
+              <th>最快取貨日</th>
               <th></th>
             </tr>
           </thead>
@@ -297,7 +297,7 @@
         </select>
       </div>
       <div class="form-row">
-        <label class="form-label">可取貨時間</label>
+        <label class="form-label">最快取貨日</label>
         <div class="pickup-radio-group">
           <label class="radio-option">
             <input type="radio" v-model="pickupMode" value="anytime" /> 隨時

@@ -24,7 +24,7 @@
           <!-- 物品名稱 -->
           <td class="td-name">{{ item.product_name || '—' }}</td>
 
-          <!-- 可取貨時間 -->
+          <!-- 最快取貨日 -->
           <td class="td-avail">{{ formatAvailableTime(item.available_time) }}</td>
 
           <!-- 價錢 -->
@@ -116,7 +116,7 @@ function formatSoldAt(isoStr) {
 /* 物品名稱 */
 .td-name { font-weight: 500; color: var(--charcoal); }
 
-/* 可取貨時間 */
+/* 最快取貨日 */
 .td-avail { color: var(--mid); font-size: 0.82rem; white-space: nowrap; }
 
 /* 價錢 */

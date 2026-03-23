@@ -27,7 +27,7 @@ export default {
   },
   productDetail: {
     title: '物品信息',
-    availableFrom: '可取货时间: ',
+    availableFrom: '最快取货日: ',
     availableStarting: '',
     availableAnytime: '随时',
     listedOn: '上架时间: ',
@@ -70,7 +70,7 @@ export default {
     reserve: '立即预定',
     colThumb: '缩图',
     colName: '物品名称',
-    colPickup: '可取货时间',
+    colPickup: '最快取货日',
     colPrice: '价格',
     itemCountPrefix: '共',
     itemCountSuffix: ' 件商品，合计：',
