@@ -163,7 +163,7 @@ const filteredProducts = computed(() => {
   if (sortOption.value === 'price_desc') return [...list].sort((a, b) => b.price - a.price)
   if (sortOption.value === 'name_asc') return [...list].sort((a, b) => a.name.localeCompare(b.name))
   if (sortOption.value === 'name_desc') return [...list].sort((a, b) => b.name.localeCompare(a.name))
-  return list
+  return [...list].sort((a, b) => (a.category || '').localeCompare(b.category || ''))
 })
 
 function openProduct(product) {
@@ -201,7 +201,7 @@ watch(
   letter-spacing: 0.02em; color: var(--charcoal);
 }
 .pill.active { background: var(--button); border: 1.5px solid var(--button); color: #fff; }
-.pill:hover:not(.active) { background: var(--border); }
+.pill:hover:not(.active) { background: var(--light); }
 .shop-actions { display: flex; gap: 12px; align-items: center; }
 .hide-sold-label {
   display: flex; align-items: center; gap: 5px;
