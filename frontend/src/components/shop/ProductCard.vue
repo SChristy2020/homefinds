@@ -2,9 +2,11 @@
   <div class="product-card" :class="{ 'sold-out': product.soldOut }">
     <div class="product-img" @click.stop>
       <template v-if="images.length">
-        <img :src="images[current].url" :alt="product.name" class="product-img-photo" @click="$emit('open')" />
-        <button v-if="images.length > 1" class="img-nav img-prev" @click.stop="prev">&#8249;</button>
-        <button v-if="images.length > 1" class="img-nav img-next" @click.stop="next">&#8250;</button>
+        <Carousel v-model="current" :wrap-around="true" snap-align="center" class="img-carousel" @click="$emit('open')">
+          <Slide v-for="(img, i) in images" :key="i">
+            <img :src="img.url" :alt="product.name" class="product-img-photo" />
+          </Slide>
+        </Carousel>
         <div v-if="images.length > 1" class="img-dots">
           <span v-for="(_, i) in images" :key="i" class="img-dot" :class="{ active: i === current }" @click.stop="current = i" />
         </div>
@@ -27,6 +29,8 @@
 import { ref, computed } from 'vue'
 import { Home } from 'lucide-vue-next'
 import { useI18nStore } from '@/stores/i18n'
+import { Carousel, Slide } from 'vue3-carousel'
+import 'vue3-carousel/dist/carousel.css'
 
 const props = defineProps({ product: Object })
 defineEmits(['open'])
@@ -42,13 +46,6 @@ const formattedDate = computed(() => {
   if (!y || !m || !day) return d
   return `${m}/${day.split('T')[0]}/${y}`
 })
-
-function prev() {
-  current.value = (current.value - 1 + images.value.length) % images.value.length
-}
-function next() {
-  current.value = (current.value + 1) % images.value.length
-}
 </script>
 
 <style scoped>
@@ -68,6 +65,9 @@ function next() {
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
+.img-carousel {
+  width: 100%; height: 100%;
+}
 .product-img-photo {
   width: 100%; height: 100%;
   object-fit: cover; aspect-ratio: 1;
@@ -80,19 +80,6 @@ function next() {
   color: rgba(255,255,255,0.4);
   aspect-ratio: 1;
 }
-.img-nav {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  background: rgba(0,0,0,0.45); color: #fff;
-  border: none; cursor: pointer;
-  width: 28px; height: 28px; border-radius: 50%;
-  font-size: 1.1rem; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transition: opacity 0.2s;
-  z-index: 2;
-}
-.product-img:hover .img-nav { opacity: 1; }
-.img-prev { left: 6px; }
-.img-next { right: 6px; }
 .img-dots {
   position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
   display: flex; gap: 4px; z-index: 2;
