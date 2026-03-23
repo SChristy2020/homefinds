@@ -30,6 +30,8 @@ body {
   color: var(--charcoal);
   min-height: 100vh;
   line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body::before {
