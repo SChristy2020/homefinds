@@ -282,7 +282,7 @@ async function handleConfirm() {
 .modal-title {
   font-family: var(--font-display);
   font-size: 1.25rem; font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 4px;
 }
 
 /* Cart Table */

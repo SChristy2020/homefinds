@@ -155,7 +155,7 @@ function maskEmail(email) {
 .modal-title {
   font-family: var(--font-display);
   font-size: 1.1rem; font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
 /* Gallery */
@@ -189,7 +189,7 @@ function maskEmail(email) {
 
 /* Product name */
 .product-name {
-  font-size: 1.5rem; font-weight: 700;
+  font-size: 1.3rem; font-weight: 700;
   color: var(--charcoal); margin-bottom: 10px;
 }
 
