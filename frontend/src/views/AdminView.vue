@@ -25,6 +25,7 @@
           <thead>
             <tr>
               <th>id</th>
+              <th></th>
               <th>zh名稱</th>
               <th>代號</th>
               <th>類別</th>
@@ -37,10 +38,14 @@
           </thead>
           <tbody>
             <tr v-if="filteredProducts.length === 0">
-              <td colspan="9" class="empty-row">無資料</td>
+              <td colspan="10" class="empty-row">無資料</td>
             </tr>
             <tr v-for="prod in pagedProducts" :key="prod.id">
               <td>{{ prod.id }}</td>
+              <td class="prod-thumb-cell">
+                <img v-if="prod.images && prod.images.length" :src="prod.images[0].url" class="prod-table-thumb" />
+                <div v-else class="prod-table-thumb-placeholder"></div>
+              </td>
               <td>{{ getProdName(prod, 'zh-TW') }}</td>
               <td>{{ prod.code }}</td>
               <td>{{ prod.category }}</td>
@@ -1237,6 +1242,17 @@ onMounted(() => {
 .marketing-checkbox {
   width: 15px; height: 15px; flex-shrink: 0;
   accent-color: var(--gold, #c9a96e); cursor: pointer;
+}
+.prod-thumb-cell {
+  width: 40px; padding: 4px 6px;
+}
+.prod-table-thumb {
+  width: 36px; height: 36px; object-fit: cover;
+  border-radius: 4px; display: block;
+}
+.prod-table-thumb-placeholder {
+  width: 36px; height: 36px; border-radius: 4px;
+  background: var(--border);
 }
 .marketing-thumb {
   width: 44px; height: 44px; object-fit: cover;
