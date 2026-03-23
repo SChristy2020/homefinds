@@ -164,10 +164,15 @@
               class="image-item"
               :class="{ 'drag-over': roomDragOver === idx }"
               draggable="true"
+              :data-idx="idx"
+              data-drag-type="room"
               @dragstart="onDragStart(idx, 'room')"
               @dragover.prevent="roomDragOver = idx"
               @dragleave="roomDragOver = null"
               @drop.prevent="onDrop(idx, 'room'); roomDragOver = null"
+              @touchstart="onTouchStart(idx, 'room', $event)"
+              @touchmove.prevent="onTouchMove"
+              @touchend="onTouchEnd"
             >
               <img v-if="img.url" :src="img.url" class="image-thumb" @error="img.loadErr = true" />
               <div v-else class="image-placeholder">{{ idx + 1 }}</div>
@@ -247,10 +252,15 @@
             class="image-item"
             :class="{ 'drag-over': prodDragOver === idx }"
             draggable="true"
+            :data-idx="idx"
+            data-drag-type="prod"
             @dragstart="onDragStart(idx, 'prod')"
             @dragover.prevent="prodDragOver = idx"
             @dragleave="prodDragOver = null"
             @drop.prevent="onDrop(idx, 'prod'); prodDragOver = null"
+            @touchstart="onTouchStart(idx, 'prod', $event)"
+            @touchmove.prevent="onTouchMove"
+            @touchend="onTouchEnd"
           >
             <img v-if="img.url" :src="img.url" class="image-thumb" />
             <div v-else class="image-placeholder">{{ idx + 1 }}</div>
@@ -523,6 +533,10 @@ const prodUploading = ref(false)
 const prodFileInput = ref(null)
 const dragSrcType = ref(null)
 const dragSrcIdx = ref(null)
+const touchGhost = ref(null)
+const touchOffsetX = ref(0)
+const touchOffsetY = ref(0)
+const touchDragOver = ref(null)
 const suppressCodeGen = ref(false)
 
 async function loadProducts() {
@@ -719,6 +733,58 @@ function onDrop(targetIdx, type) {
   const [moved] = list.splice(dragSrcIdx.value, 1)
   list.splice(targetIdx, 0, moved)
   dragSrcIdx.value = null
+}
+
+function onTouchStart(idx, type, event) {
+  dragSrcType.value = type
+  dragSrcIdx.value = idx
+  const touch = event.touches[0]
+  const rect = event.currentTarget.getBoundingClientRect()
+  touchOffsetX.value = touch.clientX - rect.left
+  touchOffsetY.value = touch.clientY - rect.top
+  const ghost = event.currentTarget.cloneNode(true)
+  ghost.style.cssText = `position:fixed;width:${rect.width}px;height:${rect.height}px;left:${touch.clientX - touchOffsetX.value}px;top:${touch.clientY - touchOffsetY.value}px;opacity:0.7;pointer-events:none;z-index:9999;border-radius:4px;`
+  document.body.appendChild(ghost)
+  touchGhost.value = ghost
+}
+
+function onTouchMove(event) {
+  if (!touchGhost.value) return
+  const touch = event.touches[0]
+  touchGhost.value.style.left = (touch.clientX - touchOffsetX.value) + 'px'
+  touchGhost.value.style.top = (touch.clientY - touchOffsetY.value) + 'px'
+  touchGhost.value.style.display = 'none'
+  const el = document.elementFromPoint(touch.clientX, touch.clientY)
+  touchGhost.value.style.display = ''
+  const item = el?.closest('[data-drag-type]')
+  if (item) {
+    const idx = parseInt(item.dataset.idx)
+    const type = item.dataset.dragType
+    if (!isNaN(idx)) {
+      touchDragOver.value = { idx, type }
+      if (type === 'prod') { prodDragOver.value = idx; roomDragOver.value = null }
+      else { roomDragOver.value = idx; prodDragOver.value = null }
+    }
+  } else {
+    touchDragOver.value = null
+    prodDragOver.value = null
+    roomDragOver.value = null
+  }
+}
+
+function onTouchEnd() {
+  if (touchGhost.value) {
+    document.body.removeChild(touchGhost.value)
+    touchGhost.value = null
+  }
+  if (touchDragOver.value) {
+    onDrop(touchDragOver.value.idx, touchDragOver.value.type)
+    touchDragOver.value = null
+  }
+  prodDragOver.value = null
+  roomDragOver.value = null
+  dragSrcIdx.value = null
+  dragSrcType.value = null
 }
 
 // ========== ROOM ==========
