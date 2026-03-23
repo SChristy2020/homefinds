@@ -393,6 +393,7 @@
           <div class="marketing-prod-info">
             <span class="marketing-prod-name">{{ getProdName(prod, 'zh-TW') }}</span>
             <span class="marketing-prod-price">${{ prod.price }}</span>
+            <span class="marketing-prod-date">{{ prod.listed_date }}</span>
           </div>
         </label>
         <p v-if="unsoldProducts.length === 0" class="empty-row">目前沒有未售出的商品</p>
@@ -954,7 +955,9 @@ const marketingSelectedIds = ref([])
 const marketingSending = ref(false)
 
 const unsoldProducts = computed(() =>
-  products.value.filter(p => p.status !== 'sold')
+  products.value
+    .filter(p => p.status !== 'sold')
+    .sort((a, b) => (b.listed_date || '').localeCompare(a.listed_date || ''))
 )
 
 function openMarketingModal() {
@@ -1305,4 +1308,5 @@ onMounted(() => {
 }
 .marketing-prod-name { font-size: 0.85rem; color: var(--charcoal); }
 .marketing-prod-price { font-size: 0.8rem; color: var(--mid); }
+.marketing-prod-date { font-size: 0.75rem; color: var(--accent); }
 </style>
