@@ -14,6 +14,8 @@ export default {
     sortPriceHigh: '价格由高到低',
     sortNameAsc: '名称 A → Z',
     sortNameDesc: '名称 Z → A',
+    sortDateNew: '上架日期：最新',
+    sortDateOld: '上架日期：最旧',
     hideSold: '隐藏已售出商品',
     soldOut: '已售出',
     categories: {

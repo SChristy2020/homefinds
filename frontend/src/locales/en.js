@@ -14,6 +14,8 @@ export default {
     sortPriceHigh: 'Price: High to Low',
     sortNameAsc: 'Name: A → Z',
     sortNameDesc: 'Name: Z → A',
+    sortDateNew: 'Date: Newest',
+    sortDateOld: 'Date: Oldest',
     hideSold: 'In Stock Only',
     soldOut: 'Sold Out',
     categories: {

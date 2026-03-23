@@ -124,6 +124,8 @@ const sortOptions = computed(() => [
   { value: 'price_desc', label: i18n.t('shop.sortPriceHigh') },
   { value: 'name_asc',   label: i18n.t('shop.sortNameAsc') },
   { value: 'name_desc',  label: i18n.t('shop.sortNameDesc') },
+  { value: 'date_new',   label: i18n.t('shop.sortDateNew') },
+  { value: 'date_old',   label: i18n.t('shop.sortDateOld') },
 ])
 
 function selectSort(value) {
@@ -163,6 +165,8 @@ const filteredProducts = computed(() => {
   if (sortOption.value === 'price_desc') return [...list].sort((a, b) => b.price - a.price)
   if (sortOption.value === 'name_asc') return [...list].sort((a, b) => a.name.localeCompare(b.name))
   if (sortOption.value === 'name_desc') return [...list].sort((a, b) => b.name.localeCompare(a.name))
+  if (sortOption.value === 'date_new') return [...list].sort((a, b) => new Date(b.date) - new Date(a.date))
+  if (sortOption.value === 'date_old') return [...list].sort((a, b) => new Date(a.date) - new Date(b.date))
   return [...list].sort((a, b) => (a.category || '').localeCompare(b.category || ''))
 })
 
