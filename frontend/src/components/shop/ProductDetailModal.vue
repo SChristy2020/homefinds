@@ -6,9 +6,11 @@
     <div class="gallery">
       <div class="gallery-main">
         <template v-if="images.length">
-          <img :src="images[current].url" :alt="product.name" class="gallery-main-img" />
-          <button v-if="images.length > 1" class="img-nav img-prev" @click="prev">&#8249;</button>
-          <button v-if="images.length > 1" class="img-nav img-next" @click="next">&#8250;</button>
+          <Carousel v-model="current" :wrap-around="true" snap-align="center" class="gallery-carousel">
+            <Slide v-for="(img, i) in images" :key="i">
+              <img :src="img.url" :alt="product.name" class="gallery-main-img" />
+            </Slide>
+          </Carousel>
         </template>
         <div v-else class="gallery-placeholder" />
       </div>
@@ -87,6 +89,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { Carousel, Slide } from 'vue3-carousel'
+import 'vue3-carousel/dist/carousel.css'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import { useCartStore } from '@/stores/cart'
 import { useToastStore } from '@/stores/toast'
@@ -117,12 +121,6 @@ const categoryLabel = computed(() => {
     || cat.code_prefix
 })
 
-function prev() {
-  current.value = (current.value - 1 + images.value.length) % images.value.length
-}
-function next() {
-  current.value = (current.value + 1) % images.value.length
-}
 
 function handleAddToCart() {
   cart.add(props.product)
@@ -169,22 +167,14 @@ function maskEmail(email) {
   border-radius: var(--radius);
   overflow: hidden;
 }
+.gallery-carousel {
+  width: 100%; height: 100%;
+}
 .gallery-main-img {
   width: 100%; height: 100%;
   object-fit: cover; display: block;
 }
 .gallery-placeholder { width: 100%; height: 100%; background: #3a3a3a; }
-.img-nav {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  background: rgba(0,0,0,0.5); color: #fff;
-  border: none; cursor: pointer;
-  width: 32px; height: 32px; border-radius: 50%;
-  font-size: 1.3rem; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 2;
-}
-.img-prev { left: 10px; }
-.img-next { right: 10px; }
 .gallery-thumbs {
   display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;
 }
