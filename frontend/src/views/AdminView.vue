@@ -61,7 +61,7 @@
                 <img v-if="prod.images && prod.images.length" :src="prod.images[0].url" class="prod-table-thumb" />
                 <div v-else class="prod-table-thumb-placeholder"></div>
               </td>
-              <td>{{ getProdName(prod, 'zh-TW') }}</td>
+              <td><div class="prod-name-cell">{{ getProdName(prod, 'zh-TW') }}</div></td>
               <td>{{ prod.code }}</td>
               <td>{{ prod.category }}</td>
               <td>{{ prod.original_price != null ? '$' + prod.original_price : '-' }}</td>
@@ -1211,6 +1211,7 @@ onMounted(() => {
 .status-badge {
   font-size: 0.72rem; padding: 2px 8px;
   border-radius: 999px; font-weight: 500;
+  white-space: nowrap;
 }
 .status-badge.available { background: #e8f5e9; color: #2e7d32; }
 .status-badge.reserved  { background: #fff8e1; color: #f57c00; }
@@ -1420,6 +1421,14 @@ onMounted(() => {
 .prod-table-thumb {
   width: 36px; height: 36px; object-fit: cover;
   border-radius: 4px; display: block;
+}
+.prod-name-cell {
+  max-width: 120px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .prod-table-thumb-placeholder {
   width: 36px; height: 36px; border-radius: 4px;
