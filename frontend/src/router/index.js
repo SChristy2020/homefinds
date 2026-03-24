@@ -19,7 +19,19 @@ const routes = [
   { path: '/admin',  name: 'admin',  component: AdminView },
 ]
 
-export default createRouter({
+const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL), //正確引導到 homefinds/
   routes,
 })
+
+router.afterEach((to) => {
+  if (window.gtag) {
+    window.gtag('event', 'page_view', {
+      page_title: document.title,
+      page_location: window.location.href,
+      page_path: to.fullPath,
+    })
+  }
+})
+
+export default router
