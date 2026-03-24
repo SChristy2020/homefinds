@@ -167,7 +167,13 @@ const filteredProducts = computed(() => {
   if (sortOption.value === 'name_desc') return [...list].sort((a, b) => b.name.localeCompare(a.name))
   if (sortOption.value === 'date_new') return [...list].sort((a, b) => new Date(b.date) - new Date(a.date))
   if (sortOption.value === 'date_old') return [...list].sort((a, b) => new Date(a.date) - new Date(b.date))
-  return [...list].sort((a, b) => (a.category || '').localeCompare(b.category || ''))
+  const catOrder = Object.fromEntries(
+    productsStore.categories.map(c => {
+      const enName = c.translations?.find(t => t.locale === 'en')?.name || ''
+      return [enName, c.sort_order ?? Infinity]
+    })
+  )
+  return [...list].sort((a, b) => (catOrder[a.category] ?? Infinity) - (catOrder[b.category] ?? Infinity))
 })
 
 function openProduct(product) {
