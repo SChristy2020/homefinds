@@ -1061,7 +1061,8 @@ onMounted(() => {
   color: var(--charcoal); vertical-align: middle;
 }
 .data-table tr:last-child td { border-bottom: none; }
-.data-table tr:hover td { background: var(--bg); }
+.data-table tbody tr { transition: background 0.15s; cursor: default; }
+.data-table tbody tr:hover td { background: var(--light); }
 .empty-row { text-align: center; color: var(--light); padding: 20px; }
 
 /* Row actions */
