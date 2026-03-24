@@ -323,11 +323,17 @@
       </div>
       <div class="form-row">
         <label class="form-label">狀態</label>
-        <select v-model="prodForm.status" class="form-input">
-          <option value="available">available</option>
-          <option value="reserved">reserved</option>
-          <option value="sold">sold</option>
-        </select>
+        <div class="pickup-radio-group">
+          <label class="radio-option">
+            <input type="radio" v-model="prodForm.status" value="available" /> available
+          </label>
+          <label class="radio-option">
+            <input type="radio" v-model="prodForm.status" value="reserved" /> reserved
+          </label>
+          <label class="radio-option">
+            <input type="radio" v-model="prodForm.status" value="sold" /> sold
+          </label>
+        </div>
       </div>
       <div class="form-row">
         <label class="form-label">顯示於購物頁</label>
