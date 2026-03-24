@@ -662,8 +662,17 @@ watch(filteredProducts, () => { prodPage.value = 1 })
 
 function autoGenerateProdCode(categoryEnName) {
   const cat = categories.value.find(c => getCatName(c, 'en') === categoryEnName)
-  if (cat) prodForm.code = cat.code_prefix + (cat.product_count + 1)
-  else prodForm.code = ''
+  if (cat) {
+    const prefix = cat.code_prefix
+    const maxNum = products.value
+      .filter(p => p.code && p.code.startsWith(prefix))
+      .map(p => parseInt(p.code.slice(prefix.length), 10))
+      .filter(n => !isNaN(n))
+      .reduce((max, n) => Math.max(max, n), 0)
+    prodForm.code = prefix + (maxNum + 1)
+  } else {
+    prodForm.code = ''
+  }
 }
 
 watch(() => prodForm.category, (newCat) => {
