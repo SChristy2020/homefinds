@@ -46,6 +46,7 @@
               <th class="sortable-th" @click="setProdSort('price')">定價<component :is="prodSortKey==='price' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='price' ? 'sort-active' : 'sort-inactive'" /></th>
               <th class="sortable-th" @click="setProdSort('status')">狀態<component :is="prodSortKey==='status' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='status' ? 'sort-active' : 'sort-inactive'" /></th>
               <th class="sortable-th" @click="setProdSort('is_visible')">顯示<component :is="prodSortKey==='is_visible' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='is_visible' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setProdSort('sort')">排序<component :is="prodSortKey==='sort' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='sort' ? 'sort-active' : 'sort-inactive'" /></th>
               <th class="sortable-th" @click="setProdSort('pickup_available_time')">最快取貨日<component :is="prodSortKey==='pickup_available_time' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='pickup_available_time' ? 'sort-active' : 'sort-inactive'" /></th>
               <th></th>
             </tr>
@@ -67,6 +68,7 @@
               <td>${{ prod.price }}</td>
               <td><span class="status-badge" :class="prod.status">{{ prod.status }}</span></td>
               <td><span class="status-badge" :class="prod.is_visible ? 'available' : 'sold'" style="cursor:pointer" @click="toggleVisible(prod)">{{ prod.is_visible ? '顯示' : '隱藏' }}</span></td>
+              <td><input type="number" class="sort-inline-input" :value="prod.sort ?? 0" @change="updateProdSort(prod, $event.target.value)" @keydown.enter="$event.target.blur()" /></td>
               <td>{{ prod.pickup_available_time ? fmtDate(prod.pickup_available_time) : '隨時' }}</td>
               <td><div class="row-actions">
                 <button class="action-btn edit" @click="openEditProd(prod)" title="編輯"><Pencil :size="14"/></button>
@@ -347,6 +349,10 @@
         </div>
       </div>
       <div class="form-row">
+        <label class="form-label">排序</label>
+        <input type="number" v-model.number="prodForm.sort" class="form-input" style="width:100px" />
+      </div>
+      <div class="form-row">
         <label class="form-label">最快取貨日</label>
         <div class="pickup-radio-group">
           <label class="radio-option">
@@ -577,7 +583,7 @@ const showProdModal = ref(false)
 const editingProdId = ref(null)
 const prodSaving = ref(false)
 const pickupMode = ref('anytime')
-const prodForm = reactive({ code: '', listed_date: '', category: '', original_price: null, price: 0, status: 'available', is_visible: false, pickup_available_time: '' })
+const prodForm = reactive({ code: '', listed_date: '', category: '', original_price: null, price: 0, status: 'available', is_visible: false, sort: 0, pickup_available_time: '' })
 const prodTranslations = reactive({
   'zh-TW': { name: '', description: '' },
   'zh-CN': { name: '', description: '' },
@@ -625,6 +631,7 @@ const filteredProducts = computed(() => {
     else if (key === 'price') { av = a.price ?? 0; bv = b.price ?? 0 }
     else if (key === 'status') { av = a.status || ''; bv = b.status || '' }
     else if (key === 'is_visible') { av = a.is_visible ? 1 : 0; bv = b.is_visible ? 1 : 0 }
+    else if (key === 'sort') { av = a.sort ?? 0; bv = b.sort ?? 0 }
     else if (key === 'pickup_available_time') { av = a.pickup_available_time || ''; bv = b.pickup_available_time || '' }
     else { av = a.id; bv = b.id }
     if (typeof av === 'string') return av.localeCompare(bv) * dir
@@ -670,6 +677,7 @@ function openAddProd() {
   prodForm.price = 0
   prodForm.status = 'available'
   prodForm.is_visible = false
+  prodForm.sort = 0
   prodForm.pickup_available_time = '2026-04-18'
   pickupMode.value = 'date'
   for (const locale of ['zh-TW', 'zh-CN', 'en']) {
@@ -691,6 +699,7 @@ function openEditProd(prod) {
   prodForm.price = prod.price
   prodForm.status = prod.status
   prodForm.is_visible = prod.is_visible ?? false
+  prodForm.sort = prod.sort ?? 0
   if (prod.pickup_available_time) {
     pickupMode.value = 'date'
     prodForm.pickup_available_time = new Date(prod.pickup_available_time).toISOString().slice(0, 10)
@@ -774,6 +783,7 @@ async function saveProdModal() {
         original_price:        prodForm.original_price || null,
         status:                prodForm.status,
         is_visible:            prodForm.is_visible,
+        sort:                  prodForm.sort,
         pickup_available_time: pickupMode.value === 'date' ? (prodForm.pickup_available_time || null) : null,
         translations: ['zh-TW', 'zh-CN', 'en']
           .filter(l => prodTranslations[l].name)
@@ -788,6 +798,7 @@ async function saveProdModal() {
         original_price:        prodForm.original_price || null,
         status:                prodForm.status,
         is_visible:            prodForm.is_visible,
+        sort:                  prodForm.sort,
         pickup_available_time: pickupMode.value === 'date' ? (prodForm.pickup_available_time || null) : null,
       })
       for (const locale of ['zh-TW', 'zh-CN', 'en']) {
@@ -822,6 +833,17 @@ async function saveProdModal() {
     toast.show('儲存失敗')
   } finally {
     prodSaving.value = false
+  }
+}
+
+async function updateProdSort(prod, value) {
+  const newSort = parseInt(value, 10) || 0
+  if (newSort === (prod.sort ?? 0)) return
+  try {
+    await api.put(`/api/products/${prod.id}`, { sort: newSort })
+    prod.sort = newSort
+  } catch (e) {
+    toast.show('更新失敗')
   }
 }
 
@@ -1156,6 +1178,12 @@ onMounted(() => {
 .sortable-th:hover { color: var(--charcoal); }
 .sort-active { vertical-align: middle; margin-left: 2px; }
 .sort-inactive { vertical-align: middle; margin-left: 2px; opacity: 0.3; }
+.sort-inline-input {
+  width: 60px; padding: 2px 4px; text-align: center;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: transparent; color: inherit; font-size: inherit;
+}
+.sort-inline-input:focus { outline: none; border-color: var(--button); background: var(--accent-light); }
 .data-table td {
   padding: 8px 10px;
   border-bottom: 1px solid var(--border);

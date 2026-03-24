@@ -11,6 +11,7 @@ class Product(Base):
     original_price        = Column(Numeric(10, 2), nullable=True)
     status                = Column(Enum("available", "reserved", "sold"), nullable=False, default="available")
     is_visible            = Column(Boolean, nullable=False, default=False)
+    sort                  = Column(Integer, nullable=False, default=0)
     pickup_available_time = Column(DateTime, nullable=True)
     listed_date           = Column(Date, nullable=False)
     waiting_list_summary  = Column(JSON, nullable=True)

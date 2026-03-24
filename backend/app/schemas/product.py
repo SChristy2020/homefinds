@@ -32,6 +32,7 @@ class ProductCreate(BaseModel):
     original_price:        Optional[float] = None
     status:                ProductStatus = ProductStatus.available
     is_visible:            bool = False
+    sort:                  int = 0
     pickup_available_time: Optional[datetime] = None
     listed_date:           date
     translations:          list[TranslationCreate] = []
@@ -43,6 +44,7 @@ class ProductUpdate(BaseModel):
     original_price:        Optional[float] = None
     status:                Optional[ProductStatus] = None
     is_visible:            Optional[bool] = None
+    sort:                  Optional[int] = None
     pickup_available_time: Optional[datetime] = None
 
 class ProductOut(BaseModel):
@@ -53,6 +55,7 @@ class ProductOut(BaseModel):
     original_price:        Optional[float]
     status:                str
     is_visible:            bool
+    sort:                  int
     pickup_available_time: Optional[datetime]
     listed_date:           date
     waiting_list_summary:  Optional[Any]
