@@ -14,7 +14,15 @@
         </template>
         <div v-else class="gallery-placeholder" />
       </div>
-      <div v-if="images.length > 1" class="gallery-thumbs">
+      <div
+        v-if="images.length > 1"
+        class="gallery-thumbs"
+        ref="thumbsEl"
+        @mousedown="onThumbDragStart"
+        @mousemove="onThumbDragMove"
+        @mouseup="onThumbDragEnd"
+        @mouseleave="onThumbDragEnd"
+      >
         <img
           v-for="(img, i) in images"
           :key="i"
@@ -22,7 +30,7 @@
           :alt="product.name"
           class="gallery-thumb"
           :class="{ active: i === current }"
-          @click="current = i"
+          @click="onThumbClick(i)"
         />
       </div>
     </div>
@@ -87,6 +95,32 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+
+const thumbsEl = ref(null)
+const thumbDragging = ref(false)
+const thumbDragStartX = ref(0)
+const thumbDragScrollLeft = ref(0)
+const thumbDragMoved = ref(false)
+
+function onThumbDragStart(e) {
+  thumbDragging.value = true
+  thumbDragMoved.value = false
+  thumbDragStartX.value = e.pageX - thumbsEl.value.offsetLeft
+  thumbDragScrollLeft.value = thumbsEl.value.scrollLeft
+}
+function onThumbDragMove(e) {
+  if (!thumbDragging.value) return
+  const x = e.pageX - thumbsEl.value.offsetLeft
+  const walk = x - thumbDragStartX.value
+  if (Math.abs(walk) > 4) thumbDragMoved.value = true
+  thumbsEl.value.scrollLeft = thumbDragScrollLeft.value - walk
+}
+function onThumbDragEnd() {
+  thumbDragging.value = false
+}
+function onThumbClick(i) {
+  if (!thumbDragMoved.value) current.value = i
+}
 import { Carousel, Slide } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 import BaseModal from '@/components/shared/BaseModal.vue'
@@ -176,9 +210,16 @@ function maskEmail(email) {
 .gallery-thumbs {
   display: flex; gap: 6px; margin-top: 8px;
   overflow-x: auto; flex-wrap: nowrap;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  padding-bottom: 4px;
+  cursor: grab;
+  user-select: none;
 }
-.gallery-thumbs::-webkit-scrollbar { display: none; }
+.gallery-thumbs:active { cursor: grabbing; }
+.gallery-thumbs::-webkit-scrollbar { height: 4px; }
+.gallery-thumbs::-webkit-scrollbar-track { background: transparent; }
+.gallery-thumbs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 .gallery-thumb {
   width: 60px; height: 60px; flex-shrink: 0;
   object-fit: cover; border-radius: 4px;
