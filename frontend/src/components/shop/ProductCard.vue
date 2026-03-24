@@ -68,7 +68,7 @@ const formattedDate = computed(() => {
   box-shadow: 1px 1px 5px #cccc;
 }
 .product-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-.product-card.sold-out { opacity: 0.5; pointer-events: none; }
+.product-card.sold-out { opacity: 0.5; }
 .product-img {
   position: relative;
   width: 100%; aspect-ratio: 1;
