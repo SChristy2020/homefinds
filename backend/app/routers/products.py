@@ -87,7 +87,7 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
             if new_cat:
                 new_cat.product_count += 1
     old_status = product.status
-    for field, value in body.model_dump(exclude_none=True).items():
+    for field, value in body.model_dump(exclude_unset=True).items():
         setattr(product, field, value)
     new_status = product.status
 
