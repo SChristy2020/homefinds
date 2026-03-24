@@ -738,6 +738,10 @@ function padToSquare(file) {
     const objectUrl = URL.createObjectURL(file)
     img.onload = () => {
       URL.revokeObjectURL(objectUrl)
+      if (img.width === img.height) {
+        resolve(file)
+        return
+      }
       const padding = Math.round(Math.max(img.width, img.height) * 0.05)
       const size = Math.max(img.width, img.height) + padding * 2
       const canvas = document.createElement('canvas')
