@@ -349,7 +349,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">描述</label>
-          <textarea v-model="prodTranslations[locale].description" rows="4" class="form-textarea" />
+          <HtmlEditor v-model="prodTranslations[locale].description" />
         </div>
       </div>
 

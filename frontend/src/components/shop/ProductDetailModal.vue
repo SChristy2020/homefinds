@@ -62,9 +62,7 @@
     </button>
 
     <!-- Description -->
-    <div v-if="product.description" class="description-box">
-      {{ product.description }}
-    </div>
+    <div v-if="product.description" class="description-box" v-html="product.description"></div>
 
     <!-- Listed date -->
     <div class="listed-date">{{ i18n.t('productDetail.listedOn') }}{{ product.date }}</div>
@@ -259,8 +257,15 @@ function maskEmail(email) {
   font-size: 0.9rem; color: var(--charcoal);
   margin-bottom: 8px;
   line-height: 1.55;
-  white-space: pre-wrap;
 }
+.description-box :deep(ul),
+.description-box :deep(ol) { padding-left: 1.5em; margin: 0.4em 0; }
+.description-box :deep(ul) { list-style-type: disc; }
+.description-box :deep(ol) { list-style-type: decimal; }
+.description-box :deep(li) { margin: 0.2em 0; }
+.description-box :deep(strong) { font-weight: 700; }
+.description-box :deep(em) { font-style: italic; }
+.description-box :deep(a) { color: var(--accent, #b5935a); text-decoration: underline; }
 
 /* Listed date */
 .listed-date {
