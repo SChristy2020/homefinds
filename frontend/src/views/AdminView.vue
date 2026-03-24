@@ -583,7 +583,7 @@ const showProdModal = ref(false)
 const editingProdId = ref(null)
 const prodSaving = ref(false)
 const pickupMode = ref('anytime')
-const prodForm = reactive({ code: '', listed_date: '', category: '', original_price: null, price: 0, status: 'available', is_visible: false, sort: 0, pickup_available_time: '' })
+const prodForm = reactive({ code: '', listed_date: '', category: '', original_price: null, price: 0, status: 'available', is_visible: false, sort: 50, pickup_available_time: '' })
 const prodTranslations = reactive({
   'zh-TW': { name: '', description: '' },
   'zh-CN': { name: '', description: '' },
@@ -677,7 +677,7 @@ function openAddProd() {
   prodForm.price = 0
   prodForm.status = 'available'
   prodForm.is_visible = false
-  prodForm.sort = 0
+  prodForm.sort = 50
   prodForm.pickup_available_time = '2026-04-18'
   pickupMode.value = 'date'
   for (const locale of ['zh-TW', 'zh-CN', 'en']) {
