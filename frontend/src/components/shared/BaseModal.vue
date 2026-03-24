@@ -12,7 +12,12 @@
       <div v-if="modelValue" class="modal-overlay" @click.self="!noBackdropClose && $emit('update:modelValue', false)">
         <div class="modal" :class="size === 'xl' ? 'modal-xl' : size === 'lg' ? 'modal-lg' : ''">
           <button class="modal-close" @click="$emit('update:modelValue', false)">×</button>
-          <slot />
+          <div class="modal-body">
+            <slot />
+          </div>
+          <div v-if="$slots.footer" class="modal-footer">
+            <slot name="footer" />
+          </div>
         </div>
       </div>
     </Transition>
@@ -39,11 +44,24 @@ defineEmits(['update:modelValue'])
 .modal {
   background: white;
   border-radius: 6px;
-  padding: 32px;
+  padding: 0;
   max-width: 520px; width: 100%;
-  max-height: 80vh; overflow-y: auto;
+  max-height: 80vh;
+  display: flex; flex-direction: column;
   box-shadow: var(--shadow-lg);
   position: relative;
+}
+.modal-body {
+  padding: 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+.modal-footer {
+  padding: 16px 32px;
+  border-top: 1px solid #eee;
+  background: white;
+  border-radius: 0 0 6px 6px;
+  flex-shrink: 0;
 }
 .modal-lg { max-width: 640px; }
 .modal-xl { max-width: 900px; }

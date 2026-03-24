@@ -378,12 +378,14 @@
         </div>
       </div>
 
-      <div class="modal-actions">
-        <button class="btn-secondary" @click="showProdModal = false">取消</button>
-        <button class="btn-primary" @click="saveProdModal" :disabled="prodSaving">
-          {{ prodSaving ? '儲存中...' : '存檔' }}
-        </button>
-      </div>
+      <template #footer>
+        <div class="modal-actions" style="margin-top:0">
+          <button class="btn-secondary" @click="showProdModal = false" style="white-space:nowrap">取消</button>
+          <button class="btn-primary" @click="saveProdModal" :disabled="prodSaving">
+            {{ prodSaving ? '儲存中...' : '存檔' }}
+          </button>
+        </div>
+      </template>
     </BaseModal>
 
     <input ref="prodFileInput" type="file" accept="image/*" multiple style="display:none" @change="onProdFileChange" />
