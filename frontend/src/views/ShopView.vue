@@ -173,7 +173,15 @@ const filteredProducts = computed(() => {
       return [enName, c.sort_order ?? Infinity]
     })
   )
-  return [...list].sort((a, b) => (catOrder[a.category] ?? Infinity) - (catOrder[b.category] ?? Infinity))
+  return [...list].sort((a, b) => {
+    const catA = catOrder[a.category] ?? Infinity
+    const catB = catOrder[b.category] ?? Infinity
+    if (catA !== catB) return catA - catB
+    const sortA = a.sort ?? 0
+    const sortB = b.sort ?? 0
+    if (sortA !== sortB) return sortA - sortB
+    return a.id - b.id
+  })
 })
 
 function openProduct(product) {
