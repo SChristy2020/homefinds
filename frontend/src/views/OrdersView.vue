@@ -769,6 +769,7 @@ function validate() {
 
 async function handleLookup() {
   if (!validate()) return
+  window.gtag?.('event', 'order_lookup')
   const user = await userStore.lookup(form.value.name, form.value.email, form.value.phone)
   if (user) {
     if (user.is_admin === 1) {

@@ -46,7 +46,7 @@
           <span class="early-bird-note">{{ i18n.t('rent.earlyBirdNote') }}</span>
         </div>
 
-        <button class="btn-primary book-btn" :disabled="!selection.end" @click="showConfirm = true">
+        <button class="btn-primary book-btn" :disabled="!selection.end" @click="onBookClick">
           {{ i18n.t('rent.bookNow') }}
         </button>
       </div>
@@ -159,6 +159,15 @@ const finalPrice = computed(() => isEarlyBird.value ? earlyBirdPrice.value : tot
 function formatDate(d) {
   if (!d) return ''
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`
+}
+
+function onBookClick() {
+  window.gtag?.('event', 'begin_checkout', {
+    content_type: 'rental',
+    nights: nights.value,
+    value: finalPrice.value,
+  })
+  showConfirm.value = true
 }
 
 function onConfirmed(formData) {

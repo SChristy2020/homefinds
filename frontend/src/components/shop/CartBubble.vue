@@ -7,7 +7,7 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <template>
-  <div class="cart-bubble" @click="cart.showModal = true">
+  <div class="cart-bubble" @click="onCartClick">
     <ShoppingCart :size="22" />
     <span v-if="cart.count > 0" class="cart-count">{{ cart.count }}</span>
   </div>
@@ -18,6 +18,11 @@ import { ShoppingCart } from 'lucide-vue-next'
 import { useCartStore } from '@/stores/cart'
 
 const cart = useCartStore()
+
+function onCartClick() {
+  window.gtag?.('event', 'view_cart')
+  cart.showModal = true
+}
 </script>
 
 <style scoped>

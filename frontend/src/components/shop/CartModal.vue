@@ -271,6 +271,11 @@ async function handleConfirm() {
     zelleRefundOther: formSnapshot.zelleRefundOther,
   }))
 
+  window.gtag?.('event', 'purchase', {
+    transaction_id: enriched.order_number,
+    value: cart.total,
+    items: cartSnapshot.map(i => ({ item_name: i.name, item_category: i.category, price: i.price })),
+  })
   cart.clear()
   emit('update:modelValue', false)
   onOrderSuccess(enriched)

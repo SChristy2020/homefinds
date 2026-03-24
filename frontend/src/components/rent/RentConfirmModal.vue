@@ -563,6 +563,11 @@ async function handleNotify() {
     return
   }
   loading.value = false
+  window.gtag?.('event', 'book_rental', {
+    order_number: orderNumber.value,
+    nights: props.nights,
+    value: props.totalPrice,
+  })
   emit('confirmed', { ...form.value, orderNumber: orderNumber.value })
   step.value = 3
   await nextTick()

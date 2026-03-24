@@ -42,6 +42,10 @@ const sliding = ref(false)
 
 function onCardClick() {
   if (sliding.value) return
+  window.gtag?.('event', 'select_item', {
+    item_name: props.product.name,
+    item_category: props.product.category,
+  })
   emit('open')
 }
 

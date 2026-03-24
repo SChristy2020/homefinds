@@ -98,8 +98,12 @@ onMounted(async () => {
 
 function toggleCategory(enName) {
   const idx = selectedCategories.value.indexOf(enName)
-  if (idx === -1) selectedCategories.value.push(enName)
-  else selectedCategories.value.splice(idx, 1)
+  if (idx === -1) {
+    selectedCategories.value.push(enName)
+    window.gtag?.('event', 'select_category', { category: enName })
+  } else {
+    selectedCategories.value.splice(idx, 1)
+  }
 }
 
 function getCatEnName(cat) {
