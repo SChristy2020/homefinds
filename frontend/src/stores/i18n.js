@@ -11,7 +11,7 @@ const SUPPORTED = ['en', 'zh-TW', 'zh-CN']
 
 function getSavedLocale() {
   const saved = localStorage.getItem(STORAGE_KEY)
-  return SUPPORTED.includes(saved) ? saved : 'zh-TW'
+  return SUPPORTED.includes(saved) ? saved : 'en'
 }
 
 export const useI18nStore = defineStore('i18n', () => {
