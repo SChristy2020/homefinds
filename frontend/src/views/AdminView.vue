@@ -658,7 +658,7 @@ const pagedProducts = computed(() => {
   return filteredProducts.value.slice(start, start + prodPageSize)
 })
 
-watch(filteredProducts, () => { prodPage.value = 1 })
+watch([prodSearch, prodCategoryFilter, prodSortKey, prodSortAsc], () => { prodPage.value = 1 })
 
 function autoGenerateProdCode(categoryEnName) {
   const cat = categories.value.find(c => getCatName(c, 'en') === categoryEnName)
