@@ -11,7 +11,6 @@
         </h2>
         <div class="table-controls">
           <button class="icon-btn" @click="prodSearchOpen = !prodSearchOpen" title="搜尋"><Search :size="16"/></button>
-          <button class="icon-btn" @click="prodSortAsc = !prodSortAsc" title="排序"><ArrowUpDown :size="16"/></button>
         </div>
       </div>
       <Transition name="slide-down">
@@ -38,15 +37,15 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>id</th>
+              <th class="sortable-th" @click="setProdSort('id')">id<component :is="prodSortKey==='id' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='id' ? 'sort-active' : 'sort-inactive'" /></th>
               <th></th>
-              <th>zh名稱</th>
-              <th>代號</th>
-              <th>類別</th>
-              <th>原價</th>
-              <th>定價</th>
-              <th>狀態</th>
-              <th>最快取貨日</th>
+              <th class="sortable-th" @click="setProdSort('name')">zh名稱<component :is="prodSortKey==='name' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='name' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setProdSort('code')">代號<component :is="prodSortKey==='code' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='code' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setProdSort('category')">類別<component :is="prodSortKey==='category' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='category' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setProdSort('original_price')">原價<component :is="prodSortKey==='original_price' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='original_price' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setProdSort('price')">定價<component :is="prodSortKey==='price' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='price' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setProdSort('status')">狀態<component :is="prodSortKey==='status' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='status' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setProdSort('pickup_available_time')">最快取貨日<component :is="prodSortKey==='pickup_available_time' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='pickup_available_time' ? 'sort-active' : 'sort-inactive'" /></th>
               <th></th>
             </tr>
           </thead>
@@ -90,7 +89,6 @@
         <h2 class="section-title">商品類別管理 <button class="icon-btn section-add-btn" @click="openAddCat" title="新增類別"><PlusCircle :size="16"/></button></h2>
         <div class="table-controls">
           <button class="icon-btn" @click="catSearchOpen = !catSearchOpen" title="搜尋"><Search :size="16"/></button>
-          <button class="icon-btn" @click="catSortAsc = !catSortAsc" title="排序"><ArrowUpDown :size="16"/></button>
         </div>
       </div>
       <Transition name="slide-down">
@@ -103,13 +101,13 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>id</th>
-              <th>zh名稱</th>
-              <th>cn名稱</th>
-              <th>en名稱</th>
-              <th>代號</th>
-              <th>商品總數</th>
-              <th>排序</th>
+              <th class="sortable-th" @click="setCatSort('id')">id<component :is="catSortKey==='id' ? (catSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="catSortKey==='id' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setCatSort('name_zh')">zh名稱<component :is="catSortKey==='name_zh' ? (catSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="catSortKey==='name_zh' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setCatSort('name_cn')">cn名稱<component :is="catSortKey==='name_cn' ? (catSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="catSortKey==='name_cn' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setCatSort('name_en')">en名稱<component :is="catSortKey==='name_en' ? (catSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="catSortKey==='name_en' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setCatSort('code_prefix')">代號<component :is="catSortKey==='code_prefix' ? (catSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="catSortKey==='code_prefix' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setCatSort('product_count')">商品總數<component :is="catSortKey==='product_count' ? (catSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="catSortKey==='product_count' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setCatSort('sort_order')">排序<component :is="catSortKey==='sort_order' ? (catSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="catSortKey==='sort_order' ? 'sort-active' : 'sort-inactive'" /></th>
               <th></th>
             </tr>
           </thead>
@@ -351,7 +349,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">描述</label>
-          <textarea v-model="prodTranslations[locale].description" rows="2" class="form-textarea" />
+          <textarea v-model="prodTranslations[locale].description" rows="4" class="form-textarea" />
         </div>
       </div>
 
@@ -415,7 +413,7 @@
 
 <script setup>
 import { ref, computed, onMounted, reactive, watch } from 'vue'
-import { Search, ArrowUpDown, Pencil, Trash2, PlusCircle, Mail } from 'lucide-vue-next'
+import { Search, ArrowUpDown, ChevronUp, ChevronDown, Pencil, Trash2, PlusCircle, Mail } from 'lucide-vue-next'
 import { api } from '@/utils/api'
 import { useToastStore } from '@/stores/toast'
 import BaseModal from '@/components/shared/BaseModal.vue'
@@ -443,6 +441,7 @@ function fmtDate(dt) {
 const categories = ref([])
 const catSearch = ref('')
 const catSearchOpen = ref(false)
+const catSortKey = ref('id')
 const catSortAsc = ref(true)
 const showCatModal = ref(false)
 const editingCatId = ref(null)
@@ -462,10 +461,27 @@ const filteredCategories = computed(() => {
       c.translations?.some(t => t.name.toLowerCase().includes(q))
     )
   }
-  return catSortAsc.value
-    ? list.sort((a, b) => a.id - b.id)
-    : list.sort((a, b) => b.id - a.id)
+  const key = catSortKey.value
+  const dir = catSortAsc.value ? 1 : -1
+  return list.sort((a, b) => {
+    let av, bv
+    if (key === 'id') { av = a.id; bv = b.id }
+    else if (key === 'name_zh') { av = getCatName(a, 'zh-TW') || ''; bv = getCatName(b, 'zh-TW') || '' }
+    else if (key === 'name_cn') { av = getCatName(a, 'zh-CN') || ''; bv = getCatName(b, 'zh-CN') || '' }
+    else if (key === 'name_en') { av = getCatName(a, 'en') || ''; bv = getCatName(b, 'en') || '' }
+    else if (key === 'code_prefix') { av = a.code_prefix || ''; bv = b.code_prefix || '' }
+    else if (key === 'product_count') { av = a.product_count ?? 0; bv = b.product_count ?? 0 }
+    else if (key === 'sort_order') { av = a.sort_order ?? 0; bv = b.sort_order ?? 0 }
+    else { av = a.id; bv = b.id }
+    if (typeof av === 'string') return av.localeCompare(bv) * dir
+    return (av - bv) * dir
+  })
 })
+
+function setCatSort(key) {
+  if (catSortKey.value === key) catSortAsc.value = !catSortAsc.value
+  else { catSortKey.value = key; catSortAsc.value = true }
+}
 
 function openAddCat() {
   editingCatId.value = null
@@ -534,7 +550,8 @@ const products = ref([])
 const prodSearch = ref('')
 const prodSearchOpen = ref(false)
 const prodCategoryFilter = ref([])
-const prodSortAsc = ref(true)
+const prodSortKey = ref('id')
+const prodSortAsc = ref(false)
 const prodPage = ref(1)
 const prodPageSize = 10
 const showProdModal = ref(false)
@@ -577,10 +594,28 @@ const filteredProducts = computed(() => {
       p.translations?.some(t => t.name.toLowerCase().includes(q))
     )
   }
-  return prodSortAsc.value
-    ? list.sort((a, b) => a.id - b.id)
-    : list.sort((a, b) => b.id - a.id)
+  const key = prodSortKey.value
+  const dir = prodSortAsc.value ? 1 : -1
+  return list.sort((a, b) => {
+    let av, bv
+    if (key === 'id') { av = a.id; bv = b.id }
+    else if (key === 'name') { av = getProdName(a, 'zh-TW') || ''; bv = getProdName(b, 'zh-TW') || '' }
+    else if (key === 'code') { av = a.code || ''; bv = b.code || '' }
+    else if (key === 'category') { av = a.category || ''; bv = b.category || '' }
+    else if (key === 'original_price') { av = a.original_price ?? -1; bv = b.original_price ?? -1 }
+    else if (key === 'price') { av = a.price ?? 0; bv = b.price ?? 0 }
+    else if (key === 'status') { av = a.status || ''; bv = b.status || '' }
+    else if (key === 'pickup_available_time') { av = a.pickup_available_time || ''; bv = b.pickup_available_time || '' }
+    else { av = a.id; bv = b.id }
+    if (typeof av === 'string') return av.localeCompare(bv) * dir
+    return (av - bv) * dir
+  })
 })
+
+function setProdSort(key) {
+  if (prodSortKey.value === key) prodSortAsc.value = !prodSortAsc.value
+  else { prodSortKey.value = key; prodSortAsc.value = true }
+}
 
 function toggleProdCategory(enName) {
   const idx = prodCategoryFilter.value.indexOf(enName)
@@ -1055,6 +1090,12 @@ onMounted(() => {
   color: var(--mid); font-weight: 600;
   white-space: nowrap;
 }
+.sortable-th {
+  cursor: pointer; user-select: none;
+}
+.sortable-th:hover { color: var(--charcoal); }
+.sort-active { vertical-align: middle; margin-left: 2px; }
+.sort-inactive { vertical-align: middle; margin-left: 2px; opacity: 0.3; }
 .data-table td {
   padding: 8px 10px;
   border-bottom: 1px solid var(--border);
@@ -1201,7 +1242,7 @@ onMounted(() => {
 .translation-block {
   border-top: 1px solid var(--border);
   padding-top: 14px; margin-top: 10px;
-  display: flex; flex-direction: column; gap: 10px;
+  display: flex; flex-direction: column; gap: 4px;
 }
 .translation-locale {
   font-size: 0.75rem; font-weight: 600;
