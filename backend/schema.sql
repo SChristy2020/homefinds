@@ -54,7 +54,7 @@ CREATE TABLE category_translations (
 CREATE TABLE products (
   id                    INT            NOT NULL AUTO_INCREMENT,
   code                  VARCHAR(50)    NOT NULL,
-  category              ENUM('Bedroom','Kitchen','Bathroom','Home & Misc') NOT NULL,
+  category              VARCHAR(50)    NOT NULL,
   price                 DECIMAL(10,2)  NOT NULL,
   original_price        DECIMAL(10,2)  NULL,
   status                ENUM('available','reserved','sold') NOT NULL DEFAULT 'available',
