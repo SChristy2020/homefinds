@@ -45,13 +45,14 @@
               <th class="sortable-th" @click="setProdSort('original_price')">原價<component :is="prodSortKey==='original_price' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='original_price' ? 'sort-active' : 'sort-inactive'" /></th>
               <th class="sortable-th" @click="setProdSort('price')">定價<component :is="prodSortKey==='price' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='price' ? 'sort-active' : 'sort-inactive'" /></th>
               <th class="sortable-th" @click="setProdSort('status')">狀態<component :is="prodSortKey==='status' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='status' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th class="sortable-th" @click="setProdSort('is_visible')">顯示<component :is="prodSortKey==='is_visible' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='is_visible' ? 'sort-active' : 'sort-inactive'" /></th>
               <th class="sortable-th" @click="setProdSort('pickup_available_time')">最快取貨日<component :is="prodSortKey==='pickup_available_time' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='pickup_available_time' ? 'sort-active' : 'sort-inactive'" /></th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="filteredProducts.length === 0">
-              <td colspan="10" class="empty-row">無資料</td>
+              <td colspan="11" class="empty-row">無資料</td>
             </tr>
             <tr v-for="prod in pagedProducts" :key="prod.id">
               <td>{{ prod.id }}</td>
@@ -65,6 +66,7 @@
               <td>{{ prod.original_price != null ? '$' + prod.original_price : '-' }}</td>
               <td>${{ prod.price }}</td>
               <td><span class="status-badge" :class="prod.status">{{ prod.status }}</span></td>
+              <td><span class="status-badge" :class="prod.is_visible ? 'available' : 'sold'" style="cursor:pointer" @click="toggleVisible(prod)">{{ prod.is_visible ? '顯示' : '隱藏' }}</span></td>
               <td>{{ prod.pickup_available_time ? fmtDate(prod.pickup_available_time) : '隨時' }}</td>
               <td><div class="row-actions">
                 <button class="action-btn edit" @click="openEditProd(prod)" title="編輯"><Pencil :size="14"/></button>
@@ -328,6 +330,17 @@
         </select>
       </div>
       <div class="form-row">
+        <label class="form-label">顯示於購物頁</label>
+        <div class="pickup-radio-group">
+          <label class="radio-option">
+            <input type="radio" v-model="prodForm.is_visible" :value="false" /> 隱藏
+          </label>
+          <label class="radio-option">
+            <input type="radio" v-model="prodForm.is_visible" :value="true" /> 顯示
+          </label>
+        </div>
+      </div>
+      <div class="form-row">
         <label class="form-label">最快取貨日</label>
         <div class="pickup-radio-group">
           <label class="radio-option">
@@ -558,7 +571,7 @@ const showProdModal = ref(false)
 const editingProdId = ref(null)
 const prodSaving = ref(false)
 const pickupMode = ref('anytime')
-const prodForm = reactive({ code: '', listed_date: '', category: '', original_price: null, price: 0, status: 'available', pickup_available_time: '' })
+const prodForm = reactive({ code: '', listed_date: '', category: '', original_price: null, price: 0, status: 'available', is_visible: false, pickup_available_time: '' })
 const prodTranslations = reactive({
   'zh-TW': { name: '', description: '' },
   'zh-CN': { name: '', description: '' },
@@ -605,6 +618,7 @@ const filteredProducts = computed(() => {
     else if (key === 'original_price') { av = a.original_price ?? -1; bv = b.original_price ?? -1 }
     else if (key === 'price') { av = a.price ?? 0; bv = b.price ?? 0 }
     else if (key === 'status') { av = a.status || ''; bv = b.status || '' }
+    else if (key === 'is_visible') { av = a.is_visible ? 1 : 0; bv = b.is_visible ? 1 : 0 }
     else if (key === 'pickup_available_time') { av = a.pickup_available_time || ''; bv = b.pickup_available_time || '' }
     else { av = a.id; bv = b.id }
     if (typeof av === 'string') return av.localeCompare(bv) * dir
@@ -649,6 +663,7 @@ function openAddProd() {
   prodForm.original_price = null
   prodForm.price = 0
   prodForm.status = 'available'
+  prodForm.is_visible = false
   prodForm.pickup_available_time = '2026-04-18'
   pickupMode.value = 'date'
   for (const locale of ['zh-TW', 'zh-CN', 'en']) {
@@ -669,6 +684,7 @@ function openEditProd(prod) {
   prodForm.original_price = prod.original_price
   prodForm.price = prod.price
   prodForm.status = prod.status
+  prodForm.is_visible = prod.is_visible ?? false
   if (prod.pickup_available_time) {
     pickupMode.value = 'date'
     prodForm.pickup_available_time = new Date(prod.pickup_available_time).toISOString().slice(0, 10)
@@ -751,6 +767,7 @@ async function saveProdModal() {
         price:                 prodForm.price,
         original_price:        prodForm.original_price || null,
         status:                prodForm.status,
+        is_visible:            prodForm.is_visible,
         pickup_available_time: pickupMode.value === 'date' ? (prodForm.pickup_available_time || null) : null,
         translations: ['zh-TW', 'zh-CN', 'en']
           .filter(l => prodTranslations[l].name)
@@ -764,6 +781,7 @@ async function saveProdModal() {
         price:                 prodForm.price,
         original_price:        prodForm.original_price || null,
         status:                prodForm.status,
+        is_visible:            prodForm.is_visible,
         pickup_available_time: pickupMode.value === 'date' ? (prodForm.pickup_available_time || null) : null,
       })
       for (const locale of ['zh-TW', 'zh-CN', 'en']) {
@@ -798,6 +816,15 @@ async function saveProdModal() {
     toast.show('儲存失敗')
   } finally {
     prodSaving.value = false
+  }
+}
+
+async function toggleVisible(prod) {
+  try {
+    await api.put(`/api/products/${prod.id}`, { is_visible: !prod.is_visible })
+    prod.is_visible = !prod.is_visible
+  } catch (e) {
+    toast.show('更新失敗')
   }
 }
 

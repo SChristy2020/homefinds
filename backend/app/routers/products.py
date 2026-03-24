@@ -30,8 +30,11 @@ def _build_out(product, db):
     return out
 
 @router.get("", response_model=list[ProductOut])
-def list_products(db: Session = Depends(get_db)):
-    products = db.query(Product).all()
+def list_products(visible_only: bool = False, db: Session = Depends(get_db)):
+    q = db.query(Product)
+    if visible_only:
+        q = q.filter(Product.is_visible == True)
+    products = q.all()
     return [_build_out(p, db) for p in products]
 
 @router.get("/{product_id}", response_model=ProductOut)

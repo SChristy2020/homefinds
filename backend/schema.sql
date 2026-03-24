@@ -58,6 +58,7 @@ CREATE TABLE products (
   price                 DECIMAL(10,2)  NOT NULL,
   original_price        DECIMAL(10,2)  NULL,
   status                ENUM('available','reserved','sold') NOT NULL DEFAULT 'available',
+  is_visible            TINYINT(1)     NOT NULL DEFAULT 0,
   pickup_available_time DATETIME       NULL,
   listed_date           DATE           NOT NULL,
   waiting_list_summary  JSON           NULL COMMENT '候補名單快照 [{"user_id":1,"name":"王小明","is_cancelled":false}]',

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, Numeric, Date, DateTime, Text, JSON, func, ForeignKey
+from sqlalchemy import Column, Integer, String, Enum, Numeric, Date, DateTime, Text, JSON, Boolean, func, ForeignKey
 from app.database import Base
 
 class Product(Base):
@@ -10,6 +10,7 @@ class Product(Base):
     price                 = Column(Numeric(10, 2), nullable=False)
     original_price        = Column(Numeric(10, 2), nullable=True)
     status                = Column(Enum("available", "reserved", "sold"), nullable=False, default="available")
+    is_visible            = Column(Boolean, nullable=False, default=False)
     pickup_available_time = Column(DateTime, nullable=True)
     listed_date           = Column(Date, nullable=False)
     waiting_list_summary  = Column(JSON, nullable=True)

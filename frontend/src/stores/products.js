@@ -31,7 +31,7 @@ export const useProductsStore = defineStore('products', () => {
   )
 
   async function fetchProducts() {
-    rawProducts.value = await api.get('/api/products')
+    rawProducts.value = await api.get('/api/products?visible_only=true')
   }
 
   async function fetchCategories() {
