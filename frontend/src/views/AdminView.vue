@@ -690,13 +690,39 @@ function addProdImage() {
   prodFileInput.value.click()
 }
 
+function padToSquare(file) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      const padding = Math.round(Math.max(img.width, img.height) * 0.05)
+      const size = Math.max(img.width, img.height) + padding * 2
+      const canvas = document.createElement('canvas')
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext('2d')
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, size, size)
+      const x = Math.round((size - img.width) / 2)
+      const y = Math.round((size - img.height) / 2)
+      ctx.drawImage(img, x, y, img.width, img.height)
+      canvas.toBlob((blob) => {
+        resolve(new File([blob], file.name, { type: 'image/jpeg' }))
+      }, 'image/jpeg', 0.92)
+    }
+    img.src = objectUrl
+  })
+}
+
 async function onProdFileChange(e) {
   const files = Array.from(e.target.files)
   if (!files.length) return
   prodUploading.value = true
   try {
     await Promise.all(files.map(async (file) => {
-      const { url } = await api.upload(file)
+      const squared = await padToSquare(file)
+      const { url } = await api.upload(squared)
       prodImages.value.push({ tempId: Date.now() + Math.random(), url, isNew: true })
     }))
   } catch {
@@ -911,7 +937,8 @@ async function onRoomFileChange(e) {
   roomUploading.value = true
   try {
     await Promise.all(files.map(async (file) => {
-      const { url } = await api.upload(file)
+      const squared = await padToSquare(file)
+      const { url } = await api.upload(squared)
       roomImages.value.push({ tempId: Date.now() + Math.random(), url, isNew: true })
     }))
   } catch {
