@@ -41,12 +41,10 @@
     <!-- Category + Code -->
     <div class="badge-row">
       <span v-if="categoryLabel" class="category-badge">{{ categoryLabel }}</span>
-      <div class="badge-row-right">
-        <span v-if="product.code" class="code-badge">#{{ product.code }}</span>
-        <button class="copy-link-btn" @click="copyLink">
-          <Link :size="13" />{{ i18n.t('productDetail.copyLink') }}
-        </button>
-      </div>
+      <span v-if="product.code" class="code-badge">#{{ product.code }}</span>
+      <button class="copy-link-btn" @click="copyLink">
+        <Link :size="13" />{{ i18n.t('productDetail.copyLink') }}
+      </button>
     </div>
 
     <!-- Status + Pickup time -->
@@ -249,11 +247,8 @@ function maskEmail(email) {
 
 /* Badges */
 .badge-row {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   margin-bottom: 10px;
-}
-.badge-row-right {
-  display: flex; align-items: center; gap: 6px;
 }
 .category-badge {
   font-size: .9rem;
@@ -266,6 +261,7 @@ function maskEmail(email) {
   font-size: 0.75rem; padding: 2px 10px;
   border: 1.5px solid var(--border);
   border-radius: 999px; color: var(--mid);
+  margin-left: auto;
 }
 .copy-link-btn {
   display: flex; align-items: center; gap: 4px;
@@ -364,4 +360,19 @@ function maskEmail(email) {
   padding-top: 10px;
 }
 .mechanism-list li { margin-bottom: 2px; }
+
+@media (max-width: 600px) {
+  .copy-link-btn {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
+  .status-row {
+    flex-wrap: wrap;
+  }
+  .pickup-time {
+    margin-left: 0;
+    width: 100%;
+  }
+}
 </style>
