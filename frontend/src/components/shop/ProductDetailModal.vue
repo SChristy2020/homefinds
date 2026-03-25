@@ -263,18 +263,20 @@ function maskEmail(email) {
   background: var(--button)
 }
 .code-badge {
-  font-size: 0.75rem; padding: 3px 10px;
+  font-size: 0.75rem; padding: 2px 10px;
   border: 1.5px solid var(--border);
   border-radius: 999px; color: var(--mid);
 }
 .copy-link-btn {
   display: flex; align-items: center; gap: 4px;
-  font-size: 0.72rem; padding: 3px 10px;
+  font-size: 0.75rem; padding: 3px 10px;
   border: 1.5px solid var(--border);
   border-radius: 999px; color: var(--mid);
   background: transparent; cursor: pointer;
   font-family: var(--font-body);
   transition: border-color 0.15s, color 0.15s;
+  color: #5f7e71;
+  font-weight: 600;
 }
 .copy-link-btn:hover { border-color: var(--charcoal); color: var(--charcoal); }
 
