@@ -24,6 +24,14 @@ const router = createRouter({
   routes,
 })
 
+router.beforeEach((to) => {
+  if (to.name === 'admin') {
+    const USER_KEY = 'homefinds_user'
+    const user = JSON.parse(sessionStorage.getItem(USER_KEY))
+    if (!user) return { name: 'orders' }
+  }
+})
+
 router.afterEach((to) => {
   if (window.gtag) {
     window.gtag('event', 'page_view', {
