@@ -46,6 +46,8 @@ export default {
       '<strong>成交确认</strong>：Christy 确认收到款项后会私讯通知您，商品也会直接改为售出状态！',
     ],
     addedToast: '{name} 已加入购物车',
+    copyLink: '分享好物',
+    copyLinkToast: '链接已复制，快分享给朋友！',
   },
   userForm: {
     firstName: '名字',

@@ -46,6 +46,8 @@ export default {
       '<strong>All Set</strong>: As soon as Christy confirms your payment, she’ll message you and update the status to SOLD!',
     ],
     addedToast: '{name} added to cart',
+    copyLink: 'Share this find',
+    copyLinkToast: 'Link copied! Ready to share.',
   },
   userForm: {
     firstName: 'First Name',

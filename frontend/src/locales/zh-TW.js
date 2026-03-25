@@ -46,6 +46,8 @@ export default {
       '<strong>成交確認</strong>：Christy 確認收到款項後會私訊通知您，商品也會直接改為售出狀態！',
     ],
     addedToast: '{name} 已加入購物車',
+    copyLink: '分享好物',
+    copyLinkToast: '連結已複製，快分享給朋友！',
   },
   userForm: {
     firstName: '名字',

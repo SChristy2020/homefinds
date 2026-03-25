@@ -41,7 +41,12 @@
     <!-- Category + Code -->
     <div class="badge-row">
       <span v-if="categoryLabel" class="category-badge">{{ categoryLabel }}</span>
-      <span v-if="product.code" class="code-badge">#{{ product.code }}</span>
+      <div class="badge-row-right">
+        <span v-if="product.code" class="code-badge">#{{ product.code }}</span>
+        <button class="copy-link-btn" @click="copyLink">
+          <Link :size="13" />{{ i18n.t('productDetail.copyLink') }}
+        </button>
+      </div>
     </div>
 
     <!-- Status + Pickup time -->
@@ -123,6 +128,7 @@ function onThumbClick(i) {
 }
 import { Carousel, Slide } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
+import { Link } from 'lucide-vue-next'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import { useCartStore } from '@/stores/cart'
 import { useToastStore } from '@/stores/toast'
@@ -153,6 +159,12 @@ const categoryLabel = computed(() => {
     || cat.code_prefix
 })
 
+
+function copyLink() {
+  const url = `${window.location.origin}${window.location.pathname}#/?product=${props.product.id}`
+  navigator.clipboard.writeText(url)
+  toast.show(i18n.t('productDetail.copyLinkToast'))
+}
 
 function handleAddToCart() {
   cart.add(props.product)
@@ -240,6 +252,9 @@ function maskEmail(email) {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 10px;
 }
+.badge-row-right {
+  display: flex; align-items: center; gap: 6px;
+}
 .category-badge {
   font-size: .9rem;
   padding: 3px 12px;
@@ -252,6 +267,16 @@ function maskEmail(email) {
   border: 1.5px solid var(--border);
   border-radius: 999px; color: var(--mid);
 }
+.copy-link-btn {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.72rem; padding: 3px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px; color: var(--mid);
+  background: transparent; cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color 0.15s, color 0.15s;
+}
+.copy-link-btn:hover { border-color: var(--charcoal); color: var(--charcoal); }
 
 /* Status + Pickup time */
 .status-row {
