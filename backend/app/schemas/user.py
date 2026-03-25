@@ -27,7 +27,7 @@ class UserCreate(BaseModel):
     has_reservation:         int = 0
     has_purchase:            int = 0
     is_subscribed_marketing: int = 1
-    locale:                  str = "zh-TW"
+    locale:                  str = "en"
 
 class UserOut(UserCreate):
     id:                      int

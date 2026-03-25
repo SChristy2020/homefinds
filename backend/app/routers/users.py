@@ -30,7 +30,7 @@ def create_user(body: UserCreate, response: Response, db: Session = Depends(get_
         response.status_code = 200
         return existing
 
-    data = body.model_dump(exclude={"locale"})
+    data = body.model_dump()
     user = User(**data)
     db.add(user)
     db.commit()
