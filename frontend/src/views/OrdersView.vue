@@ -82,11 +82,12 @@
               <th v-if="isAdmin" class="sortable" @click="toggleSort('updated')">
                 {{ i18n.t('orders.updatedAt') }}<SortIcon col="updated" :active="sortColumn" :dir="sortDirection" />
               </th>
+              <th v-if="isAdmin">補發訂單確認</th>
             </tr>
           </thead>
           <tbody v-if="filteredOrders.length === 0">
             <tr>
-              <td :colspan="isAdmin ? 11 : 6" class="td-empty">{{ i18n.t('orders.noOrdersTable') }}</td>
+              <td :colspan="isAdmin ? 12 : 6" class="td-empty">{{ i18n.t('orders.noOrdersTable') }}</td>
             </tr>
           </tbody>
           <tbody v-for="order in paginatedOrders" :key="order.id">
@@ -171,11 +172,16 @@
               </template>
               <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
               <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
+              <td v-if="isAdmin" class="td-resend" @click.stop>
+                <button class="btn-edit-icon" @click.stop="resendOrderConfirmation(order)" title="補發訂單確認">
+                  <Mail :size="14" />
+                </button>
+              </td>
             </tr>
 
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
-              <td :colspan="isAdmin ? 12 : 6">
+              <td :colspan="isAdmin ? 13 : 6">
                 <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" :orderStatus="order.order_status" @cancel="handleCancel" />
 
                 <!-- Total summary -->
@@ -590,7 +596,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { ArrowLeft, Pencil, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-vue-next'
+import { ArrowLeft, Pencil, ChevronUp, ChevronDown, ChevronsUpDown, Mail } from 'lucide-vue-next'
 import { useOrdersStore } from '@/stores/orders'
 import { useReservationsStore } from '@/stores/reservations'
 import { useUserStore } from '@/stores/user'
@@ -855,6 +861,11 @@ async function saveAdminNotes(order) {
 async function handleCancel(itemId) {
   await ordersStore.cancelOrderItem(itemId)
   toast.show(i18n.t('orders.cancelToast'))
+}
+
+async function resendOrderConfirmation(order) {
+  await api.post(`/api/orders/${order.id}/resend-confirmation?admin_id=${userStore.currentUser.id}`)
+  toast.show('訂單確認信已補發')
 }
 
 const ORDER_STATUSES = ['待付訂金', '待入住', '已入住', '已退房', '已取消']

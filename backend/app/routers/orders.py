@@ -405,6 +405,28 @@ def update_admin_notes(order_id: int, body: AdminNotesUpdate, admin_id: int, db:
     db.refresh(order)
     return _build_out(order, db)
 
+@router.post("/{order_id}/resend-confirmation")
+def resend_order_confirmation(order_id: int, admin_id: int, db: Session = Depends(get_db)):
+    admin = db.query(User).filter(User.id == admin_id, User.is_admin == 1).first()
+    if not admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    user = db.query(User).filter(User.id == order.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    order_out = _build_out(order, db)
+    def _send():
+        new_db = SessionLocal()
+        try:
+            new_user = new_db.query(User).filter(User.id == user.id).first()
+            send_order_confirmation(new_user, order_out, new_db)
+        finally:
+            new_db.close()
+    threading.Thread(target=_send, daemon=True).start()
+    return {"message": "Confirmation email resent"}
+
 @router.put("/items/{item_id}/cancel", response_model=dict)
 def cancel_order_item(item_id: int, db: Session = Depends(get_db)):
     item = db.query(OrderItem).filter(OrderItem.id == item_id).first()
