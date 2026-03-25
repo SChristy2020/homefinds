@@ -16,6 +16,8 @@ export default {
     sortNameDesc: '名称 Z → A',
     sortDateNew: '上架日期：最新',
     sortDateOld: '上架日期：最旧',
+    sortPickupEarly: '取货日：最早',
+    sortPickupLate: '取货日：最晚',
     hideSold: '隐藏已售出商品',
     soldOut: '已售出',
     categories: {

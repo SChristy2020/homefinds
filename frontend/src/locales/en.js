@@ -16,6 +16,8 @@ export default {
     sortNameDesc: 'Name: Z → A',
     sortDateNew: 'Date: Newest',
     sortDateOld: 'Date: Oldest',
+    sortPickupEarly: 'Pickup: Earliest',
+    sortPickupLate: 'Pickup: Latest',
     hideSold: 'In Stock Only',
     soldOut: 'Sold Out',
     categories: {

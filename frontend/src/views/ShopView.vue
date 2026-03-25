@@ -137,8 +137,10 @@ const sortOptions = computed(() => [
   { value: 'price_desc', label: i18n.t('shop.sortPriceHigh') },
   { value: 'name_asc',   label: i18n.t('shop.sortNameAsc') },
   { value: 'name_desc',  label: i18n.t('shop.sortNameDesc') },
-  { value: 'date_new',   label: i18n.t('shop.sortDateNew') },
-  { value: 'date_old',   label: i18n.t('shop.sortDateOld') },
+  { value: 'date_new',      label: i18n.t('shop.sortDateNew') },
+  { value: 'date_old',      label: i18n.t('shop.sortDateOld') },
+  { value: 'pickup_early',  label: i18n.t('shop.sortPickupEarly') },
+  { value: 'pickup_late',   label: i18n.t('shop.sortPickupLate') },
 ])
 
 function selectSort(value) {
@@ -181,6 +183,16 @@ const filteredProducts = computed(() => {
   if (sortOption.value === 'name_desc') return [...list].sort((a, b) => b.name.localeCompare(a.name))
   if (sortOption.value === 'date_new') return [...list].sort((a, b) => new Date(b.date) - new Date(a.date))
   if (sortOption.value === 'date_old') return [...list].sort((a, b) => new Date(a.date) - new Date(b.date))
+  if (sortOption.value === 'pickup_early') return [...list].sort((a, b) => {
+    const aT = a.pickupTime ? new Date(a.pickupTime).getTime() : 0
+    const bT = b.pickupTime ? new Date(b.pickupTime).getTime() : 0
+    return aT - bT
+  })
+  if (sortOption.value === 'pickup_late') return [...list].sort((a, b) => {
+    const aT = a.pickupTime ? new Date(a.pickupTime).getTime() : Infinity
+    const bT = b.pickupTime ? new Date(b.pickupTime).getTime() : Infinity
+    return bT - aT
+  })
   const catOrder = Object.fromEntries(
     productsStore.categories.map(c => {
       const enName = c.translations?.find(t => t.locale === 'en')?.name || ''
