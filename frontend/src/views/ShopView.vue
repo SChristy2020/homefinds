@@ -1,57 +1,60 @@
 <template>
   <div>
-    <!-- Filters bar -->
-    <div class="shop-filters">
-      <div class="category-pills">
-        <button
-          class="pill"
-          :class="{ active: selectedCategories.length === 0 }"
-          @click="selectedCategories = []"
-        >
-          {{ i18n.t('shop.all') }}
-        </button>
-        <button
-          v-for="cat in productsStore.categories"
-          :key="cat.id"
-          class="pill"
-          :class="{ active: selectedCategories.includes(getCatEnName(cat)) }"
-          @click="toggleCategory(getCatEnName(cat))"
-        >
-          {{ getCatLabel(cat) }}
-        </button>
-      </div>
-      <div class="shop-actions">
-        <label class="hide-sold-label">
-          <input type="checkbox" v-model="hideSold" class="hide-sold-checkbox" />
-          {{ i18n.t('shop.hideSold') }}
-        </label>
-        <button class="icon-btn" @click="searchOpen = !searchOpen"><Search :size="17" /></button>
-        <div class="sort-dropdown" ref="sortRef">
-          <button class="icon-btn" :class="{ active: sortOption !== '' }" @click="sortOpen = !sortOpen">
-            <ArrowUpDown :size="17" />
+    <!-- Sticky filters + search bar -->
+    <div class="shop-sticky-bar" :class="{ 'is-stuck': isStuck }">
+      <!-- Filters bar -->
+      <div class="shop-filters">
+        <div class="category-pills">
+          <button
+            class="pill"
+            :class="{ active: selectedCategories.length === 0 }"
+            @click="selectedCategories = []"
+          >
+            {{ i18n.t('shop.all') }}
           </button>
-          <Transition name="slide-down">
-            <div v-if="sortOpen" class="sort-menu">
-              <button
-                v-for="opt in sortOptions"
-                :key="opt.value"
-                class="sort-item"
-                :class="{ active: sortOption === opt.value }"
-                @click="selectSort(opt.value)"
-              >{{ opt.label }}</button>
-            </div>
-          </Transition>
+          <button
+            v-for="cat in productsStore.categories"
+            :key="cat.id"
+            class="pill"
+            :class="{ active: selectedCategories.includes(getCatEnName(cat)) }"
+            @click="toggleCategory(getCatEnName(cat))"
+          >
+            {{ getCatLabel(cat) }}
+          </button>
+        </div>
+        <div class="shop-actions">
+          <label class="hide-sold-label">
+            <input type="checkbox" v-model="hideSold" class="hide-sold-checkbox" />
+            {{ i18n.t('shop.hideSold') }}
+          </label>
+          <button class="icon-btn" @click="searchOpen = !searchOpen"><Search :size="17" /></button>
+          <div class="sort-dropdown" ref="sortRef">
+            <button class="icon-btn" :class="{ active: sortOption !== '' }" @click="sortOpen = !sortOpen">
+              <ArrowUpDown :size="17" />
+            </button>
+            <Transition name="slide-down">
+              <div v-if="sortOpen" class="sort-menu">
+                <button
+                  v-for="opt in sortOptions"
+                  :key="opt.value"
+                  class="sort-item"
+                  :class="{ active: sortOption === opt.value }"
+                  @click="selectSort(opt.value)"
+                >{{ opt.label }}</button>
+              </div>
+            </Transition>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Search -->
-    <Transition name="slide-down">
-      <div v-if="searchOpen" class="search-bar">
-        <Search :size="15" class="search-icon" />
-        <input v-model="searchQuery" :placeholder="i18n.t('shop.searchPlaceholder')" autofocus />
-      </div>
-    </Transition>
+      <!-- Search -->
+      <Transition name="slide-down">
+        <div v-if="searchOpen" class="search-bar">
+          <Search :size="15" class="search-icon" />
+          <input v-model="searchQuery" :placeholder="i18n.t('shop.searchPlaceholder')" autofocus />
+        </div>
+      </Transition>
+    </div>
 
     <!-- Item count -->
     <div class="item-count">{{ i18n.t('shop.itemCount', { count: filteredProducts.length }) }}</div>
@@ -87,6 +90,11 @@ const cart = useCartStore()
 const i18n = useI18nStore()
 
 const selectedCategories = ref([])
+const isStuck = ref(false)
+
+function onScrollSticky() {
+  isStuck.value = window.scrollY > 10
+}
 
 onMounted(async () => {
   await Promise.all([
@@ -94,6 +102,7 @@ onMounted(async () => {
     productsStore.fetchProducts(),
   ])
   document.addEventListener('click', onClickOutside)
+  window.addEventListener('scroll', onScrollSticky, { passive: true })
 })
 
 function toggleCategory(enName) {
@@ -143,6 +152,7 @@ function onClickOutside(e) {
 
 onUnmounted(() => {
   document.removeEventListener('click', onClickOutside)
+  window.removeEventListener('scroll', onScrollSticky)
 })
 
 const selectedProduct = ref(null)
@@ -210,9 +220,37 @@ watch(
 </script>
 
 <style scoped>
+.shop-sticky-bar {
+  position: sticky;
+  top: var(--header-height, 78px);
+  z-index: 90;
+  margin: -20px -24px 0;
+  padding: 10px 24px 6px;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.shop-sticky-bar.is-stuck {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 10px 6px 1px;
+}
+.shop-sticky-bar.is-stuck .category-pills {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  justify-content: flex-start;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  width: 100%;
+}
+.shop-sticky-bar.is-stuck .category-pills::-webkit-scrollbar {
+  display: none;
+}
+.shop-sticky-bar.is-stuck .category-pills .pill {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 .shop-filters {
   display: flex; flex-direction: column; align-items: center;
-  margin-bottom: 4px; gap: 10px;
+  margin-bottom: 4px; gap: 6px;
 }
 .category-pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .pill {
@@ -275,7 +313,7 @@ watch(
 .search-bar {
   display: flex; gap: 10px; align-items: center;
   background: var(--light-light); border: 1.5px solid var(--border);
-  border-radius: var(--radius); padding: 6px 14px; margin-bottom: 20px;
+  border-radius: var(--radius); padding: 6px 14px; margin-top: 6px;
 }
 .search-bar input {
   border: none; background: transparent;
@@ -286,7 +324,7 @@ watch(
 .search-icon { color: var(--mid); flex-shrink: 0; }
 .item-count {
   font-size: 0.82rem; color: var(--mid);
-  margin-bottom: 14px;
+  margin-top: 14px; margin-bottom: 14px;
 }
 .slide-down-enter-active, .slide-down-leave-active { transition: all 0.2s ease; }
 .slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-8px); }

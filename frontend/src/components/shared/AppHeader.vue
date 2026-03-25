@@ -7,7 +7,7 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <template>
-  <header class="site-header">
+  <header class="site-header" ref="headerEl">
     <div class="header-top">
       <h1 class="site-title"><img src="/logo.png" class="site-logo" alt="logo" />Christy's Home Finds</h1>
     </div>
@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18nStore } from '@/stores/i18n'
 import { useUserStore } from '@/stores/user'
@@ -40,6 +40,16 @@ const route = useRoute()
 const i18n = useI18nStore()
 const userStore = useUserStore()
 const isAdmin = computed(() => userStore.currentUser?.is_admin === 1)
+
+const headerEl = ref(null)
+let ro
+onMounted(() => {
+  ro = new ResizeObserver(() => {
+    document.documentElement.style.setProperty('--header-height', headerEl.value.offsetHeight + 'px')
+  })
+  ro.observe(headerEl.value)
+})
+onUnmounted(() => ro?.disconnect())
 </script>
 
 <style scoped>
