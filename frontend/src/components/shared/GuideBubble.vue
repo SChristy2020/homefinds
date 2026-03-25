@@ -160,6 +160,7 @@ onMounted(async () => {
 }
 .guide-tab {
   flex: 1;
+  min-width: 0;
   background: none;
   border: none;
   border-bottom: 2.5px solid transparent;
@@ -170,8 +171,9 @@ onMounted(async () => {
   color: var(--mid);
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
-  white-space: nowrap;
   text-align: center;
+  word-break: break-word;
+  line-height: 1.3;
 }
 .guide-tab:hover { color: var(--charcoal); }
 .guide-tab.active {
