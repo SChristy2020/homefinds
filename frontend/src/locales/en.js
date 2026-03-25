@@ -43,7 +43,7 @@ export default {
     mechanism: [
       '<strong>Waitlist Policy</strong>: No worries if you\'re not first! If the previous buyer passes, Christy will reach out to the next person right away.',
       '<strong>Fast Track</strong>: Don\'t want to wait? <strong>You can secure the item anytime by completing your payment, even if you aren\'t first in line!</strong>',
-      '<strong>All Set</strong>: As soon as Christy confirms your payment, she’ll message you and update the status to SOLD!',
+      '<strong>All Set</strong>: As soon as Christy confirms your payment, she’ll email you and update the status to SOLD!',
     ],
     addedToast: '{name} added to cart',
     copyLink: 'Share this find',

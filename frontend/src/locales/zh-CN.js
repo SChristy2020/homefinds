@@ -43,7 +43,7 @@ export default {
     mechanism: [
       '<strong>递补机制</strong>：若第一顺位取消，系统将依序通知下一位候补者。',
       '<strong>即时认购</strong>：只要预约后<strong>直接完成汇款，不论目前的排序，您就能直接获得这项宝物！</strong>',
-      '<strong>成交确认</strong>：Christy 确认收到款项后会私讯通知您，商品也会直接改为售出状态！',
+      '<strong>成交确认</strong>：Christy 确认收到款项后会寄信通知您，商品也会直接改为售出状态！',
     ],
     addedToast: '{name} 已加入购物车',
     copyLink: '分享好物',

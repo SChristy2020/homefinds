@@ -43,7 +43,7 @@ export default {
     mechanism: [
       '<strong>遞補機制</strong>：若第一順位取消，系統將依序通知下一位候補者。',
       '<strong>即時認購</strong>：只要預約後<strong>直接完成匯款，不論目前的排序，您就能直接獲得這項寶物！</strong>',
-      '<strong>成交確認</strong>：Christy 確認收到款項後會私訊通知您，商品也會直接改為售出狀態！',
+      '<strong>成交確認</strong>：Christy 確認收到款項後會寄信通知您，商品也會直接改為售出狀態！',
     ],
     addedToast: '{name} 已加入購物車',
     copyLink: '分享好物',
