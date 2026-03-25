@@ -75,7 +75,7 @@
 
 <script setup>
 import { ref, computed, provide, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Search, ArrowUpDown } from 'lucide-vue-next'
 import { useProductsStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
@@ -88,6 +88,7 @@ import OrderSuccessModal from '@/components/shop/OrderSuccessModal.vue'
 const productsStore = useProductsStore()
 const cart = useCartStore()
 const i18n = useI18nStore()
+const router = useRouter()
 
 const selectedCategories = ref([])
 const isStuck = ref(false)
@@ -213,7 +214,12 @@ const filteredProducts = computed(() => {
 function openProduct(product) {
   selectedProduct.value = product
   showDetailModal.value = true
+  router.replace({ query: { product: product.id } })
 }
+
+watch(showDetailModal, (val) => {
+  if (!val) router.replace({ query: {} })
+})
 
 // 從 URL query ?product=ID 自動開啟商品跳窗
 const route = useRoute()
