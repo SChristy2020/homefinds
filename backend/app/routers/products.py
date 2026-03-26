@@ -129,7 +129,7 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
                             )
                         else:
                             send_item_snatched_pending_notification(
-                                affected_user, [_pid], new_db
+                                affected_user, [_pid], new_db, order=affected_order
                             )
                     except Exception as e:
                         print(f"[update_product sold] affected order {affected_order_id} email failed: {e}")
@@ -156,7 +156,7 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
                     if not user or user.id in sent_user_ids:
                         continue
                     sent_user_ids.add(user.id)
-                    send_product_restored_notification(user, [_pid], new_db)
+                    send_product_restored_notification(user, [_pid], new_db, order=order)
             finally:
                 new_db.close()
         threading.Thread(target=_send_restore_emails, daemon=True).start()

@@ -243,7 +243,7 @@ def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
                     else:
                         # 訂單中還有未售出商品 → 提醒盡速付款
                         send_item_snatched_pending_notification(
-                            affected_user, snatched_pids, new_db
+                            affected_user, snatched_pids, new_db, order=affected_order
                         )
                 except Exception as e:
                     print(f"[mark_order_paid] affected order {affected_order_id} email failed: {e}")
@@ -311,6 +311,7 @@ def revert_paid_order(order_id: int, body: RevertPaidBody, db: Session = Depends
 
     # 6. 寄信通知所有含此商品的訂單購買者（非 cancelled 物品）
     _product_ids = affected_product_ids[:]
+    _reverted_order_id = order.id
     _reverted_order_user_id = order.user_id
     _reverted_order_number = order.order_number
     _reverted_target_status = body.target_status
@@ -321,9 +322,11 @@ def revert_paid_order(order_id: int, body: RevertPaidBody, db: Session = Depends
             # 6a. 寄信給被 revert 的訂單 user，通知訂單狀態已變更
             try:
                 reverted_user = new_db.query(User).filter(User.id == _reverted_order_user_id).first()
+                reverted_order = new_db.query(Order).filter(Order.id == _reverted_order_id).first()
                 if reverted_user:
                     send_order_status_reverted_notification(
-                        reverted_user, _reverted_order_number, _reverted_target_status, _product_ids, new_db
+                        reverted_user, _reverted_order_number, _reverted_target_status, _product_ids, new_db,
+                        order=reverted_order,
                     )
             except Exception as e:
                 print(f"[revert_paid_order] status reverted email failed: {e}")
@@ -342,7 +345,7 @@ def revert_paid_order(order_id: int, body: RevertPaidBody, db: Session = Depends
                 if not user or user.id in sent_user_ids:
                     continue
                 sent_user_ids.add(user.id)
-                send_product_restored_notification(user, _product_ids, new_db)
+                send_product_restored_notification(user, _product_ids, new_db, order=ao)
         finally:
             new_db.close()
 

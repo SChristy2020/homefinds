@@ -198,7 +198,7 @@ EMAIL_TRANSLATIONS = {
 RESTORE_EMAIL_TRANSLATIONS = {
     "zh-TW": {
         "html_lang": "zh-TW",
-        "subject": "【好消息】您訂單中的商品恢復販售了！- Christy's HomeFinds",
+        "subject": "【好消息】您訂單中的商品恢復販售了！- Christy’s HomeFinds",
         "header": "商品恢復販售通知",
         "greeting": "Hi {first_name}，好消息！",
         "body": "您訂單中，原本已出售的商品現已恢復販售。本場採用「先付款先得」制，請把握機會完成付款！",
@@ -211,10 +211,20 @@ RESTORE_EMAIL_TRANSLATIONS = {
         "orders_link_text": "前往查看我的訂單",
         "footer": "💡 有任何問題？歡迎聯絡 Christy:",
         "anytime": "隨時",
+        "order_number_label": "訂單編號：",
+        "order_summary_title": "更新後的訂單明細",
+        "col_pickup": "最快取貨日",
+        "col_position": "目前順位",
+        "total": "共 {count} 樣物品，總計：",
+        "position_labels": [
+            "第一順位", "第二順位", "第三順位", "第四順位", "第五順位",
+            "第六順位", "第七順位", "第八順位", "第九順位", "第十順位",
+        ],
+        "position_fallback": "第{n}順位",
     },
     "zh-CN": {
         "html_lang": "zh-CN",
-        "subject": "【好消息】您订单中的商品恢复销售了！- Christy's HomeFinds",
+        "subject": "【好消息】您订单中的商品恢复销售了！- Christy’s HomeFinds",
         "header": "商品恢复销售通知",
         "greeting": "Hi {first_name}，好消息！",
         "body": "您订单中，原本已售出的商品现已恢复销售。本场采用「先付款先得」制，请把握机会完成付款！",
@@ -227,10 +237,20 @@ RESTORE_EMAIL_TRANSLATIONS = {
         "orders_link_text": "前往查看我的订单",
         "footer": "💡 有任何问题？欢迎联络 Christy:",
         "anytime": "随时",
+        "order_number_label": "订单号：",
+        "order_summary_title": "更新后的订单明细",
+        "col_pickup": "最快取货日",
+        "col_position": "目前顺位",
+        "total": "共 {count} 件商品，合计：",
+        "position_labels": [
+            "第一顺位", "第二顺位", "第三顺位", "第四顺位", "第五顺位",
+            "第六顺位", "第七顺位", "第八顺位", "第九顺位", "第十顺位",
+        ],
+        "position_fallback": "第{n}顺位",
     },
     "en": {
         "html_lang": "en",
-        "subject": "Great News! An item in your order is back for sale! - Christy's HomeFinds",
+        "subject": "Great News! An item in your order is back for sale! - Christy’s HomeFinds",
         "header": "Items Back on Sale",
         "greeting": "Hi {first_name}, Good news!",
         "body": "An item in your order that was previously sold out is now available again. Please note that we operate on a \"first-pay, first-served\" basis. Don’t miss this chance to complete your purchase!",
@@ -243,6 +263,16 @@ RESTORE_EMAIL_TRANSLATIONS = {
         "orders_link_text": "Go to My Order",
         "footer": "💡 Have questions? Feel free to contact Christy at:",
         "anytime": "Anytime",
+        "order_number_label": "Order ID:",
+        "order_summary_title": "Your Updated Order",
+        "col_pickup": "Pickup Time",
+        "col_position": "Current Rank",
+        "total": "{count} item(s), Total:",
+        "position_labels": [
+            "1st Place", "2nd Place", "3rd Place", "4th Place", "5th Place",
+            "6th Place", "7th Place", "8th Place", "9th Place", "10th Place",
+        ],
+        "position_fallback": "{n}th Place",
     },
 }
 
@@ -258,6 +288,7 @@ PAYMENT_SUCCESS_TRANSLATIONS = {
         "order_number_label": "訂單編號：",
         "col_name": "物品名稱",
         "col_price": "價錢",
+        "total": "共 {count} 樣物品，總計：",
         "orders_link_text": "查看我的訂單",
         "footer": "💡 有任何問題？歡迎聯絡 Christy:",
         "anytime": "隨時",
@@ -272,6 +303,7 @@ PAYMENT_SUCCESS_TRANSLATIONS = {
         "order_number_label": "订单号：",
         "col_name": "物品名称",
         "col_price": "价格",
+        "total": "共 {count} 件商品，合计：",
         "orders_link_text": "查看我的订单",
         "footer": "💡 有任何问题？欢迎联络 Christy:",
         "anytime": "随时",
@@ -286,6 +318,7 @@ PAYMENT_SUCCESS_TRANSLATIONS = {
         "order_number_label": "Order ID:",
         "col_name": "Item",
         "col_price": "Price",
+        "total": "{count} item(s), Total:",
         "orders_link_text": "View My Orders",
         "footer": "💡 Questions? Feel free to contact Christy:",
         "anytime": "Anytime",
@@ -307,9 +340,19 @@ ITEM_SNATCHED_PENDING_TRANSLATIONS = {
         "zelle_account": "帳號: (984)373-9392",
         "zelle_name": "戶名: SHU CHING LI",
         "zelle_note": "備註: 請務必註明您的「訂單編號」",
-        "orders_link_text": "立即前往付款",
+        "orders_link_text": "查看我的訂單",
         "footer": "💡 有任何問題？歡迎聯絡 Christy:",
         "anytime": "隨時",
+        "order_number_label": "訂單編號：",
+        "order_summary_title": "更新後的訂單明細",
+        "col_pickup": "最快取貨日",
+        "col_position": "目前順位",
+        "total": "共 {count} 樣物品，總計：",
+        "position_labels": [
+            "第一順位", "第二順位", "第三順位", "第四順位", "第五順位",
+            "第六順位", "第七順位", "第八順位", "第九順位", "第十順位",
+        ],
+        "position_fallback": "第{n}順位",
     },
     "zh-CN": {
         "html_lang": "zh-CN",
@@ -324,9 +367,19 @@ ITEM_SNATCHED_PENDING_TRANSLATIONS = {
         "zelle_account": "帐号: (984)373-9392",
         "zelle_name": "户名: SHU CHING LI",
         "zelle_note": "备注: 请务必注明您的「订单号」",
-        "orders_link_text": "立即前往付款",
+        "orders_link_text": "查看我的订单",
         "footer": "💡 有任何问题？欢迎联络 Christy:",
         "anytime": "随时",
+        "order_number_label": "订单号：",
+        "order_summary_title": "更新后的订单明细",
+        "col_pickup": "最快取货日",
+        "col_position": "目前顺位",
+        "total": "共 {count} 件商品，合计：",
+        "position_labels": [
+            "第一顺位", "第二顺位", "第三顺位", "第四顺位", "第五顺位",
+            "第六顺位", "第七顺位", "第八顺位", "第九顺位", "第十顺位",
+        ],
+        "position_fallback": "第{n}顺位",
     },
     "en": {
         "html_lang": "en",
@@ -341,9 +394,19 @@ ITEM_SNATCHED_PENDING_TRANSLATIONS = {
         "zelle_account": "Account: (984)373-9392",
         "zelle_name": "Name: SHU CHING LI",
         "zelle_note": "Note: Please include your \"Order ID\" in the memo.",
-        "orders_link_text": "Pay Now",
+        "orders_link_text": "Review Order & Pay",
         "footer": "💡 Questions? Feel free to contact Christy:",
         "anytime": "Anytime",
+        "order_number_label": "Order ID:",
+        "order_summary_title": "Updated order details",
+        "col_pickup": "Pickup Time",
+        "col_position": "Current Rank",
+        "total": "{count} item(s), Total:",
+        "position_labels": [
+            "1st Place", "2nd Place", "3rd Place", "4th Place", "5th Place",
+            "6th Place", "7th Place", "8th Place", "9th Place", "10th Place",
+        ],
+        "position_fallback": "{n}th Place",
     },
 }
 
@@ -409,6 +472,15 @@ ORDER_STATUS_REVERTED_TRANSLATIONS = {
         "orders_link_text": "查看我的訂單",
         "footer": "💡 有任何問題？歡迎聯絡 Christy:",
         "anytime": "隨時",
+        "order_summary_title": "更新後的訂單明細",
+        "col_pickup": "最快取貨日",
+        "col_position": "目前順位",
+        "total": "共 {count} 樣物品，總計：",
+        "position_labels": [
+            "第一順位", "第二順位", "第三順位", "第四順位", "第五順位",
+            "第六順位", "第七順位", "第八順位", "第九順位", "第十順位",
+        ],
+        "position_fallback": "第{n}順位",
     },
     "zh-CN": {
         "html_lang": "zh-CN",
@@ -424,6 +496,15 @@ ORDER_STATUS_REVERTED_TRANSLATIONS = {
         "orders_link_text": "查看我的订单",
         "footer": "💡 有任何问题？欢迎联络 Christy:",
         "anytime": "随时",
+        "order_summary_title": "更新后的订单明细",
+        "col_pickup": "最快取货日",
+        "col_position": "目前顺位",
+        "total": "共 {count} 件商品，合计：",
+        "position_labels": [
+            "第一顺位", "第二顺位", "第三顺位", "第四顺位", "第五顺位",
+            "第六顺位", "第七顺位", "第八顺位", "第九顺位", "第十顺位",
+        ],
+        "position_fallback": "第{n}顺位",
     },
     "en": {
         "html_lang": "en",
@@ -439,6 +520,15 @@ ORDER_STATUS_REVERTED_TRANSLATIONS = {
         "orders_link_text": "View My Orders",
         "footer": "💡 Questions? Feel free to contact Christy:",
         "anytime": "Anytime",
+        "order_summary_title": "Your Updated Order",
+        "col_pickup": "Pickup Time",
+        "col_position": "Current Rank",
+        "total": "{count} item(s), Total:",
+        "position_labels": [
+            "1st Place", "2nd Place", "3rd Place", "4th Place", "5th Place",
+            "6th Place", "7th Place", "8th Place", "9th Place", "10th Place",
+        ],
+        "position_fallback": "{n}th Place",
     },
 }
 
@@ -683,7 +773,7 @@ def _format_datetime_12h(dt):
     return f"{dt.strftime('%m/%d/%Y')} {h12}:{dt.strftime('%M')} {ampm}"
 
 
-def send_product_restored_notification(user, restored_product_ids, db):
+def send_product_restored_notification(user, restored_product_ids, db, order=None):
     """通知買家：訂單中原本已出售的商品恢復販售了。"""
     resend_api_key = os.getenv("RESEND_API_KEY", "")
     from_email = os.getenv("RESEND_FROM", "")
@@ -759,6 +849,8 @@ def send_product_restored_notification(user, restored_product_ids, db):
         f'style="color:#c9a96e;text-decoration:underline;">{tr["orders_link_text"]}</a>'
     )
 
+    order_summary_html = _build_order_summary_section(order, db, db_locale, tr) if order else ""
+
     html = f"""<!DOCTYPE html>
 <html lang="{tr["html_lang"]}">
 <head>
@@ -812,6 +904,7 @@ def send_product_restored_notification(user, restored_product_ids, db):
                 </ul>
               </div>
 
+              {order_summary_html}
               <p style="font-size:13px;color:#444;margin:0;">{orders_link}</p>
             </td>
           </tr>
@@ -844,6 +937,137 @@ def send_product_restored_notification(user, restored_product_ids, db):
         print(f"Restore notification sent to={to} cc={cc}")
     except Exception as e:
         print(f"Email sending failed: {e}")
+
+
+def _build_order_summary_section(order, db, db_locale, tr):
+    """Build the 'updated order details' HTML section with full item table + total row."""
+    from app.models.order import Order as _Order, OrderItem as _OrderItem
+    remaining_items = (
+        db.query(_OrderItem)
+        .filter(
+            _OrderItem.order_id == order.id,
+            _OrderItem.status.in_(["reserved", "paid"]),
+        )
+        .all()
+    )
+    if not remaining_items:
+        return ""
+
+    item_rows = ""
+    total_price = 0.0
+    total_original = 0.0
+    for i, oi in enumerate(remaining_items, 1):
+        product = db.query(Product).filter(Product.id == oi.product_id).first()
+        translation = db.query(ProductTranslation).filter(
+            ProductTranslation.product_id == oi.product_id,
+            ProductTranslation.locale == db_locale,
+        ).first()
+        if not translation and db_locale != "zh-TW":
+            translation = db.query(ProductTranslation).filter(
+                ProductTranslation.product_id == oi.product_id,
+                ProductTranslation.locale == "zh-TW",
+            ).first()
+        image = (
+            db.query(ProductImage)
+            .filter(ProductImage.product_id == oi.product_id)
+            .order_by(ProductImage.sort_order)
+            .first()
+        )
+        name = translation.name if translation else (product.code if product else str(oi.product_id))
+        img_url = image.url if image else ""
+        price = float(oi.price)
+        original_price = float(product.original_price) if product and product.original_price else None
+        pickup_time = product.pickup_available_time if product else None
+        pickup_str = pickup_time.strftime('%m/%d/%Y') if pickup_time else tr["anytime"]
+
+        position = (
+            db.query(_OrderItem)
+            .join(_Order, _OrderItem.order_id == _Order.id)
+            .filter(
+                _OrderItem.product_id == oi.product_id,
+                _OrderItem.status != "cancelled",
+                _Order.created_at <= order.created_at,
+            )
+            .count()
+        )
+        pos_color = "#2e7d32" if position == 1 else "#c0392b"
+        pos_label = _position_label(position, tr)
+
+        total_price += price
+        total_original += original_price if original_price is not None else price
+
+        original_td = (
+            f'<span style="text-decoration:line-through;color:#aaa;margin-right:4px;">'
+            f'${_format_price(original_price)}</span>'
+            if original_price is not None else ""
+        )
+        thumb_cell = (
+            f'<img src="{img_url}" width="40" height="40" '
+            f'style="border-radius:4px;object-fit:cover;display:block;" />'
+            if img_url
+            else '<div style="width:40px;height:40px;background:#eee;border-radius:4px;"></div>'
+        )
+        item_rows += f"""
+        <tr>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;color:#999;font-size:13px;text-align:center;">{i}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;">{thumb_cell}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;">{name}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;color:#666;">{pickup_str}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:600;text-align:right;white-space:nowrap;">
+            {original_td}${_format_price(price)}
+          </td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:700;color:{pos_color};text-align:center;white-space:nowrap;">
+            {pos_label}
+          </td>
+        </tr>"""
+
+    total_label = tr.get("total", "{count} item(s), Total:").replace("{count}", str(len(remaining_items)))
+    total_original_html = (
+        f'<span style="text-decoration:line-through;color:#aaa;margin-right:6px;">'
+        f'${_format_price(total_original)}</span>'
+        if total_original > total_price else ""
+    )
+    total_row = f"""
+        <tr>
+          <td colspan="5" style="padding:10px 6px 4px;font-size:13px;font-weight:700;border-top:1.5px solid #e0e0e0;">
+            {total_label}
+          </td>
+          <td style="padding:10px 6px 4px;font-size:13px;font-weight:700;text-align:right;border-top:1.5px solid #e0e0e0;white-space:nowrap;">
+            {total_original_html}${_format_price(total_price)}
+          </td>
+        </tr>"""
+
+    order_number_html = ""
+    if order.order_number:
+        order_number_html = f"""
+              <p style="font-size:14px;font-weight:700;margin:0 0 8px;">
+                {tr["order_number_label"]}
+                <span style="font-family:monospace;background:#f4f4f4;border-radius:4px;padding:3px 10px;letter-spacing:0.05em;margin-left:4px;">
+                  {order.order_number}
+                </span>
+              </p>"""
+
+    return f"""
+              <div style="margin-top:20px;">
+                <p style="font-size:18px;font-weight:700;margin:0 0 10px;">{tr["order_summary_title"]}</p>
+                {order_number_html}
+                <table width="100%" cellpadding="0" cellspacing="0"
+                       style="border-collapse:collapse;margin-bottom:16px;font-size:13px;">
+                  <thead>
+                    <tr style="border-bottom:1.5px solid #e0e0e0;">
+                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:center;width:24px;"></th>
+                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;width:50px;"></th>
+                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">{tr["col_name"]}</th>
+                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">{tr["col_pickup"]}</th>
+                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:right;">{tr["col_price"]}</th>
+                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:center;">{tr["col_position"]}</th>
+                    </tr>
+                  </thead>
+                  <tbody>{item_rows}
+                    {total_row}
+                  </tbody>
+                </table>
+              </div>"""
 
 
 def _build_simple_product_rows(product_ids, db, db_locale):
@@ -901,7 +1125,7 @@ def _build_simple_product_rows(product_ids, db, db_locale):
 def _build_simple_email_html(tr, greeting, body_text, product_ids, db, db_locale,
                               order_number=None, extra_section_html=""):
     """Build a simple email HTML with optional product table."""
-    _, item_rows = _build_simple_product_rows(product_ids, db, db_locale)
+    products_data, item_rows = _build_simple_product_rows(product_ids, db, db_locale)
 
     orders_link = (
         f'<a href="https://schristy2020.github.io/homefinds/#/orders" '
@@ -920,6 +1144,26 @@ def _build_simple_email_html(tr, greeting, body_text, product_ids, db, db_locale
 
     product_table_html = ""
     if item_rows:
+        total_price = sum(item["price"] for item in products_data)
+        total_original = sum(
+            item["original_price"] if item["original_price"] is not None else item["price"]
+            for item in products_data
+        )
+        total_label = tr.get("total", "{count} item(s), Total:").replace("{count}", str(len(products_data)))
+        total_original_html = (
+            f'<span style="text-decoration:line-through;color:#aaa;margin-right:6px;">'
+            f'${_format_price(total_original)}</span>'
+            if total_original > total_price else ""
+        )
+        total_row = f"""
+                <tr>
+                  <td colspan="2" style="padding:10px 6px 4px;font-size:13px;font-weight:700;border-top:1.5px solid #e0e0e0;">
+                    {total_label}
+                  </td>
+                  <td style="padding:10px 6px 4px;font-size:13px;font-weight:700;text-align:right;border-top:1.5px solid #e0e0e0;white-space:nowrap;">
+                    {total_original_html}${_format_price(total_price)}
+                  </td>
+                </tr>"""
         product_table_html = f"""
               <table width="100%" cellpadding="0" cellspacing="0"
                      style="border-collapse:collapse;margin-bottom:16px;font-size:13px;">
@@ -931,6 +1175,7 @@ def _build_simple_email_html(tr, greeting, body_text, product_ids, db, db_locale
                   </tr>
                 </thead>
                 <tbody>{item_rows}
+                  {total_row}
                 </tbody>
               </table>"""
 
@@ -1028,7 +1273,7 @@ def send_payment_success_notification(user, order_number, pickup_time, paid_prod
     _send_simple_email(user, subject, html, resend_api_key, from_email)
 
 
-def send_item_snatched_pending_notification(user, snatched_product_ids, db):
+def send_item_snatched_pending_notification(user, snatched_product_ids, db, order=None):
     """有商品被搶先付款，但訂單中還有未售出商品 — 提醒盡速付款。"""
     resend_api_key = os.getenv("RESEND_API_KEY", "")
     from_email = os.getenv("RESEND_FROM", "")
@@ -1052,6 +1297,8 @@ def send_item_snatched_pending_notification(user, snatched_product_ids, db):
                 </ul>
               </div>"""
 
+    order_summary_html = _build_order_summary_section(order, db, db_locale, tr) if order else ""
+
     html = _build_simple_email_html(
         tr=tr,
         greeting=greeting,
@@ -1059,7 +1306,7 @@ def send_item_snatched_pending_notification(user, snatched_product_ids, db):
         product_ids=snatched_product_ids,
         db=db,
         db_locale=db_locale,
-        extra_section_html=zelle_section,
+        extra_section_html=zelle_section + order_summary_html,
     )
     _send_simple_email(user, tr["subject"], html, resend_api_key, from_email)
 
@@ -1091,7 +1338,7 @@ def send_order_auto_cancelled_notification(user, order_number, snatched_product_
     _send_simple_email(user, subject, html, resend_api_key, from_email)
 
 
-def send_order_status_reverted_notification(user, order_number, target_status, product_ids, db):
+def send_order_status_reverted_notification(user, order_number, target_status, product_ids, db, order=None):
     """訂單從「已付款」改為「待付款」或「取消」 — 通知 user。"""
     resend_api_key = os.getenv("RESEND_API_KEY", "")
     from_email = os.getenv("RESEND_FROM", "")
@@ -1105,6 +1352,7 @@ def send_order_status_reverted_notification(user, order_number, target_status, p
 
     greeting = tr["greeting"].replace("{first_name}", user.first_name)
     body_text = tr["body_pending"] if target_status == "pending_payment" else tr["body_cancelled"]
+    order_summary_html = _build_order_summary_section(order, db, db_locale, tr) if order else ""
 
     html = _build_simple_email_html(
         tr=tr,
@@ -1114,6 +1362,7 @@ def send_order_status_reverted_notification(user, order_number, target_status, p
         db=db,
         db_locale=db_locale,
         order_number=order_number,
+        extra_section_html=order_summary_html,
     )
     subject = tr["subject"]
     _send_simple_email(user, subject, html, resend_api_key, from_email)
