@@ -1011,7 +1011,7 @@ def send_payment_success_notification(user, order_number, pickup_time, paid_prod
     tr = PAYMENT_SUCCESS_TRANSLATIONS.get(locale, PAYMENT_SUCCESS_TRANSLATIONS["zh-TW"])
     db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
 
-    pickup_str = _format_datetime_12h(pickup_time) if pickup_time else tr["anytime"]
+    pickup_str = pickup_time.strftime('%m/%d/%Y') if pickup_time else tr["anytime"]
     greeting = tr["greeting"].replace("{first_name}", user.first_name)
     body_text = tr["body"].replace("{pickup_time}", f"<strong>{pickup_str}</strong>")
 
@@ -1172,7 +1172,7 @@ def send_order_confirmation(user, order_out, db):
         )
         pickup_time = product.pickup_available_time if product else None
         pickup_str = (
-            _format_datetime_12h(pickup_time) if pickup_time else tr["anytime"]
+            pickup_time.strftime('%m/%d/%Y') if pickup_time else tr["anytime"]
         )
 
         total_price += price
