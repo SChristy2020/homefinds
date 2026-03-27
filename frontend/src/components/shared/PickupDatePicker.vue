@@ -85,8 +85,14 @@ if (props.modelValue) {
   }
 }
 
-// Hour & minute options
-const hours   = Array.from({ length: 12 }, (_, i) => String(i + 10).padStart(2, '0')) // 10:00–21:00
+// Hour & minute options — on CUTOFF_DATE (Apr 25), cap at 12:00
+const hours = computed(() => {
+  const isCutoff = selectedDate.value &&
+    selectedDate.value.toDateString() === CUTOFF_DATE.toDateString()
+  const maxHour = isCutoff ? 12 : 21
+  const count = maxHour - 10 + 1
+  return Array.from({ length: count }, (_, i) => String(i + 10).padStart(2, '0'))
+})
 const minutes = ['00', '15', '30', '45']
 
 const isEn = computed(() => i18n.locale === 'en')
@@ -142,6 +148,11 @@ function nextMonth() {
 function selectDate(day) {
   if (!day || day.full < today || day.full > CUTOFF_DATE) return
   selectedDate.value = day.full
+  // If switching to cutoff date and current hour exceeds noon, cap it
+  if (day.full.toDateString() === CUTOFF_DATE.toDateString() && +hourValue.value > 12) {
+    hourValue.value = '12'
+    minuteValue.value = '00'
+  }
   emit('update:modelValue', displayValue.value)
 }
 
