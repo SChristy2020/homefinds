@@ -35,4 +35,5 @@ class ProductImage(Base):
     id         = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
     url        = Column(String(500), nullable=False)
+    name       = Column(String(255), nullable=True)
     sort_order = Column(Integer, nullable=False, default=0)

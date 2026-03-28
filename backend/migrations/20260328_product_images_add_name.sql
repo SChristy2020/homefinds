@@ -1,0 +1,2 @@
+ALTER TABLE product_images
+  ADD COLUMN name VARCHAR(255) NULL AFTER url;

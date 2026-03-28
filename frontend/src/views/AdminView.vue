@@ -270,8 +270,7 @@
           <div
             v-for="(img, idx) in prodImages"
             :key="img.id || img.tempId"
-            class="image-item"
-            :class="{ 'drag-over': prodDragOver === idx }"
+            class="image-wrapper"
             draggable="true"
             :data-idx="idx"
             data-drag-type="prod"
@@ -283,9 +282,18 @@
             @touchmove.prevent="onTouchMove"
             @touchend="onTouchEnd"
           >
-            <img v-if="img.url" :src="img.url" class="image-thumb" />
-            <div v-else class="image-placeholder">{{ idx + 1 }}</div>
-            <button class="image-remove" @click="removeProdImage(idx)">×</button>
+            <div class="image-item" :class="{ 'drag-over': prodDragOver === idx }">
+              <img v-if="img.url" :src="img.url" class="image-thumb" />
+              <div v-else class="image-placeholder">{{ idx + 1 }}</div>
+              <button class="image-remove" @click.stop="removeProdImage(idx)">×</button>
+            </div>
+            <input
+              class="image-name-input"
+              v-model="img.name"
+              @click.stop
+              @dragstart.stop
+              @mousedown.stop
+            />
           </div>
           <button class="image-add" @click="addProdImage" :disabled="prodUploading">
             {{ prodUploading ? '上傳中...' : '+' }}
@@ -723,7 +731,10 @@ function openEditProd(prod) {
     prodTranslations[locale].name = t?.name || ''
     prodTranslations[locale].description = t?.description || ''
   }
-  prodImages.value = prod.images ? prod.images.map(img => ({ ...img })) : []
+  prodImages.value = prod.images ? prod.images.map(img => ({
+    ...img,
+    name: img.name || decodeURIComponent(img.url.split('/').pop() || ''),
+  })) : []
   deletedProdImageIds.value = []
   showProdModal.value = true
 }
@@ -769,7 +780,7 @@ async function onProdFileChange(e) {
     await Promise.all(files.map(async (file) => {
       const squared = await padToSquare(file)
       const { url } = await api.upload(squared)
-      prodImages.value.push({ tempId: Date.now() + Math.random(), url, isNew: true })
+      prodImages.value.push({ tempId: Date.now() + Math.random(), url, name: file.name, isNew: true })
     }))
   } catch {
     toast.show('圖片上傳失敗')
@@ -832,7 +843,8 @@ async function saveProdModal() {
     for (let i = 0; i < prodImages.value.length; i++) {
       const img = prodImages.value[i]
       if (img.isNew) {
-        await api.post(`/api/products/${id}/images?url=${encodeURIComponent(img.url)}&sort_order=${i}`, {})
+        const nameParam = img.name ? `&name=${encodeURIComponent(img.name)}` : ''
+        await api.post(`/api/products/${id}/images?url=${encodeURIComponent(img.url)}&sort_order=${i}${nameParam}`, {})
       }
     }
     const reorderData = prodImages.value
@@ -1291,16 +1303,28 @@ onMounted(() => {
 
 /* Images */
 .image-list { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+.image-wrapper {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: grab;
+}
 .image-item {
   position: relative; width: 72px; height: 72px;
   border: 1.5px solid var(--border); border-radius: 4px;
-  overflow: hidden; cursor: grab;
+  overflow: hidden;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .image-item.drag-over {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px #f9a87566;
 }
+.image-name-input {
+  width: 72px; font-size: 0.62rem; color: var(--charcoal);
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: 1px 3px; background: var(--bg); outline: none;
+  text-align: center; cursor: text; overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis;
+}
+.image-name-input:focus { border-color: var(--charcoal); }
 .image-thumb {
   width: 100%; height: 100%; object-fit: cover;
 }

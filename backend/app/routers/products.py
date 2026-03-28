@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel as PydanticModel
 import threading
 from app.database import get_db, SessionLocal
@@ -291,11 +291,11 @@ def upsert_product_translation(product_id: int, locale: str, body: TranslationCr
     return translation
 
 @router.post("/{product_id}/images", response_model=ImageOut, status_code=201)
-def add_image(product_id: int, url: str, sort_order: int = 0, db: Session = Depends(get_db)):
+def add_image(product_id: int, url: str, sort_order: int = 0, name: Optional[str] = None, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    image = ProductImage(product_id=product_id, url=url, sort_order=sort_order)
+    image = ProductImage(product_id=product_id, url=url, name=name, sort_order=sort_order)
     db.add(image)
     db.commit()
     db.refresh(image)

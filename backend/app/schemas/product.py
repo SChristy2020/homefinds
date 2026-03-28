@@ -21,6 +21,7 @@ class TranslationOut(TranslationCreate):
 class ImageOut(BaseModel):
     id:         int
     url:        str
+    name:       Optional[str] = None
     sort_order: int
     class Config:
         from_attributes = True
