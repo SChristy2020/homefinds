@@ -283,7 +283,7 @@
             @touchend="onTouchEnd"
           >
             <div class="image-item" :class="{ 'drag-over': prodDragOver === idx }">
-              <img v-if="img.url" :src="img.url" class="image-thumb" />
+              <img v-if="img.name" :src="`https://amadegx.synology.me/img/${img.name}`" class="image-thumb" />
               <div v-else class="image-placeholder">{{ idx + 1 }}</div>
               <button class="image-remove" @click.stop="removeProdImage(idx)">×</button>
             </div>
@@ -295,9 +295,7 @@
               @mousedown.stop
             />
           </div>
-          <button class="image-add" @click="addProdImage" :disabled="prodUploading">
-            {{ prodUploading ? '上傳中...' : '+' }}
-          </button>
+          <button class="image-add" @click="addProdImage">+</button>
         </div>
         <p class="hint">可拖移圖片改變順序</p>
       </div>
@@ -396,7 +394,7 @@
       </template>
     </BaseModal>
 
-    <input ref="prodFileInput" type="file" accept="image/*" multiple style="display:none" @change="onProdFileChange" />
+
     <input ref="roomFileInput" type="file" accept="image/*" multiple style="display:none" @change="onRoomFileChange" />
 
     <!-- ===== Marketing Email Modal ===== -->
@@ -602,8 +600,7 @@ const prodTranslations = reactive({
 const prodImages = ref([])
 const deletedProdImageIds = ref([])
 const prodDragOver = ref(null)
-const prodUploading = ref(false)
-const prodFileInput = ref(null)
+
 const dragSrcType = ref(null)
 const dragSrcIdx = ref(null)
 const touchGhost = ref(null)
@@ -613,7 +610,14 @@ const touchDragOver = ref(null)
 const suppressCodeGen = ref(false)
 
 async function loadProducts() {
-  products.value = await api.get('/api/products')
+  const raw = await api.get('/api/products')
+  products.value = raw.map(p => ({
+    ...p,
+    images: (p.images || []).map(img => ({
+      ...img,
+      url: img.name ? `https://amadegx.synology.me/img/${img.name}` : img.url,
+    })),
+  }))
 }
 
 const filteredProducts = computed(() => {
@@ -733,61 +737,14 @@ function openEditProd(prod) {
   }
   prodImages.value = prod.images ? prod.images.map(img => ({
     ...img,
-    name: img.name || decodeURIComponent(img.url.split('/').pop() || ''),
+    name: img.name || '',
   })) : []
   deletedProdImageIds.value = []
   showProdModal.value = true
 }
 
 function addProdImage() {
-  prodFileInput.value.click()
-}
-
-function padToSquare(file) {
-  return new Promise((resolve) => {
-    const img = new Image()
-    const objectUrl = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl)
-      if (img.width === img.height) {
-        resolve(file)
-        return
-      }
-      const padding = Math.round(Math.max(img.width, img.height) * 0.05)
-      const size = Math.max(img.width, img.height) + padding * 2
-      const canvas = document.createElement('canvas')
-      canvas.width = size
-      canvas.height = size
-      const ctx = canvas.getContext('2d')
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, size, size)
-      const x = Math.round((size - img.width) / 2)
-      const y = Math.round((size - img.height) / 2)
-      ctx.drawImage(img, x, y, img.width, img.height)
-      canvas.toBlob((blob) => {
-        resolve(new File([blob], file.name, { type: 'image/jpeg' }))
-      }, 'image/jpeg', 0.92)
-    }
-    img.src = objectUrl
-  })
-}
-
-async function onProdFileChange(e) {
-  const files = Array.from(e.target.files)
-  if (!files.length) return
-  prodUploading.value = true
-  try {
-    await Promise.all(files.map(async (file) => {
-      const squared = await padToSquare(file)
-      const { url } = await api.upload(squared)
-      prodImages.value.push({ tempId: Date.now() + Math.random(), url, name: file.name, isNew: true })
-    }))
-  } catch {
-    toast.show('圖片上傳失敗')
-  } finally {
-    prodUploading.value = false
-    e.target.value = ''
-  }
+  prodImages.value.push({ tempId: Date.now() + Math.random(), name: '', isNew: true })
 }
 
 function removeProdImage(idx) {
@@ -843,13 +800,18 @@ async function saveProdModal() {
     for (let i = 0; i < prodImages.value.length; i++) {
       const img = prodImages.value[i]
       if (img.isNew) {
-        const nameParam = img.name ? `&name=${encodeURIComponent(img.name)}` : ''
-        await api.post(`/api/products/${id}/images?url=${encodeURIComponent(img.url)}&sort_order=${i}${nameParam}`, {})
+        if (!img.name) continue
+        const url = `https://amadegx.synology.me/img/${img.name}`
+        await api.post(`/api/products/${id}/images?url=${encodeURIComponent(url)}&sort_order=${i}&name=${encodeURIComponent(img.name)}`, {})
       }
     }
-    const reorderData = prodImages.value
-      .filter(img => img.id)
-      .map((img, i) => ({ id: img.id, sort_order: i }))
+    const existingImages = prodImages.value.filter(img => img.id)
+    for (const img of existingImages) {
+      if (img.name !== undefined) {
+        await api.patch(`/api/products/${id}/images/${img.id}?name=${encodeURIComponent(img.name)}`, {})
+      }
+    }
+    const reorderData = existingImages.map((img, i) => ({ id: img.id, sort_order: i }))
     if (reorderData.length > 0) {
       await api.put(`/api/products/${id}/images/reorder`, reorderData)
     }
@@ -1308,7 +1270,7 @@ onMounted(() => {
   cursor: grab;
 }
 .image-item {
-  position: relative; width: 72px; height: 72px;
+  position: relative; width: 100px; height: 100px;
   border: 1.5px solid var(--border); border-radius: 4px;
   overflow: hidden;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -1318,7 +1280,7 @@ onMounted(() => {
   box-shadow: 0 0 0 2px #f9a87566;
 }
 .image-name-input {
-  width: 72px; font-size: 0.62rem; color: var(--charcoal);
+  width: 100px; font-size: 0.62rem; color: var(--charcoal);
   border: 1px solid var(--border); border-radius: 3px;
   padding: 1px 3px; background: var(--bg); outline: none;
   text-align: center; cursor: text; overflow: hidden;

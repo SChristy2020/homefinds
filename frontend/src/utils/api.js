@@ -26,17 +26,4 @@ export const api = {
   put:    (path, body)   => request(path, { method: 'PUT',   body: JSON.stringify(body) }),
   patch:  (path, body)   => request(path, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: (path)         => request(path, { method: 'DELETE' }),
-  upload: async (file) => {
-    const form = new FormData()
-    form.append('file', file)
-    const res = await fetch(`${BASE_URL}/api/upload`, { method: 'POST', body: form })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw { status: res.status, detail: err.detail || 'Upload failed' }
-    }
-    const data = await res.json()
-    // 補上 API base URL，避免圖片被當作前端相對路徑
-    if (data.url?.startsWith('/')) data.url = `${BASE_URL}${data.url}`
-    return data
-  },
 }

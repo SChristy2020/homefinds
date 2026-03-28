@@ -1,7 +1,7 @@
 // stores/products.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { api, resolveImageUrl } from '@/utils/api'
+import { api } from '@/utils/api'
 import { useI18nStore } from '@/stores/i18n'
 
 export const useProductsStore = defineStore('products', () => {
@@ -18,7 +18,7 @@ export const useProductsStore = defineStore('products', () => {
         || {}
       return {
         ...p,
-        images: (p.images || []).map(img => ({ ...img, url: resolveImageUrl(img.url) })),
+        images: (p.images || []).map(img => ({ ...img, url: img.name ? `https://amadegx.synology.me/img/${img.name}` : img.url })),
         name: t.name || p.code,
         description: t.description || '',
         originalPrice: p.original_price ?? null,

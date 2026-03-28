@@ -301,6 +301,17 @@ def add_image(product_id: int, url: str, sort_order: int = 0, name: Optional[str
     db.refresh(image)
     return image
 
+@router.patch("/{product_id}/images/{image_id}", response_model=ImageOut)
+def update_product_image(product_id: int, image_id: int, name: str, db: Session = Depends(get_db)):
+    image = db.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.product_id == product_id).first()
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found")
+    image.name = name
+    image.url = f"https://amadegx.synology.me/img/{name}"
+    db.commit()
+    db.refresh(image)
+    return image
+
 @router.delete("/{product_id}/images/{image_id}", status_code=204)
 def delete_product_image(product_id: int, image_id: int, db: Session = Depends(get_db)):
     image = db.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.product_id == product_id).first()
