@@ -18,7 +18,7 @@ export const useProductsStore = defineStore('products', () => {
         || {}
       return {
         ...p,
-        images: (p.images || []).map(img => ({ ...img, url: img.name ? `https://amadegx.synology.me/img/${img.name}` : img.url })),
+        images: (p.images || []).map(img => ({ ...img, url: img.name ? `${import.meta.env.VITE_IMAGE_BASE_URL}${img.name}` : img.url })),
         name: t.name || p.code,
         description: t.description || '',
         originalPrice: p.original_price ?? null,

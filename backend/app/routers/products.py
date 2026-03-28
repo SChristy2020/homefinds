@@ -1,8 +1,11 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel as PydanticModel
 import threading
+
+IMAGE_BASE_URL = os.environ.get("IMAGE_BASE_URL", "https://amadegx.synology.me/img/")
 from app.database import get_db, SessionLocal
 from app.models.product import Product, ProductTranslation, ProductImage
 from app.models.category import Category, CategoryTranslation
@@ -307,7 +310,7 @@ def update_product_image(product_id: int, image_id: int, name: str, db: Session 
     if not image:
         raise HTTPException(status_code=404, detail="Image not found")
     image.name = name
-    image.url = f"https://amadegx.synology.me/img/{name}"
+    image.url = f"{IMAGE_BASE_URL}{name}"
     db.commit()
     db.refresh(image)
     return image

@@ -283,7 +283,7 @@
             @touchend="onTouchEnd"
           >
             <div class="image-item" :class="{ 'drag-over': prodDragOver === idx }">
-              <img v-if="img.name" :src="`https://amadegx.synology.me/img/${img.name}`" class="image-thumb" />
+              <img v-if="img.name" :src="`${IMAGE_BASE_URL}${img.name}`" class="image-thumb" />
               <div v-else class="image-placeholder">{{ idx + 1 }}</div>
               <button class="image-remove" @click.stop="removeProdImage(idx)">×</button>
             </div>
@@ -448,6 +448,7 @@
 import { ref, computed, onMounted, reactive, watch } from 'vue'
 import { Search, ArrowUpDown, ChevronUp, ChevronDown, Pencil, Trash2, PlusCircle, Mail } from 'lucide-vue-next'
 import { api } from '@/utils/api'
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL
 import { useToastStore } from '@/stores/toast'
 import BaseModal from '@/components/shared/BaseModal.vue'
 import HtmlEditor from '@/components/shared/HtmlEditor.vue'
@@ -615,7 +616,7 @@ async function loadProducts() {
     ...p,
     images: (p.images || []).map(img => ({
       ...img,
-      url: img.name ? `https://amadegx.synology.me/img/${img.name}` : img.url,
+      url: img.name ? `${IMAGE_BASE_URL}${img.name}` : img.url,
     })),
   }))
 }
@@ -801,7 +802,7 @@ async function saveProdModal() {
       const img = prodImages.value[i]
       if (img.isNew) {
         if (!img.name) continue
-        const url = `https://amadegx.synology.me/img/${img.name}`
+        const url = `${IMAGE_BASE_URL}${img.name}`
         await api.post(`/api/products/${id}/images?url=${encodeURIComponent(url)}&sort_order=${i}&name=${encodeURIComponent(img.name)}`, {})
       }
     }
