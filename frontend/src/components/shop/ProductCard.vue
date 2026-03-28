@@ -4,7 +4,13 @@
       <template v-if="images.length">
         <Carousel v-model="current" :wrap-around="true" snap-align="center" class="img-carousel" @slide-start="sliding = true" @slide-end="sliding = false">
           <Slide v-for="(img, i) in images" :key="i">
-            <img :src="img.url" :alt="product.name" class="product-img-photo" />
+            <img
+              :src="img.url"
+              :alt="product.name"
+              class="product-img-photo"
+              :fetchpriority="i === 0 ? 'high' : 'low'"
+              :loading="i === 0 ? 'eager' : 'lazy'"
+            />
           </Slide>
         </Carousel>
         <div v-if="images.length > 1" class="img-dots">
