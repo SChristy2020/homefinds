@@ -1306,7 +1306,7 @@ onMounted(() => {
   line-height: 1;
 }
 .image-add {
-  width: 72px; height: 72px;
+  width: 100px; height: 100px;
   border: 1.5px dashed var(--border); border-radius: 4px;
   background: none; cursor: pointer;
   font-size: 1.5rem; color: var(--light);
