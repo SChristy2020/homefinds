@@ -15,7 +15,7 @@ const toast = useToastStore()
   bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--charcoal);
+  background: var(--accent);
   color: #fff;
   padding: 10px 24px;
   border-radius: 99px;
