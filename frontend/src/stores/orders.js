@@ -30,7 +30,7 @@ export const useOrdersStore = defineStore('orders', () => {
     if (formData.estimatedPickup) {
       const parts = formData.estimatedPickup.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/)
       if (parts) {
-        pickupTime = new Date(+parts[3], +parts[1] - 1, +parts[2], +parts[4], +parts[5]).toISOString()
+        pickupTime = `${parts[3]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}T${parts[4].padStart(2,'0')}:${parts[5].padStart(2,'0')}:00`
       }
     }
 

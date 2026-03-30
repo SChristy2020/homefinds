@@ -1077,7 +1077,7 @@ function fromPickerFormat(str) {
   if (!str) return null
   const parts = str.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/)
   if (!parts) return null
-  return new Date(+parts[3], +parts[1] - 1, +parts[2], +parts[4], +parts[5]).toISOString()
+  return `${parts[3]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}T${parts[4].padStart(2,'0')}:${parts[5].padStart(2,'0')}:00`
 }
 
 // ── Pickup/Rental Calendar ────────────────────────────────────────────────────
