@@ -18,6 +18,7 @@
         </div>
       </template>
       <div v-else class="product-img-placeholder"><Home :size="28" /></div>
+      <span v-if="product.soldOut" class="sold-badge">{{ i18n.t('shop.soldOut') }}</span>
     </div>
     <div class="product-info">
       <div class="product-name">{{ product.name }}</div>
@@ -26,7 +27,6 @@
         <span class="price-current">${{ product.price }}</span>
       </div>
       <div class="product-date">{{ i18n.t('productDetail.availableFrom') }}{{ formattedDate ? i18n.t('productDetail.availableStarting') : '' }}{{ formattedDate || i18n.t('productDetail.availableAnytime') }}</div>
-      <span v-if="product.soldOut" class="sold-badge">{{ i18n.t('shop.soldOut') }}</span>
     </div>
   </div>
 </template>
@@ -113,8 +113,10 @@ const formattedDate = computed(() => {
 .price-current  { font-size: 1.2rem; font-weight: 600; color: var(--charcoal); }
 .product-date   { font-size: 0.8rem; color: var(--charcoal); margin-top: 2px; }
 .sold-badge {
-  display: inline-block; font-size: 0.65rem;
+  position: absolute; bottom: 10%; right: 0;
+  font-size: 0.75rem;
   background: var(--red); color: #fff;
-  padding: 2px 6px; border-radius: 2px; margin-top: 2px;
+  padding: 4px 10px; border-radius: 2px 0 0 0;
+  z-index: 3;
 }
 </style>

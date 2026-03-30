@@ -19,7 +19,7 @@ export default {
     sortPickupEarly: '取貨日：最早',
     sortPickupLate: '取貨日：最晚',
     hideSold: '隱藏已售出商品',
-    soldOut: '已售出',
+    soldOut: '已找到新家',
     categories: {
       Bedroom: '臥室',
       Kitchen: '廚房',
@@ -35,6 +35,7 @@ export default {
     listedOn: '上架時間: ',
     addCart: '加入購物車',
     added: '已加入',
+    soldOut: '已找到新家',
     status_available: '可購買',
     status_reserved: '預訂中',
     status_sold: '已售出',

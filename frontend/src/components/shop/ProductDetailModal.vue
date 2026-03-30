@@ -69,7 +69,7 @@
       :disabled="cart.has(product.id) || product.soldOut"
       @click="handleAddToCart"
     >
-      {{ cart.has(product.id) ? i18n.t('productDetail.added') : i18n.t('productDetail.addCart') }}
+      {{ product.soldOut ? i18n.t('productDetail.soldOut') : cart.has(product.id) ? i18n.t('productDetail.added') : i18n.t('productDetail.addCart') }}
     </button>
 
     <!-- Description -->

@@ -19,7 +19,7 @@ export default {
     sortPickupEarly: 'Pickup: Earliest',
     sortPickupLate: 'Pickup: Latest',
     hideSold: 'In Stock Only',
-    soldOut: 'Sold Out',
+    soldOut: 'Found a New Home',
     categories: {
       Bedroom: 'Bedroom',
       Kitchen: 'Kitchen',
@@ -35,6 +35,7 @@ export default {
     listedOn: 'Listed: ',
     addCart: 'Add to Cart',
     added: 'Added',
+    soldOut: 'Found a New Home',
     status_available: 'In Stock',
     status_reserved: 'Reserved',
     status_sold: 'Sold',
