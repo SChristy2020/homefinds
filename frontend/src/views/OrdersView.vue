@@ -688,6 +688,7 @@ const pageNumbers = computed(() => {
 watch(searchQuery, () => { currentPage.value = 1 })
 watch(statusFilter, () => { currentPage.value = 1 }, { deep: true })
 
+
 function toggleStatusFilter(s) {
   const idx = statusFilter.value.indexOf(s)
   statusFilter.value = idx === -1
@@ -946,6 +947,18 @@ const resPageNumbers = computed(() => {
 
 watch(resStatusFilter, () => { resCurrentPage.value = 1 }, { deep: true })
 watch(resSearchQuery, () => { resCurrentPage.value = 1 })
+
+watch(paginatedOrders, (orders) => {
+  if (expandedOrderId.value === null && orders.length > 0) {
+    expandedOrderId.value = orders[0].id
+  }
+}, { immediate: true })
+
+watch(resPaginatedReservations, (reservations) => {
+  if (expandedResId.value === null && reservations.length > 0) {
+    expandedResId.value = reservations[0].id
+  }
+}, { immediate: true })
 
 function toggleResStatusFilter(s) {
   const idx = resStatusFilter.value.indexOf(s)
