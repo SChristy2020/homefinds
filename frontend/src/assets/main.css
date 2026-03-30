@@ -34,6 +34,10 @@ body {
   text-size-adjust: 100%;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 body::before {
   content: '';
   position: fixed;
