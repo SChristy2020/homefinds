@@ -73,7 +73,7 @@
 
     <!-- Reserve Button -->
     <div class="action-row">
-      <button class="btn-primary" :disabled="!isValid" @click="handleConfirm">{{ i18n.t('cart.reserve') }}</button>
+      <button class="btn-primary" :disabled="!isValid || isChecking" @click="handleConfirm">{{ isChecking ? '...' : i18n.t('cart.reserve') }}</button>
       <div v-if="soldOutProductIds.length" class="duplicate-btn-error">{{ i18n.t('cart.soldOutBtn') }}</div>
       <div v-if="duplicateProductIds.length" class="duplicate-btn-error">{{ i18n.t('cart.alreadyReservedBtn') }}</div>
     </div>
@@ -131,6 +131,7 @@ const form = ref({
 const duplicateProductIds = ref([])
 const soldOutProductIds = ref([])
 const subscribeMarketing = ref(true)
+const isChecking = ref(false)
 
 // 當 modal 開啟時，從 localStorage / userStore 補填空白欄位
 watch(() => props.modelValue, (open) => {
@@ -206,9 +207,17 @@ function getItemName(item) {
 }
 
 async function handleConfirm() {
-  if (!isValid.value) return
+  if (!isValid.value || isChecking.value) return
   duplicateProductIds.value = []
   soldOutProductIds.value = []
+
+  // 重新抓最新商品狀態，確保 A 付款後 B 無法再下單
+  isChecking.value = true
+  try {
+    await productsStore.fetchProducts()
+  } finally {
+    isChecking.value = false
+  }
 
   // 檢查購物車商品是否已被設為 sold out
   const soldIds = cart.items
