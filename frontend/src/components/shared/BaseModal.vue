@@ -53,8 +53,20 @@ defineEmits(['update:modelValue'])
 }
 .modal-body {
   padding: 32px;
-  overflow-y: auto;
+  overflow-y: scroll;
   flex: 1;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #ccc transparent; /* Firefox */
+}
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-body::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
 }
 .modal-footer {
   padding: 16px 32px;
