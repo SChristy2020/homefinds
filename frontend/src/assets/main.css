@@ -21,7 +21,7 @@
   --shadow-lg:    0 8px 40px rgba(0,0,0,0.14);
   --radius:       4px;
   --font-display: var(--font-body);
-  --font-body:    'DM Sans', sans-serif;
+  --font-body:    'DM Sans', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
 }
 
 body {
