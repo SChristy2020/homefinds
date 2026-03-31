@@ -62,7 +62,7 @@ const open = ref(false)
 const today = new Date(); today.setHours(0,0,0,0)
 
 const DEFAULT_DATE = new Date(2026, 3, 18) // April 18, 2026
-const DEFAULT_HOUR = '14'
+const DEFAULT_HOUR = '15'
 const DEFAULT_MIN  = '00'
 const CUTOFF_DATE  = new Date(2026, 3, 25) // April 25, 2026 — no dates after this
 
