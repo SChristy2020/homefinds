@@ -156,7 +156,7 @@
                 </template>
                 <template v-else>
                   <div class="pickup-edit-wrap" @click.stop>
-                    <PickupDatePicker v-model="editPickupValue" />
+                    <PickupDatePicker v-model="editPickupValue" :bookedSlots="editPickupBookedSlots" />
                     <div class="pickup-edit-actions">
                       <button class="btn-save-pickup" @click.stop="savePickupTime(order)">{{ i18n.t('orders.savePickup') }}</button>
                       <button class="btn-cancel-pickup" @click.stop="cancelEditPickup">{{ i18n.t('orders.cancelPickupEdit') }}</button>
@@ -748,6 +748,7 @@ onMounted(async () => {
 })
 const editingOrderId = ref(null)
 const editPickupValue = ref('')
+const editPickupBookedSlots = ref([])
 const editingStatusOrderId = ref(null)
 const editingStatusValue = ref('')
 const editingNotesOrderId = ref(null)
@@ -804,9 +805,20 @@ function toggleExpand(orderId) {
   }
 }
 
-function startEditPickup(order) {
+async function startEditPickup(order) {
   editingOrderId.value = order.id
   editPickupValue.value = toPickerFormat(order.pickup_time)
+  const slots = await ordersStore.fetchBookedSlots()
+  // 排除本訂單目前的時段，讓 admin 可以保留或換到其他時段
+  const currentSlot = pickerToSlotKey(editPickupValue.value)
+  editPickupBookedSlots.value = currentSlot ? slots.filter(s => s !== currentSlot) : slots
+}
+
+function pickerToSlotKey(pickerStr) {
+  const parts = pickerStr.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/)
+  if (!parts) return null
+  const slotMin = (Math.floor(parseInt(parts[5]) / 15) * 15)
+  return `${parts[3]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}T${parts[4].padStart(2,'0')}:${String(slotMin).padStart(2,'0')}`
 }
 
 function cancelEditPickup() {

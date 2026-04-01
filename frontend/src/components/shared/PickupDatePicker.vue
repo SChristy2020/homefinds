@@ -29,30 +29,39 @@
       <div class="pdp-time-row">
         <span class="pdp-time-label">{{ timeLabel }}</span>
         <div class="pdp-time-selects" @click.stop>
-          <select class="pdp-select" :value="hourValue" @change="hourValue = $event.target.value">
-            <option v-for="h in hours" :key="h" :value="h">{{ h }}</option>
+          <select class="pdp-select" :value="hourValue" @change="onHourChange($event.target.value)">
+            <option v-for="h in hours" :key="h" :value="h" :disabled="isHourFull(h)">
+              {{ h }}{{ isHourFull(h) ? (isEn ? ' (Full)' : i18n.locale === 'zh-CN' ? ' (此时段已满)' : ' (此時段已滿)') : '' }}
+            </option>
           </select>
           <span class="pdp-colon">:</span>
           <select class="pdp-select" :value="minuteValue" @change="minuteValue = $event.target.value">
-            <option v-for="m in minutes" :key="m" :value="m">{{ m }}</option>
+            <option v-for="m in minutes" :key="m" :value="m" :disabled="isSlotBooked(hourValue, m)">
+              {{ m }}{{ isSlotBooked(hourValue, m) ? (isEn ? ' (Already booked)' : i18n.locale === 'zh-CN' ? ' (已被预约)' : ' (已被預約)') : '' }}
+            </option>
           </select>
         </div>
       </div>
+      <div v-if="currentSlotBooked" class="pdp-slot-error">{{ slotBookedLabel }}</div>
 
       <!-- Confirm -->
       <div class="pdp-footer">
-        <button class="pdp-confirm" @click.stop="confirm">{{ confirmLabel }}</button>
+        <button class="pdp-confirm" :disabled="currentSlotBooked" @click.stop="confirm">{{ confirmLabel }}</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { useI18nStore } from '@/stores/i18n'
 
-const props = defineProps({ modelValue: String, placeholder: { type: String, default: '' } })
+const props = defineProps({
+  modelValue: String,
+  placeholder: { type: String, default: '' },
+  bookedSlots: { type: Array, default: () => [] },
+})
 const emit = defineEmits(['update:modelValue'])
 
 const i18n = useI18nStore()
@@ -106,6 +115,50 @@ const monthLabel = computed(() => {
 })
 const timeLabel    = computed(() => isEn.value ? 'Time' : '時間')
 const confirmLabel = computed(() => isEn.value ? 'OK' : '確認')
+const slotBookedLabel = computed(() => isEn.value ? 'This time slot is taken' : i18n.locale === 'zh-CN' ? '此时段已被预订' : '此時段已被預訂')
+
+function isHourFull(hour) {
+  return minutes.every(m => isSlotBooked(hour, m))
+}
+
+function isSlotBooked(hour, minute) {
+  if (!props.bookedSlots?.length || !selectedDate.value) return false
+  const d = selectedDate.value
+  const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  return props.bookedSlots.includes(`${dateStr}T${hour}:${minute}`)
+}
+
+const currentSlotBooked = computed(() => isSlotBooked(hourValue.value, minuteValue.value))
+
+function findNextAvailableSlot() {
+  const hourList = hours.value
+  const startIdx = hourList.indexOf(hourValue.value)
+  for (let i = startIdx; i < hourList.length; i++) {
+    for (const m of minutes) {
+      if (!isSlotBooked(hourList[i], m)) {
+        return { hour: hourList[i], minute: m }
+      }
+    }
+  }
+  return null
+}
+
+watch([() => props.bookedSlots, selectedDate, hourValue], () => {
+  if (!currentSlotBooked.value) return
+  const next = findNextAvailableSlot()
+  if (next) {
+    hourValue.value = next.hour
+    minuteValue.value = next.minute
+  }
+})
+
+function onHourChange(h) {
+  hourValue.value = h
+  if (isSlotBooked(h, minuteValue.value)) {
+    const available = minutes.find(m => !isSlotBooked(h, m))
+    if (available) minuteValue.value = available
+  }
+}
 
 const displayValue = computed(() => {
   if (!selectedDate.value) return ''
@@ -296,5 +349,13 @@ onUnmounted(() => document.removeEventListener('mousedown', onOutsideClick))
   cursor: pointer;
   transition: opacity 0.15s;
 }
-.pdp-confirm:hover { opacity: 0.85; }
+.pdp-confirm:hover:not(:disabled) { opacity: 0.85; }
+.pdp-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.pdp-slot-error {
+  font-size: 0.75rem;
+  color: #e74c3c;
+  margin-top: 6px;
+  text-align: center;
+}
 </style>

@@ -61,7 +61,7 @@
     <div class="section-divider"></div>
 
     <!-- Checkout Form -->
-    <UserInfoForm v-model="form" :pickupWarningDate="pickupWarningDate" />
+    <UserInfoForm v-model="form" :pickupWarningDate="pickupWarningDate" :bookedSlots="bookedSlots" />
 
     <!-- Subscribe Marketing -->
     <div class="subscribe-row">
@@ -76,6 +76,7 @@
       <button class="btn-primary" :disabled="!isValid || isChecking" @click="handleConfirm">{{ isChecking ? '...' : i18n.t('cart.reserve') }}</button>
       <div v-if="soldOutProductIds.length" class="duplicate-btn-error">{{ i18n.t('cart.soldOutBtn') }}</div>
       <div v-if="duplicateProductIds.length" class="duplicate-btn-error">{{ i18n.t('cart.alreadyReservedBtn') }}</div>
+      <div v-if="slotTakenError" class="duplicate-btn-error">{{ i18n.locale === 'en' ? 'This time slot was just taken. Please choose another.' : '此取貨時段剛被預訂，請重新選擇時間。' }}</div>
     </div>
 
     <div class="section-divider"></div>
@@ -130,11 +131,13 @@ const form = ref({
 })
 const duplicateProductIds = ref([])
 const soldOutProductIds = ref([])
+const slotTakenError = ref(false)
 const subscribeMarketing = ref(true)
 const isChecking = ref(false)
+const bookedSlots = ref([])
 
-// 當 modal 開啟時，從 localStorage / userStore 補填空白欄位
-watch(() => props.modelValue, (open) => {
+// 當 modal 開啟時，從 localStorage / userStore 補填空白欄位，並載入已預訂時段
+watch(() => props.modelValue, async (open) => {
   if (!open) return
   const s = loadSavedUser()
   const cu = userStore.currentUser
@@ -145,12 +148,18 @@ watch(() => props.modelValue, (open) => {
   if (!f.email)            f.email            = cu?.email        || s.email       || ''
   if (!f.phone)            f.phone            = cu?.phone        || s.phone       || ''
   if (!f.zelleRefundOther) f.zelleRefundOther = s.zelleRefundOther || ''
+  slotTakenError.value = false
+  bookedSlots.value = await ordersStore.fetchBookedSlots()
 })
 
 // 當 user 身份欄位變動時清除重複錯誤
 watch(() => [form.value.lastName, form.value.email, form.value.phone], () => {
   duplicateProductIds.value = []
   soldOutProductIds.value = []
+})
+
+watch(() => form.value.estimatedPickup, () => {
+  slotTakenError.value = false
 })
 
 const totalOriginal = computed(() =>
@@ -238,6 +247,11 @@ async function handleConfirm() {
   } catch (err) {
     if (err.message === 'duplicate' && err.duplicateProductIds) {
       duplicateProductIds.value = err.duplicateProductIds
+      return
+    }
+    if (err.message === 'slot_taken') {
+      slotTakenError.value = true
+      bookedSlots.value = await ordersStore.fetchBookedSlots()
       return
     }
     throw err

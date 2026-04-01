@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 import threading
 from app.database import get_db, SessionLocal
 from app.models.order import Order, OrderItem
@@ -94,6 +94,19 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
             detail={"duplicate_product_ids": duplicate_product_ids},
         )
 
+    # 檢查取貨時段是否已有人預定（每15分鐘只能1人）
+    if body.pickup_time:
+        slot_min = (body.pickup_time.minute // 15) * 15
+        slot_start = body.pickup_time.replace(minute=slot_min, second=0, microsecond=0)
+        slot_end = slot_start + timedelta(minutes=15)
+        slot_taken = db.query(Order).filter(
+            Order.order_status != "cancelled",
+            Order.pickup_time >= slot_start,
+            Order.pickup_time < slot_end,
+        ).first()
+        if slot_taken:
+            raise HTTPException(status_code=409, detail={"slot_taken": True})
+
     order = Order(user_id=body.user_id, pickup_time=body.pickup_time)
     db.add(order)
     db.flush()
@@ -131,6 +144,21 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
 
     threading.Thread(target=_send_email, daemon=True).start()
     return order_out
+
+@router.get("/booked-slots")
+def get_booked_slots(db: Session = Depends(get_db)):
+    """回傳所有已被預訂的取貨時段（格式：YYYY-MM-DDTHH:MM），每15分鐘為一個時段。"""
+    orders = db.query(Order).filter(
+        Order.order_status != "cancelled",
+        Order.pickup_time.isnot(None),
+    ).all()
+    slots = set()
+    for order in orders:
+        pt = order.pickup_time
+        slot_min = (pt.minute // 15) * 15
+        slot_key = pt.replace(minute=slot_min, second=0, microsecond=0).strftime("%Y-%m-%dT%H:%M")
+        slots.add(slot_key)
+    return {"booked_slots": sorted(slots)}
 
 @router.get("/all", response_model=list[OrderOut])
 def get_all_orders(db: Session = Depends(get_db)):

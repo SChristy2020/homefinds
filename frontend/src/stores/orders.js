@@ -49,6 +49,9 @@ export const useOrdersStore = defineStore('orders', () => {
         dupError.duplicateProductIds = err.detail.duplicate_product_ids
         throw dupError
       }
+      if (err.status === 409 && err.detail?.slot_taken) {
+        throw new Error('slot_taken')
+      }
       throw err
     }
     orders.value.push(order)
@@ -123,6 +126,11 @@ export const useOrdersStore = defineStore('orders', () => {
     return updated
   }
 
+  async function fetchBookedSlots() {
+    const result = await api.get('/api/orders/booked-slots')
+    return result.booked_slots || []
+  }
+
   function clearOrders() {
     orders.value = []
     sessionStorage.removeItem(ORDERS_KEY)
@@ -131,5 +139,5 @@ export const useOrdersStore = defineStore('orders', () => {
   // 保留介面相容性，waiting list 功能需後端另行實作
   function getWaitingList() { return [] }
 
-  return { orders, createOrder, fetchOrdersByUser, fetchAllOrders, updatePayStatus, updateOrderStatus, revertPaidOrder, cancelOrderItem, updatePickupTime, updateAdminNotes, clearOrders, getWaitingList }
+  return { orders, createOrder, fetchBookedSlots, fetchOrdersByUser, fetchAllOrders, updatePayStatus, updateOrderStatus, revertPaidOrder, cancelOrderItem, updatePickupTime, updateAdminNotes, clearOrders, getWaitingList }
 })

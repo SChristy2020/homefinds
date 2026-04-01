@@ -28,7 +28,7 @@
       <div class="form-group">
         <label>{{ i18n.t('userForm.estimatedPickup') }}</label>
         <span v-if="pickupWarningDate" class="field-error">{{ i18n.t('userForm.pickupWarningPrefix') }} {{ pickupWarningDate }}</span>
-        <PickupDatePicker :modelValue="modelValue.estimatedPickup" :placeholder="i18n.t('userForm.estimatedPickupPlaceholder')" @update:modelValue="update('estimatedPickup', $event)" />
+        <PickupDatePicker :modelValue="modelValue.estimatedPickup" :placeholder="i18n.t('userForm.estimatedPickupPlaceholder')" :bookedSlots="bookedSlots" @update:modelValue="update('estimatedPickup', $event)" />
       </div>
     </div>
     <div class="form-group" :class="{ 'has-error': touched.email && !validEmail(modelValue.email) }">
@@ -68,7 +68,11 @@ import { ref, computed } from 'vue'
 import { useI18nStore } from '@/stores/i18n'
 import PickupDatePicker from '@/components/shared/PickupDatePicker.vue'
 
-const props = defineProps({ modelValue: Object, pickupWarningDate: { type: String, default: '' } })
+const props = defineProps({
+  modelValue: Object,
+  pickupWarningDate: { type: String, default: '' },
+  bookedSlots: { type: Array, default: () => [] },
+})
 const emit = defineEmits(['update:modelValue'])
 const i18n = useI18nStore()
 
