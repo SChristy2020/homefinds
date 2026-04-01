@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, Any
 from datetime import date, datetime
 from enum import Enum
+from app.schemas import UTCDatetime
 
 class ProductStatus(str, Enum):
     available = "available"
@@ -57,11 +58,11 @@ class ProductOut(BaseModel):
     status:                str
     is_visible:            bool
     sort:                  int
-    pickup_available_time: Optional[datetime]
+    pickup_available_time: Optional[UTCDatetime]
     listed_date:           date
     waiting_list_summary:  Optional[Any]
-    created_at:            datetime
-    updated_at:            datetime
+    created_at:            UTCDatetime
+    updated_at:            UTCDatetime
     translations:          list[TranslationOut] = []
     images:                list[ImageOut] = []
 

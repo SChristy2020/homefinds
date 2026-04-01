@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 from enum import Enum
+from app.schemas import UTCDatetime
 
 class ItemStatus(str, Enum):
     reserved  = "reserved"
@@ -18,14 +19,14 @@ class OrderItemOut(BaseModel):
     product_id:       int
     price:            float
     status:           str
-    cancelled_at:     Optional[datetime]
-    sold_at:          Optional[datetime]
-    updated_at:       datetime
+    cancelled_at:     Optional[UTCDatetime]
+    sold_at:          Optional[UTCDatetime]
+    updated_at:       UTCDatetime
     waiting_position: Optional[int] = None
     product_name:     Optional[str] = None
     original_price:   Optional[float] = None
     image_url:        Optional[str] = None
-    available_time:   Optional[datetime] = None
+    available_time:   Optional[UTCDatetime] = None
 
     class Config:
         from_attributes = True
@@ -50,10 +51,10 @@ class OrderOut(BaseModel):
     order_number: Optional[str]
     user_id:      int
     order_status: str
-    paid_at:     Optional[datetime]
-    pickup_time: Optional[datetime]
-    created_at:  datetime
-    updated_at:  datetime
+    paid_at:     Optional[UTCDatetime]
+    pickup_time: Optional[UTCDatetime]
+    created_at:  UTCDatetime
+    updated_at:  UTCDatetime
     items:       list[OrderItemOut] = []
     buyer_first_name:        Optional[str] = None
     buyer_last_name:         Optional[str] = None
