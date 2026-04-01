@@ -19,6 +19,7 @@ def create_user(body: UserCreate, response: Response, db: Session = Depends(get_
         existing.salutation        = body.salutation
         existing.zelle_refund      = body.zelle_refund
         existing.zelle_refund_other = body.zelle_refund_other
+        existing.locale            = body.locale
         if body.has_reservation:
             existing.has_reservation = 1
         if body.has_purchase:
