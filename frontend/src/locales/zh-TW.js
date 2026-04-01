@@ -328,7 +328,8 @@ export default {
     step3Title: 'Step 3. 取貨',
     step3Items: [
       '取貨時間：請依「預計取貨時間」準時到現場。',
-      '修改資料：後續若需更改取貨時間，可至「我的訂單」進行編輯。',
+      '修改取貨時間：可至「我的訂單」進行編輯。',
+      '取貨方式：到場時請電話簡訊給Christy，如果東西不多直接幫你送下樓!',
     ],
     step3LocationLabel: '取貨地點：',
     step3LocationName: 'Crowne at 501',

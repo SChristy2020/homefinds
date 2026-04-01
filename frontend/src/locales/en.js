@@ -266,7 +266,8 @@ export default {
     step3Title: 'Step 3. Pickup',
     step3Items: [
       'Schedule: Please arrive on time according to your "Estimated Pickup Time."',
-      'Edit Info: You can modify your pickup time later in the "My Orders" section.',
+      'Edit pickup time: You can modify the time in the "My Orders" section.',
+      'Pickup Method: Please text Christy when you arrive. If there aren’t many items, she can bring them down to you!',
     ],
     step3LocationLabel: 'Pickup Location:',
     step3LocationName: 'Crowne at 501',

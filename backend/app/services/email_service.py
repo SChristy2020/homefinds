@@ -56,7 +56,8 @@ EMAIL_TRANSLATIONS = {
         "step3_title": "Step 3. 取貨",
         "step3_items": [
             "取貨時間：請依「預計取貨時間」準時到現場。",
-            "修改資料：後續若需更改取貨時間，可至「我的訂單」進行編輯。",
+            "修改取貨時間：可至「我的訂單」進行編輯。",
+            "取貨方式：到場時請電話簡訊給Christy，如果東西不多直接幫你送下樓!",
         ],
         "step3_location_label": "取貨地點：",
         "step3_location_name": "Crowne at 501",
@@ -117,7 +118,8 @@ EMAIL_TRANSLATIONS = {
         "step3_title": "Step 3. 取货",
         "step3_items": [
             "取货时间：请依「预计取货时间」准时到现场。",
-            "修改资料：后续若需更改取货时间，可至「我的订单」进行编辑。",
+            "修改取货时间：可至「我的订单」进行编辑。",
+            "取货方式：到场时请电话简讯给Christy，如果东西不多直接帮你送下楼!",
         ],
         "step3_location_label": "取货地点：",
         "step3_location_name": "Crowne at 501",
@@ -178,7 +180,8 @@ EMAIL_TRANSLATIONS = {
         "step3_title": "Step 3. Pickup",
         "step3_items": [
             "Schedule: Please arrive on time according to your \"Estimated Pickup Time.\"",
-            "Edit Info: You can modify your pickup time later in the \"My Orders\" section.",
+            'Edit pickup time: You can modify the time in the \"My Orders\"" section.',
+            'Pickup Method: Please text Christy when you arrive. If there aren’t many items, she can bring them down to you!',
         ],
         "step3_location_label": "Pickup Location:",
         "step3_location_name": "Crowne at 501",
