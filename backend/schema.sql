@@ -103,6 +103,7 @@ CREATE TABLE orders (
   order_status ENUM('pending_payment','paid','cancelled') NOT NULL DEFAULT 'pending_payment',
   paid_at      DATETIME   NULL,
   pickup_time  DATETIME   NULL,
+  pickup_reminder_sent_at DATETIME NULL,
   created_at   DATETIME   NOT NULL DEFAULT NOW(),
   updated_at   DATETIME   NOT NULL DEFAULT NOW() ON UPDATE NOW(),
   PRIMARY KEY (id),

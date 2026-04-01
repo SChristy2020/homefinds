@@ -10,6 +10,7 @@ class Order(Base):
     order_status = Column(Enum("pending_payment", "paid", "picked_up", "cancelled"), nullable=False, default="pending_payment")
     paid_at      = Column(DateTime, nullable=True)
     pickup_time  = Column(DateTime, nullable=True)
+    pickup_reminder_sent_at = Column(DateTime, nullable=True)
     admin_notes  = Column(Text, nullable=True)
     created_at   = Column(DateTime, nullable=False, server_default=func.now())
     updated_at   = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())

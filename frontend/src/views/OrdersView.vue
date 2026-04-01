@@ -82,12 +82,13 @@
               <th v-if="isAdmin" class="sortable" @click="toggleSort('updated')">
                 {{ i18n.t('orders.updatedAt') }}<SortIcon col="updated" :active="sortColumn" :dir="sortDirection" />
               </th>
+              <th v-if="isAdmin">取貨通知</th>
               <th v-if="isAdmin">補發訂單確認</th>
             </tr>
           </thead>
           <tbody v-if="filteredOrders.length === 0">
             <tr>
-              <td :colspan="isAdmin ? 12 : 6" class="td-empty">{{ i18n.t('orders.noOrdersTable') }}</td>
+              <td :colspan="isAdmin ? 14 : 6" class="td-empty">{{ i18n.t('orders.noOrdersTable') }}</td>
             </tr>
           </tbody>
           <tbody v-for="order in paginatedOrders" :key="order.id">
@@ -173,6 +174,11 @@
               <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
               <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
               <td v-if="isAdmin" class="td-resend" @click.stop>
+                <button class="btn-edit-icon" @click.stop="sendPickupReminder(order)" title="取貨通知">
+                  <Mail :size="14" />
+                </button>
+              </td>
+              <td v-if="isAdmin" class="td-resend" @click.stop>
                 <button class="btn-edit-icon" @click.stop="resendOrderConfirmation(order)" title="補發訂單確認">
                   <Mail :size="14" />
                 </button>
@@ -181,7 +187,7 @@
 
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
-              <td :colspan="isAdmin ? 13 : 6">
+              <td :colspan="isAdmin ? 14 : 6">
                 <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" :orderStatus="order.order_status" @cancel="handleCancel" />
 
                 <!-- Total summary -->
@@ -877,8 +883,30 @@ async function handleCancel(itemId) {
 }
 
 async function resendOrderConfirmation(order) {
-  await api.post(`/api/orders/${order.id}/resend-confirmation?admin_id=${userStore.currentUser.id}`)
-  toast.show('訂單確認信已補發')
+  try {
+    await api.post(`/api/orders/${order.id}/resend-confirmation?admin_id=${userStore.currentUser.id}`)
+    toast.show('訂單確認信已補發')
+  } catch (e) {
+    toast.show(`補發失敗: ${formatApiErrorDetail(e)}`)
+  }
+}
+
+async function sendPickupReminder(order) {
+  try {
+    await api.post(`/api/orders/${order.id}/send-pickup-reminder?admin_id=${userStore.currentUser.id}`)
+    toast.show('取貨通知信已寄出')
+  } catch (e) {
+    toast.show(`寄送失敗: ${formatApiErrorDetail(e)}`)
+  }
+}
+
+function formatApiErrorDetail(e) {
+  const detail = e?.detail
+  if (!detail) return e?.message || '未知錯誤'
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) return detail.join(', ')
+  if (typeof detail === 'object') return JSON.stringify(detail)
+  return String(detail)
 }
 
 const ORDER_STATUSES = ['待付訂金', '待入住', '已入住', '已退房', '已取消']
@@ -1621,3 +1649,4 @@ const calCells = computed(() => {
   margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
 }
 </style>
+

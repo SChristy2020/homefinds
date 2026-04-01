@@ -57,7 +57,7 @@ EMAIL_TRANSLATIONS = {
         "step3_items": [
             "取貨時間：請依「預計取貨時間」準時到現場。",
             "修改取貨時間：可至「我的訂單」進行編輯。",
-            "取貨方式：到場時請電話簡訊給Christy，如果東西不多直接幫你送下樓!",
+            "取貨方式：<strong>到場時請電話簡訊給Christy</strong>，如果東西不多直接幫你送下樓!",
         ],
         "step3_location_label": "取貨地點：",
         "step3_location_name": "Crowne at 501",
@@ -119,7 +119,7 @@ EMAIL_TRANSLATIONS = {
         "step3_items": [
             "取货时间：请依「预计取货时间」准时到现场。",
             "修改取货时间：可至「我的订单」进行编辑。",
-            "取货方式：到场时请电话简讯给Christy，如果东西不多直接帮你送下楼!",
+            "取货方式：<strong>到场时请电话简讯给Christy</strong>，如果东西不多直接帮你送下楼!",
         ],
         "step3_location_label": "取货地点：",
         "step3_location_name": "Crowne at 501",
@@ -181,7 +181,7 @@ EMAIL_TRANSLATIONS = {
         "step3_items": [
             "Schedule: Please arrive on time according to your \"Estimated Pickup Time.\"",
             'Edit pickup time: You can modify the time in the \"My Orders\"" section.',
-            'Pickup Method: Please text Christy when you arrive. If there aren’t many items, she can bring them down to you!',
+            'Pickup Method: <strong>Please text Christy when you arrive.</strong> If there aren’t many items, she can bring them down to you!',
         ],
         "step3_location_label": "Pickup Location:",
         "step3_location_name": "Crowne at 501",
@@ -532,6 +532,58 @@ ORDER_STATUS_REVERTED_TRANSLATIONS = {
             "6th Place", "7th Place", "8th Place", "9th Place", "10th Place",
         ],
         "position_fallback": "{n}th Place",
+    },
+}
+
+# ── Pickup reminder email translations ────────────────────────────────────────
+PICKUP_REMINDER_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "取貨通知，別忘了來帶走您的好物喔 ✨ - Christy's HomeFinds",
+        "header": "取貨通知提醒",
+        "emoji": "🎁",
+        "greeting": "Hi {first_name}，",
+        "body": "提醒您，明天 <strong>{pickup_time}</strong> 就是我們的取貨約定時間！<br>我們已經把您的寶貝物品準備妥當，就等您來帶它回家。<br>如果行程有變動，記得先至「{link}」改一下時間，才不會接空喔！<br>明天見！",
+        "my_orders_link_text": "我的訂單",
+        "order_number_label": "訂單編號：",
+        "col_name": "物品名稱",
+        "col_price": "價錢",
+        "total": "共 {count} 樣物品，總計：",
+        "orders_link_text": "查看我的訂單",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+        "anytime": "隨時",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "取货通知，别忘了来带走您的好物哦 ✨ - Christy's HomeFinds",
+        "header": "取货通知提醒",
+        "emoji": "🎁",
+        "greeting": "Hi {first_name}，",
+        "body": "提醒您，明天 <strong>{pickup_time}</strong> 就是我们的取货约定时间！<br>我们已经把您的宝贝物品准备妥当，就等您来带它回家。<br>如果行程有变动，记得先至「{link}」改一下时间，才不会白跑一趟哦！<br>明天见！",
+        "my_orders_link_text": "我的订单",
+        "order_number_label": "订单号：",
+        "col_name": "物品名称",
+        "col_price": "价格",
+        "total": "共 {count} 件商品，合计：",
+        "orders_link_text": "查看我的订单",
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+        "anytime": "随时",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "Pickup Reminder — Don't forget your goodies! ✨ - Christy's HomeFinds",
+        "header": "Pickup Reminder",
+        "emoji": "🎁",
+        "greeting": "Hi {first_name},",
+        "body": "Just a reminder that tomorrow <strong>{pickup_time}</strong> is your scheduled pickup time! <br>Your items are all set and waiting for you. <br>If your plans change, please update the time in \"{link}\" so we don't miss each other. <br>See you tomorrow!",
+        "my_orders_link_text": "My Orders",
+        "order_number_label": "Order ID:",
+        "col_name": "Item",
+        "col_price": "Price",
+        "total": "{count} item(s), Total:",
+        "orders_link_text": "View My Orders",
+        "footer": "💡 Questions? Feel free to contact Christy:",
+        "anytime": "Anytime",
     },
 }
 
@@ -1125,6 +1177,70 @@ def _build_simple_product_rows(product_ids, db, db_locale):
     return products_data, item_rows
 
 
+def _build_guide_section_html(tr):
+    """Build the Shopping & Pickup Guide HTML section using EMAIL_TRANSLATIONS keys."""
+    step1_items_html = "".join(
+        f'<li style="font-size:12px;color:#444;line-height:1.5;">{item}</li>'
+        for item in tr["step1_items"]
+    )
+
+    step2_pay_item = f"""<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">
+                    {tr["step2_pay_label"]}
+                    <div style="margin-top:4px;padding:6px 10px;font-weight:600;color:#1a1a1a;">
+                      <div>{tr["step2_zelle_a"]}</div>
+                      <div>{tr["step2_zelle_b"]}</div>
+                      <div>{tr["step2_zelle_c"]}</div>
+                    </div>
+                  </li>"""
+    step2_items_html = ""
+    for idx, item in enumerate(tr["step2_items"]):
+        step2_items_html += f'<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">{item}</li>'
+        if idx == 1:
+            step2_items_html += step2_pay_item
+
+    step3_items_html = "".join(
+        f'<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">{item}</li>'
+        for item in tr["step3_items"]
+    )
+    step3_items_html += f"""<li style="font-size:12px;color:#444;line-height:1.5;margin-bottom:4px;">
+                    <span style="display:block;">{tr["step3_location_label"]}</span>
+                    <a href="https://maps.app.goo.gl/HiHjmGr1PLTvgbex9" target="_blank"
+                       style="display:inline-block;margin-top:4px;padding:6px 10px;background:#f9f7f4;border-radius:6px;text-decoration:none;">
+                      <span style="font-weight:600;color:#c9a96e;display:block;">{tr["step3_location_name"]}</span>
+                      <span style="font-size:11px;color:#666;">{tr["step3_location_address"]}</span>
+                    </a>
+                    <br/>
+                    <img src="https://schristy2020.github.io/homefinds/images/pickup-location.jpg"
+                         alt="Pickup Location"
+                         width="300"
+                         style="margin-top:8px;border-radius:8px;display:block;max-width:100%;" />
+                  </li>"""
+
+    return f"""
+              <hr style="border:none;border-top:1px solid #e8e8e8;margin:20px 0;" />
+              <h3 style="font-size:14px;font-weight:700;color:#1a1a1a;margin:0 0 14px;">{tr["guide_title"]}</h3>
+              <div style="margin-bottom:14px;font-size:13px;">
+                <p style="font-size:13px;font-weight:700;color:#c9a96e;margin:0 0 6px;">{tr["step1_title"]}</p>
+                <ol style="margin:0;padding-left:18px;">
+                  {step1_items_html}
+                  <li style="font-size:12px;color:#c0392b;font-weight:600;list-style:none;margin-left:-18px;">{tr["step1_warning"]}</li>
+                </ol>
+              </div>
+              <div style="margin-bottom:14px;font-size:13px;">
+                <p style="font-size:13px;font-weight:700;color:#c9a96e;margin:0 0 6px;">{tr["step2_title"]}</p>
+                <p style="font-size:12px;color:#555;margin:0 0 6px;">{tr["step2_intro"]}</p>
+                <ol style="margin:0;padding-left:18px;">
+                  {step2_items_html}
+                </ol>
+              </div>
+              <div style="margin-bottom:14px;font-size:13px;">
+                <p style="font-size:13px;font-weight:700;color:#c9a96e;margin:0 0 6px;">{tr["step3_title"]}</p>
+                <ul style="margin:0;padding-left:18px;">
+                  {step3_items_html}
+                </ul>
+              </div>"""
+
+
 def _build_simple_email_html(tr, greeting, body_text, product_ids, db, db_locale,
                               order_number=None, extra_section_html=""):
     """Build a simple email HTML with optional product table."""
@@ -1263,6 +1379,9 @@ def send_payment_success_notification(user, order_number, pickup_time, paid_prod
     greeting = tr["greeting"].replace("{first_name}", user.first_name)
     body_text = tr["body"].replace("{pickup_time}", f"<strong>{pickup_str}</strong>")
 
+    guide_tr = EMAIL_TRANSLATIONS.get(locale, EMAIL_TRANSLATIONS["zh-TW"])
+    guide_html = _build_guide_section_html(guide_tr)
+
     html = _build_simple_email_html(
         tr=tr,
         greeting=greeting,
@@ -1271,6 +1390,7 @@ def send_payment_success_notification(user, order_number, pickup_time, paid_prod
         db=db,
         db_locale=db_locale,
         order_number=order_number,
+        extra_section_html=guide_html,
     )
     subject = tr["subject"].replace("{order_number}", order_number)
     _send_simple_email(user, subject, html, resend_api_key, from_email)
@@ -1366,6 +1486,48 @@ def send_order_status_reverted_notification(user, order_number, target_status, p
         db_locale=db_locale,
         order_number=order_number,
         extra_section_html=order_summary_html,
+    )
+    subject = tr["subject"]
+    _send_simple_email(user, subject, html, resend_api_key, from_email)
+
+
+def send_pickup_reminder_notification(user, order_number, pickup_time, product_ids, db):
+    """取貨提醒 — 在取貨前一天提醒 user 準時到場。"""
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
+    tr = PICKUP_REMINDER_TRANSLATIONS.get(locale, PICKUP_REMINDER_TRANSLATIONS["zh-TW"])
+    db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
+
+    pickup_str = _format_datetime_12h(pickup_time) if pickup_time else tr["anytime"]
+    greeting = tr["greeting"].replace("{first_name}", user.first_name)
+
+    my_orders_link_html = (
+        f'<a href="https://schristy2020.github.io/homefinds/#/orders" '
+        f'style="color:#c9a96e;text-decoration:underline;">{tr["my_orders_link_text"]}</a>'
+    )
+    body_text = (
+        tr["body"]
+        .replace("{pickup_time}", pickup_str)
+        .replace("{link}", my_orders_link_html)
+    )
+
+    guide_tr = EMAIL_TRANSLATIONS.get(locale, EMAIL_TRANSLATIONS["zh-TW"])
+    guide_html = _build_guide_section_html(guide_tr)
+
+    html = _build_simple_email_html(
+        tr=tr,
+        greeting=greeting,
+        body_text=body_text,
+        product_ids=product_ids,
+        db=db,
+        db_locale=db_locale,
+        order_number=order_number,
+        extra_section_html=guide_html,
     )
     subject = tr["subject"]
     _send_simple_email(user, subject, html, resend_api_key, from_email)

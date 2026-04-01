@@ -16,7 +16,9 @@ from app.services.email_service import (
     send_item_snatched_pending_notification,
     send_order_auto_cancelled_notification,
     send_order_status_reverted_notification,
+    send_pickup_reminder_notification,
 )
+from app.services.pickup_reminder_service import send_due_pickup_reminders
 
 router = APIRouter()
 
@@ -457,6 +459,50 @@ def resend_order_confirmation(order_id: int, admin_id: int, db: Session = Depend
             new_db.close()
     threading.Thread(target=_send, daemon=True).start()
     return {"message": "Confirmation email resent"}
+
+@router.post("/{order_id}/send-pickup-reminder")
+def send_pickup_reminder(order_id: int, admin_id: int, db: Session = Depends(get_db)):
+    admin = db.query(User).filter(User.id == admin_id, User.is_admin == 1).first()
+    if not admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if not order.pickup_time:
+        raise HTTPException(status_code=400, detail="Order has no pickup time")
+    if order.order_status not in ("pending_payment", "paid"):
+        raise HTTPException(status_code=400, detail="Only pending_payment/paid orders can send pickup reminder")
+
+    user = db.query(User).filter(User.id == order.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    product_rows = db.query(OrderItem.product_id).filter(
+        OrderItem.order_id == order.id,
+        OrderItem.status.in_(("reserved", "paid")),
+    ).all()
+    product_ids = [row[0] for row in product_rows]
+    if not product_ids:
+        raise HTTPException(status_code=400, detail="No active items in this order")
+
+    send_pickup_reminder_notification(
+        user=user,
+        order_number=order.order_number,
+        pickup_time=order.pickup_time,
+        product_ids=product_ids,
+        db=db,
+    )
+
+    order.pickup_reminder_sent_at = datetime.now()
+    db.commit()
+
+    return {"ok": True, "message": "Pickup reminder sent"}
+
+@router.post("/send-pickup-reminders")
+def send_pickup_reminders_now(db: Session = Depends(get_db)):
+    result = send_due_pickup_reminders(db)
+    return {"ok": True, **result}
 
 @router.put("/items/{item_id}/cancel", response_model=dict)
 def cancel_order_item(item_id: int, db: Session = Depends(get_db)):

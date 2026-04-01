@@ -53,6 +53,7 @@ class OrderOut(BaseModel):
     order_status: str
     paid_at:     Optional[UTCDatetime]
     pickup_time: Optional[UTCDatetime]
+    pickup_reminder_sent_at: Optional[UTCDatetime] = None
     created_at:  UTCDatetime
     updated_at:  UTCDatetime
     items:       list[OrderItemOut] = []
