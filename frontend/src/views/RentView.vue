@@ -137,10 +137,16 @@ const totalPrice = computed(() => {
 
   let remaining = n
   let total = 0
-  if (price_30_days && remaining >= 30) {
+  if (price_30_days && remaining >= 28) {
     const months = Math.floor(remaining / 30)
-    total += months * Number(price_30_days)
-    remaining -= months * 30
+    const extra = remaining % 30
+    // 28~29天視為滿一個月（月份天數不同，不足2天補齊）
+    const totalMonths = extra >= 28 ? months + 1 : months
+    if (totalMonths > 0) {
+      total += totalMonths * Number(price_30_days)
+      remaining -= totalMonths * 30
+      if (remaining < 0) remaining = 0
+    }
   }
   if (price_7_nights && remaining >= 7) {
     const weeks = Math.floor(remaining / 7)
