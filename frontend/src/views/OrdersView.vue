@@ -1061,7 +1061,7 @@ function statusLabel(order) {
 
 function statusClass(order) {
   if (order.order_status === 'paid') return 'status-paid'
-  if (order.order_status === 'picked_up') return 'status-paid'
+  if (order.order_status === 'picked_up') return 'status-picked-up'
   if (order.order_status === 'cancelled') return 'status-cancelled'
   return 'status-unpaid'
 }
@@ -1299,6 +1299,7 @@ const calCells = computed(() => {
 
 /* Payment status */
 .status-paid      { color: #2e7d32; font-weight: 600; }
+.status-picked-up { color: #103a8b; font-weight: 600; }
 .status-unpaid    { color: var(--mid); }
 .status-cancelled { color: var(--red, #c0392b); }
 
