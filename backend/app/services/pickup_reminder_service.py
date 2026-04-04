@@ -45,6 +45,11 @@ def send_due_pickup_reminders(db: Session, now: datetime | None = None) -> dict:
             skipped += 1
             continue
 
+        db.refresh(order)
+        if order.order_status not in ("pending_payment", "paid"):
+            skipped += 1
+            continue
+
         try:
             send_pickup_reminder_notification(
                 user=user,
