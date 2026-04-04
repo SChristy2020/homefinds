@@ -851,7 +851,7 @@ function cancelEditStatus() {
 }
 
 async function saveStatus(order) {
-  if (order.order_status === 'paid' && editingStatusValue.value !== 'paid') {
+  if (order.order_status === 'paid' && editingStatusValue.value !== 'paid' && editingStatusValue.value !== 'picked_up') {
     await ordersStore.revertPaidOrder(order.id, editingStatusValue.value)
   } else {
     await ordersStore.updateOrderStatus(order.id, editingStatusValue.value)
