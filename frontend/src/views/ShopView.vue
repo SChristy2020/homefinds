@@ -127,7 +127,7 @@ function getCatLabel(cat) {
 }
 const searchOpen = ref(false)
 const searchQuery = ref('')
-const hideSold = ref(false)
+const hideSold = ref(true)
 const sortOption = ref('')
 const sortOpen = ref(false)
 const sortRef = ref(null)
