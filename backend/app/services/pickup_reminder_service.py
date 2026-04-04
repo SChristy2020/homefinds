@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from sqlalchemy.orm import Session
+
+_EASTERN = ZoneInfo("America/New_York")
 
 from app.models.order import Order, OrderItem
 from app.models.user import User
@@ -7,7 +10,7 @@ from app.services.email_service import send_pickup_reminder_notification
 
 
 def send_due_pickup_reminders(db: Session, now: datetime | None = None) -> dict:
-    now = now or datetime.now()
+    now = now or datetime.now(_EASTERN).replace(tzinfo=None)
     cutoff = now + timedelta(hours=24)
 
     due_orders = (
