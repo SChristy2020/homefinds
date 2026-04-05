@@ -98,7 +98,7 @@ if (props.modelValue) {
 const hours = computed(() => {
   const isCutoff = selectedDate.value &&
     selectedDate.value.toDateString() === CUTOFF_DATE.toDateString()
-  const maxHour = isCutoff ? 12 : 21
+  const maxHour = isCutoff ? 12 : 20
   const count = maxHour - 10 + 1
   return Array.from({ length: count }, (_, i) => String(i + 10).padStart(2, '0'))
 })
