@@ -68,6 +68,7 @@
               <th class="sortable" @click="toggleSort('pickup')">
                 {{ i18n.t('orders.pickupTimeLabel') }}<SortIcon col="pickup" :active="sortColumn" :dir="sortDirection" />
               </th>
+              <th v-if="isAdmin">(預訂)取貨通知</th>
               <template v-if="isAdmin">
                 <th class="sortable" @click="toggleSort('buyer')">
                   {{ i18n.t('orders.buyer') }}<SortIcon col="buyer" :active="sortColumn" :dir="sortDirection" />
@@ -82,7 +83,6 @@
               <th v-if="isAdmin" class="sortable" @click="toggleSort('updated')">
                 {{ i18n.t('orders.updatedAt') }}<SortIcon col="updated" :active="sortColumn" :dir="sortDirection" />
               </th>
-              <th v-if="isAdmin">(預訂)取貨通知</th>
               <th v-if="isAdmin">補發訂單確認</th>
             </tr>
           </thead>
@@ -165,14 +165,6 @@
                   </div>
                 </template>
               </td>
-              <template v-if="isAdmin">
-                <td class="td-buyer">{{ order.buyer_last_name }} {{ order.buyer_first_name }}</td>
-                <td class="td-buyer-info">{{ order.buyer_email }}</td>
-                <td class="td-buyer-info">{{ order.buyer_phone }}</td>
-                <td class="td-buyer-info">{{ order.buyer_zelle_refund === 'other' ? order.buyer_zelle_refund_other : order.buyer_zelle_refund === 'email' ? 'Email' : '電話' }}</td>
-              </template>
-              <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
-              <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
               <td v-if="isAdmin" class="td-resend" @click.stop>
                 <button
                   v-if="order.order_status === 'pending_payment'"
@@ -191,6 +183,15 @@
                   <Mail :size="14" />
                 </button>
               </td>
+              <template v-if="isAdmin">
+                <td class="td-buyer">{{ order.buyer_last_name }} {{ order.buyer_first_name }}</td>
+                <td class="td-buyer-info">{{ order.buyer_email }}</td>
+                <td class="td-buyer-info">{{ order.buyer_phone }}</td>
+                <td class="td-buyer-info">{{ order.buyer_zelle_refund === 'other' ? order.buyer_zelle_refund_other : order.buyer_zelle_refund === 'email' ? 'Email' : '電話' }}</td>
+              </template>
+              <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
+              <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
+              
               <td v-if="isAdmin" class="td-resend" @click.stop>
                 <button class="btn-edit-icon" @click.stop="resendOrderConfirmation(order)" title="補發訂單確認">
                   <Mail :size="14" />
