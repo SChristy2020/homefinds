@@ -23,6 +23,7 @@ class OrderItemOut(BaseModel):
     sold_at:          Optional[UTCDatetime]
     updated_at:       UTCDatetime
     waiting_position: Optional[int] = None
+    current_position: Optional[int] = None
     product_name:     Optional[str] = None
     original_price:   Optional[float] = None
     image_url:        Optional[str] = None
@@ -54,6 +55,7 @@ class OrderOut(BaseModel):
     paid_at:     Optional[UTCDatetime]
     pickup_time: Optional[UTCDatetime]
     pickup_reminder_sent_at: Optional[UTCDatetime] = None
+    pre_booking_reminder_sent_at: Optional[UTCDatetime] = None
     created_at:  UTCDatetime
     updated_at:  UTCDatetime
     items:       list[OrderItemOut] = []

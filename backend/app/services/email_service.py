@@ -587,6 +587,85 @@ PICKUP_REMINDER_TRANSLATIONS = {
     },
 }
 
+# ── Pre-booking pickup reminder email translations ────────────────────────────
+PREBOOKING_REMINDER_TRANSLATIONS = {
+    "zh-TW": {
+        "html_lang": "zh-TW",
+        "subject": "預訂取貨通知，明天見！ 🎁 - Christy's HomeFinds",
+        "header": "預訂取貨通知",
+        "emoji": "📦",
+        "greeting": "Hi {first_name}，",
+        "body_line1": "提醒您，明天 <strong>{pickup_time}</strong> 就是我們的取貨約定時間！",
+        "body_line2": "恭喜您即將獲得以下排序為「<strong>第一順位</strong>」的寶貝物品！",
+        "body_line3": "如果行程有變動，記得先至「{link}」改一下時間，才不會白跑一趟哦！",
+        "body_warning": "<strong>請注意： 商品優先權以完成付款或確認為準。為確保為您預留商品，請務必發信至 qsa8647332@gmail.com 告知 Christy 您預計領取的品項，我們將專程為您保留。</strong>",
+        "my_orders_link_text": "我的訂單",
+        "order_number_label": "訂單編號：",
+        "col_name": "物品名稱",
+        "col_price": "價錢",
+        "col_position": "目前順位",
+        "total": "共 {count} 樣物品，總計：",
+        "orders_link_text": "查看我的訂單",
+        "footer": "💡 有任何問題？歡迎聯絡 Christy:",
+        "anytime": "隨時",
+        "position_labels": [
+            "第一順位", "第二順位", "第三順位", "第四順位", "第五順位",
+            "第六順位", "第七順位", "第八順位", "第九順位", "第十順位",
+        ],
+        "position_fallback": "第{n}順位",
+    },
+    "zh-CN": {
+        "html_lang": "zh-CN",
+        "subject": "预订取货通知，明天见！ 🎁 - Christy's HomeFinds",
+        "header": "预订取货通知",
+        "emoji": "📦",
+        "greeting": "Hi {first_name}，",
+        "body_line1": "提醒您，明天 <strong>{pickup_time}</strong> 就是我们的取货约定时间！",
+        "body_line2": "恭喜您即将获得以下排序为「<strong>第一顺位</strong>」的宝贝物品！",
+        "body_line3": "如果行程有变动，记得先至「{link}」改一下时间，才不会白跑一趟哦！",
+        "body_warning": "<strong>请注意： 商品优先权以完成付款或确认为准。为确保为您预留商品，请务必發信至 qsa8647332@gmail.com 告知 Christy 您预计领取的品项，我们将专程为您保留。</strong>",
+        "my_orders_link_text": "我的订单",
+        "order_number_label": "订单号：",
+        "col_name": "物品名称",
+        "col_price": "价格",
+        "col_position": "目前顺位",
+        "total": "共 {count} 件商品，合计：",
+        "orders_link_text": "查看我的订单",
+        "footer": "💡 有任何问题？欢迎联络 Christy:",
+        "anytime": "随时",
+        "position_labels": [
+            "第一顺位", "第二顺位", "第三顺位", "第四顺位", "第五顺位",
+            "第六顺位", "第七顺位", "第八顺位", "第九顺位", "第十顺位",
+        ],
+        "position_fallback": "第{n}顺位",
+    },
+    "en": {
+        "html_lang": "en",
+        "subject": "Pre-Booking Pickup Reminder — See you tomorrow! 🎁 - Christy's HomeFinds",
+        "header": "Pre-Booking Pickup Reminder",
+        "emoji": "📦",
+        "greeting": "Hi {first_name},",
+        "body_line1": "Just a reminder that tomorrow <strong>{pickup_time}</strong> is our scheduled pickup time!",
+        "body_line2": "Congratulations — you are currently in <strong>1st place</strong> for the following items!",
+        "body_line3": "If your plans change, please update your time in \"{link}\" so you don't make a wasted trip!",
+        "body_warning": "<strong>Please note: Items are available on a first-come, first-served basis. To secure your items and ensure they are held exclusively for you, please send a quick confirmation to qsa8647332@gmail.com. Simply let Christy know which items you plan to pick up tomorrow!</strong>",
+        "my_orders_link_text": "My Orders",
+        "order_number_label": "Order ID:",
+        "col_name": "Item",
+        "col_price": "Price",
+        "col_position": "Current Rank",
+        "total": "{count} item(s), Total:",
+        "orders_link_text": "View My Orders",
+        "footer": "💡 Questions? Feel free to contact Christy:",
+        "anytime": "Anytime",
+        "position_labels": [
+            "1st Place", "2nd Place", "3rd Place", "4th Place", "5th Place",
+            "6th Place", "7th Place", "8th Place", "9th Place", "10th Place",
+        ],
+        "position_fallback": "{n}th Place",
+    },
+}
+
 # ── Marketing / new arrivals email translations ────────────────────────────────
 MARKETING_EMAIL_TRANSLATIONS = {
     "zh-TW": {
@@ -1529,6 +1608,215 @@ def send_pickup_reminder_notification(user, order_number, pickup_time, product_i
         order_number=order_number,
         extra_section_html=guide_html,
     )
+    subject = tr["subject"]
+    _send_simple_email(user, subject, html, resend_api_key, from_email)
+
+
+def send_prebooking_reminder_notification(user, order_number, pickup_time, product_ids, db,
+                                          product_positions=None):
+    """預訂取貨通知 — 提前通知 user 明天取貨，並提醒順位資訊。
+    product_positions: dict {product_id: position_int} 可選，提供各商品目前順位。
+    """
+    resend_api_key = os.getenv("RESEND_API_KEY", "")
+    from_email = os.getenv("RESEND_FROM", "")
+    if not resend_api_key or not from_email:
+        print("Email skipped: RESEND_API_KEY / RESEND_FROM not configured")
+        return
+
+    if product_positions is None:
+        product_positions = {}
+
+    locale = getattr(user, "locale", "zh-TW") or "zh-TW"
+    tr = PREBOOKING_REMINDER_TRANSLATIONS.get(locale, PREBOOKING_REMINDER_TRANSLATIONS["zh-TW"])
+    db_locale = _LOCALE_TO_DB.get(locale, "zh-TW")
+
+    pickup_str = _format_datetime_12h(pickup_time) if pickup_time else tr["anytime"]
+    greeting = tr["greeting"].replace("{first_name}", user.first_name)
+
+    my_orders_link_html = (
+        f'<a href="https://schristy2020.github.io/homefinds/#/orders" '
+        f'style="color:#c9a96e;text-decoration:underline;">{tr["my_orders_link_text"]}</a>'
+    )
+
+    body_line1 = tr["body_line1"].replace("{pickup_time}", pickup_str)
+    body_line2 = tr["body_line2"]
+    body_line3 = tr["body_line3"].replace("{link}", my_orders_link_html)
+    body_warning = tr["body_warning"]
+
+    body_html = (
+        f'<p style="font-size:13px;color:#444;margin:0 0 8px;line-height:1.8;">{body_line1}</p>'
+        f'<p style="font-size:13px;color:#444;margin:0 0 8px;line-height:1.8;">{body_line2}</p>'
+        f'<p style="font-size:13px;color:#444;margin:0 0 16px;line-height:1.8;">{body_line3}</p>'
+        f'<p style="font-size:13px;color:#e53e3e;margin:0 0 16px;line-height:1.8;">{body_warning}</p>'
+    )
+
+    # ── Build product rows with position column ───────────────────────────────
+    products_data = []
+    for pid in product_ids:
+        product = db.query(Product).filter(Product.id == pid).first()
+        if not product:
+            continue
+        translation = db.query(ProductTranslation).filter(
+            ProductTranslation.product_id == pid,
+            ProductTranslation.locale == db_locale,
+        ).first()
+        if not translation and db_locale != "zh-TW":
+            translation = db.query(ProductTranslation).filter(
+                ProductTranslation.product_id == pid,
+                ProductTranslation.locale == "zh-TW",
+            ).first()
+        image = (
+            db.query(ProductImage)
+            .filter(ProductImage.product_id == pid)
+            .order_by(ProductImage.sort_order)
+            .first()
+        )
+        name = translation.name if translation else (product.code if product else str(pid))
+        img_url = image.url if image else ""
+        price = float(product.price)
+        original_price = float(product.original_price) if product.original_price else None
+        position = product_positions.get(pid)
+        products_data.append({
+            "pid": pid,
+            "name": name,
+            "img_url": img_url,
+            "price": price,
+            "original_price": original_price,
+            "position": position,
+        })
+
+    item_rows = ""
+    for item in products_data:
+        original_td = (
+            f'<span style="text-decoration:line-through;color:#aaa;margin-right:4px;">'
+            f'${_format_price(item["original_price"])}</span>'
+            if item["original_price"] is not None else ""
+        )
+        thumb_cell = (
+            f'<img src="{item["img_url"]}" width="40" height="40" '
+            f'style="border-radius:4px;object-fit:cover;display:block;" />'
+            if item["img_url"]
+            else '<div style="width:40px;height:40px;background:#eee;border-radius:4px;"></div>'
+        )
+        pos = item["position"]
+        pos_label = _position_label(pos, tr) if pos else "—"
+        pos_color = "#c9a96e" if pos == 1 else ("#444" if pos else "#aaa")
+        item_rows += f"""
+        <tr>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;">{thumb_cell}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;">{item["name"]}</td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:600;text-align:right;white-space:nowrap;">
+            {original_td}${_format_price(item["price"])}
+          </td>
+          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:700;color:{pos_color};text-align:center;white-space:nowrap;">
+            {pos_label}
+          </td>
+        </tr>"""
+
+    orders_link = (
+        f'<a href="https://schristy2020.github.io/homefinds/#/orders" '
+        f'style="color:#c9a96e;text-decoration:underline;">{tr["orders_link_text"]}</a>'
+    )
+
+    order_number_html = ""
+    if order_number:
+        order_number_html = f"""
+              <p style="font-size:14px;font-weight:700;margin:0 0 16px;">
+                {tr["order_number_label"]}
+                <span style="font-family:monospace;background:#f4f4f4;border-radius:4px;padding:3px 10px;letter-spacing:0.05em;margin-left:4px;">
+                  {order_number}
+                </span>
+              </p>"""
+
+    product_table_html = ""
+    if item_rows:
+        total_price = sum(item["price"] for item in products_data)
+        total_original = sum(
+            item["original_price"] if item["original_price"] is not None else item["price"]
+            for item in products_data
+        )
+        total_label = tr.get("total", "{count} item(s), Total:").replace("{count}", str(len(products_data)))
+        total_original_html = (
+            f'<span style="text-decoration:line-through;color:#aaa;margin-right:6px;">'
+            f'${_format_price(total_original)}</span>'
+            if total_original > total_price else ""
+        )
+        total_row = f"""
+                <tr>
+                  <td colspan="3" style="padding:10px 6px 4px;font-size:13px;font-weight:700;border-top:1.5px solid #e0e0e0;">
+                    {total_label}
+                  </td>
+                  <td style="padding:10px 6px 4px;font-size:13px;font-weight:700;text-align:right;border-top:1.5px solid #e0e0e0;white-space:nowrap;">
+                    {total_original_html}${_format_price(total_price)}
+                  </td>
+                </tr>"""
+        product_table_html = f"""
+              <table width="100%" cellpadding="0" cellspacing="0"
+                     style="border-collapse:collapse;margin-bottom:16px;font-size:13px;">
+                <thead>
+                  <tr style="border-bottom:1.5px solid #e0e0e0;">
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;width:50px;"></th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">{tr["col_name"]}</th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:right;">{tr["col_price"]}</th>
+                    <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:center;">{tr["col_position"]}</th>
+                  </tr>
+                </thead>
+                <tbody>{item_rows}
+                  {total_row}
+                </tbody>
+              </table>"""
+
+    guide_tr = EMAIL_TRANSLATIONS.get(locale, EMAIL_TRANSLATIONS["zh-TW"])
+    guide_html = _build_guide_section_html(guide_tr)
+
+    html = f"""<!DOCTYPE html>
+<html lang="{tr["html_lang"]}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{tr["header"]}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Noto Sans TC',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);max-width:600px;">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding:32px 24px 16px;border-bottom:1px solid #f0ebe3;">
+              <div style="font-size:36px;margin-bottom:8px;">{tr["emoji"]}</div>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;">
+                <a href="https://schristy2020.github.io/homefinds/" style="color:#c9a96e;text-decoration:underline;">Christy's HomeFinds</a>
+                — {tr["header"]}
+              </h1>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:24px 28px;">
+              <p style="font-size:15px;font-weight:700;margin:0 0 12px;">{greeting}</p>
+              {body_html}
+              {order_number_html}
+              {product_table_html}
+              {guide_html}
+              <p style="font-size:13px;color:#444;margin:16px 0 0;">{orders_link}</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 28px 28px;border-top:1px solid #f0f0f0;font-size:12px;color:#888;text-align:center;">
+              {tr["footer"]}
+              <a href="mailto:qsa8647332@gmail.com" style="color:#c9a96e;text-decoration:none;">qsa8647332@gmail.com</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
     subject = tr["subject"]
     _send_simple_email(user, subject, html, resend_api_key, from_email)
 

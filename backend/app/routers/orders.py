@@ -17,6 +17,7 @@ from app.services.email_service import (
     send_order_auto_cancelled_notification,
     send_order_status_reverted_notification,
     send_pickup_reminder_notification,
+    send_prebooking_reminder_notification,
 )
 from app.services.pickup_reminder_service import send_due_pickup_reminders
 
@@ -47,6 +48,7 @@ def _build_out(order, db):
         )
         item_out = OrderItemOut.model_validate(item)
         item_out.waiting_position = position
+        item_out.current_position = item.current_position
 
         product = db.query(Product).filter(Product.id == item.product_id).first()
         if product:
@@ -114,7 +116,17 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
     db.flush()
 
     for item in body.items:
-        db.add(OrderItem(order_id=order.id, product_id=item.product_id, price=item.price))
+        existing_count = (
+            db.query(OrderItem)
+            .join(Order, OrderItem.order_id == Order.id)
+            .filter(
+                OrderItem.product_id == item.product_id,
+                OrderItem.status != "cancelled",
+                Order.order_status != "cancelled",
+            )
+            .count()
+        )
+        db.add(OrderItem(order_id=order.id, product_id=item.product_id, price=item.price, current_position=existing_count + 1))
         position = db.query(WaitingList).filter(
             WaitingList.product_id == item.product_id,
             WaitingList.is_cancelled == 0,
@@ -498,6 +510,67 @@ def send_pickup_reminder(order_id: int, admin_id: int, db: Session = Depends(get
     db.commit()
 
     return {"ok": True, "message": "Pickup reminder sent"}
+
+@router.post("/{order_id}/send-prebooking-reminder")
+def send_prebooking_reminder(order_id: int, admin_id: int, db: Session = Depends(get_db)):
+    admin = db.query(User).filter(User.id == admin_id, User.is_admin == 1).first()
+    if not admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if not order.pickup_time:
+        raise HTTPException(status_code=400, detail="Order has no pickup time")
+    if order.order_status not in ("pending_payment", "paid"):
+        raise HTTPException(status_code=400, detail="Only pending_payment/paid orders can send pre-booking reminder")
+
+    user = db.query(User).filter(User.id == order.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    active_items = db.query(OrderItem).filter(
+        OrderItem.order_id == order.id,
+        OrderItem.status.in_(("reserved", "paid")),
+    ).all()
+    product_ids = [item.product_id for item in active_items]
+
+    if not product_ids:
+        raise HTTPException(status_code=400, detail="No active items in this order")
+
+    # 計算每個商品的目前順位
+    product_positions = {}
+    for item in active_items:
+        if item.current_position is not None:
+            product_positions[item.product_id] = item.current_position
+        else:
+            # 舊資料沒有 current_position，動態計算
+            pos = (
+                db.query(OrderItem)
+                .join(Order, OrderItem.order_id == Order.id)
+                .filter(
+                    OrderItem.product_id == item.product_id,
+                    OrderItem.status != "cancelled",
+                    Order.created_at <= order.created_at,
+                )
+                .count()
+            )
+            product_positions[item.product_id] = pos
+
+    send_prebooking_reminder_notification(
+        user=user,
+        order_number=order.order_number,
+        pickup_time=order.pickup_time,
+        product_ids=product_ids,
+        db=db,
+        product_positions=product_positions,
+    )
+
+    order.pre_booking_reminder_sent_at = datetime.now()
+    db.commit()
+
+    return {"ok": True, "message": "Pre-booking reminder sent"}
+
 
 @router.post("/send-pickup-reminders")
 def send_pickup_reminders_now(db: Session = Depends(get_db)):

@@ -82,13 +82,14 @@
               <th v-if="isAdmin" class="sortable" @click="toggleSort('updated')">
                 {{ i18n.t('orders.updatedAt') }}<SortIcon col="updated" :active="sortColumn" :dir="sortDirection" />
               </th>
+              <th v-if="isAdmin">預訂取貨通知</th>
               <th v-if="isAdmin">取貨通知</th>
               <th v-if="isAdmin">補發訂單確認</th>
             </tr>
           </thead>
           <tbody v-if="filteredOrders.length === 0">
             <tr>
-              <td :colspan="isAdmin ? 14 : 6" class="td-empty">{{ i18n.t('orders.noOrdersTable') }}</td>
+              <td :colspan="isAdmin ? 15 : 6" class="td-empty">{{ i18n.t('orders.noOrdersTable') }}</td>
             </tr>
           </tbody>
           <tbody v-for="order in paginatedOrders" :key="order.id">
@@ -174,6 +175,11 @@
               <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
               <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
               <td v-if="isAdmin" class="td-resend" @click.stop>
+                <button class="btn-edit-icon" @click.stop="sendPrebookingReminder(order)" title="預訂取貨通知">
+                  <Mail :size="14" />
+                </button>
+              </td>
+              <td v-if="isAdmin" class="td-resend" @click.stop>
                 <button class="btn-edit-icon" @click.stop="sendPickupReminder(order)" title="取貨通知">
                   <Mail :size="14" />
                 </button>
@@ -187,7 +193,7 @@
 
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
-              <td :colspan="isAdmin ? 14 : 6">
+              <td :colspan="isAdmin ? 15 : 6">
                 <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" :orderStatus="order.order_status" @cancel="handleCancel" />
 
                 <!-- Total summary -->
@@ -888,6 +894,15 @@ async function resendOrderConfirmation(order) {
     toast.show('訂單確認信已補發')
   } catch (e) {
     toast.show(`補發失敗: ${formatApiErrorDetail(e)}`)
+  }
+}
+
+async function sendPrebookingReminder(order) {
+  try {
+    await api.post(`/api/orders/${order.id}/send-prebooking-reminder?admin_id=${userStore.currentUser.id}`)
+    toast.show('預訂取貨通知信已寄出')
+  } catch (e) {
+    toast.show(`寄送失敗: ${formatApiErrorDetail(e)}`)
   }
 }
 
