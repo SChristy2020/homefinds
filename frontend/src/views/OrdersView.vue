@@ -126,7 +126,7 @@
                   {{ statusLabel(order) }}
                 </template>
               </td>
-              <td v-if="isAdmin" class="td-admin-notes" @click.stop>
+              <td v-if="isAdmin" class="td-admin-notes">
                 <template v-if="editingNotesOrderId !== order.id">
                   <span class="notes-display">
                     <span class="notes-text">{{ order.admin_notes || '—' }}</span>
@@ -136,8 +136,8 @@
                   </span>
                 </template>
                 <template v-else>
-                  <div class="notes-edit-wrap">
-                    <textarea v-model="editingNotesValue" class="notes-textarea" rows="2" @click.stop />
+                  <div class="notes-edit-wrap" @click.stop>
+                    <textarea v-model="editingNotesValue" class="notes-textarea" rows="2" />
                     <div class="pickup-edit-actions">
                       <button class="btn-save-pickup" @click.stop="saveAdminNotes(order)">{{ i18n.t('orders.savePickup') }}</button>
                       <button class="btn-cancel-pickup" @click.stop="cancelEditNotes">{{ i18n.t('orders.cancelPickupEdit') }}</button>
