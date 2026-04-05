@@ -82,14 +82,13 @@
               <th v-if="isAdmin" class="sortable" @click="toggleSort('updated')">
                 {{ i18n.t('orders.updatedAt') }}<SortIcon col="updated" :active="sortColumn" :dir="sortDirection" />
               </th>
-              <th v-if="isAdmin">預訂取貨通知</th>
-              <th v-if="isAdmin">取貨通知</th>
+              <th v-if="isAdmin">(預訂)取貨通知</th>
               <th v-if="isAdmin">補發訂單確認</th>
             </tr>
           </thead>
           <tbody v-if="filteredOrders.length === 0">
             <tr>
-              <td :colspan="isAdmin ? 15 : 6" class="td-empty">{{ i18n.t('orders.noOrdersTable') }}</td>
+              <td :colspan="isAdmin ? 14 : 6" class="td-empty">{{ i18n.t('orders.noOrdersTable') }}</td>
             </tr>
           </tbody>
           <tbody v-for="order in paginatedOrders" :key="order.id">
@@ -175,12 +174,20 @@
               <td class="td-created">{{ formatDateTime(order.created_at) }}</td>
               <td v-if="isAdmin" class="td-created">{{ formatDateTime(order.updated_at) }}</td>
               <td v-if="isAdmin" class="td-resend" @click.stop>
-                <button class="btn-edit-icon" @click.stop="sendPrebookingReminder(order)" title="預訂取貨通知">
+                <button
+                  v-if="order.order_status === 'pending_payment'"
+                  class="btn-edit-icon btn-mail-prebooking"
+                  @click.stop="sendPrebookingReminder(order)"
+                  title="預訂取貨通知"
+                >
                   <Mail :size="14" />
                 </button>
-              </td>
-              <td v-if="isAdmin" class="td-resend" @click.stop>
-                <button class="btn-edit-icon" @click.stop="sendPickupReminder(order)" title="取貨通知">
+                <button
+                  v-else-if="order.order_status === 'paid'"
+                  class="btn-edit-icon"
+                  @click.stop="sendPickupReminder(order)"
+                  title="取貨通知"
+                >
                   <Mail :size="14" />
                 </button>
               </td>
@@ -193,7 +200,7 @@
 
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
-              <td :colspan="isAdmin ? 15 : 6">
+              <td :colspan="isAdmin ? 14 : 6">
                 <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" :orderStatus="order.order_status" @cancel="handleCancel" />
 
                 <!-- Total summary -->
@@ -1355,6 +1362,7 @@ const calCells = computed(() => {
   transition: opacity 0.15s;
 }
 .btn-edit-icon:hover { opacity: 0.7; }
+.btn-mail-prebooking { color: #2563eb; }
 
 .status-display {
   display: inline-flex; align-items: center; white-space: nowrap;
