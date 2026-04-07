@@ -182,8 +182,7 @@
             <div
               v-for="(img, idx) in roomImages"
               :key="img.id || img.tempId"
-              class="image-item"
-              :class="{ 'drag-over': roomDragOver === idx }"
+              class="image-wrapper"
               draggable="true"
               :data-idx="idx"
               data-drag-type="room"
@@ -195,13 +194,20 @@
               @touchmove.prevent="onTouchMove"
               @touchend="onTouchEnd"
             >
-              <img v-if="img.url" :src="img.url" class="image-thumb" @error="img.loadErr = true" />
-              <div v-else class="image-placeholder">{{ idx + 1 }}</div>
-              <button class="image-remove" @click="removeRoomImage(idx)">×</button>
+              <div class="image-item" :class="{ 'drag-over': roomDragOver === idx }">
+                <img v-if="img.name" :src="`${IMAGE_BASE_URL}${img.name}`" class="image-thumb" />
+                <div v-else class="image-placeholder">{{ idx + 1 }}</div>
+                <button class="image-remove" @click.stop="removeRoomImage(idx)">×</button>
+              </div>
+              <input
+                class="image-name-input"
+                v-model="img.name"
+                @click.stop
+                @dragstart.stop
+                @mousedown.stop
+              />
             </div>
-            <button class="image-add" @click="addRoomImage" :disabled="roomUploading">
-            {{ roomUploading ? '上傳中...' : '+' }}
-          </button>
+            <button class="image-add" @click="addRoomImage">+</button>
           </div>
           <p class="hint">可拖移圖片改變順序</p>
         </div>
@@ -394,8 +400,6 @@
       </template>
     </BaseModal>
 
-
-    <input ref="roomFileInput" type="file" accept="image/*" multiple style="display:none" @change="onRoomFileChange" />
 
     <!-- ===== Marketing Email Modal ===== -->
     <BaseModal v-model="showMarketingModal" size="xl" no-backdrop-close>
@@ -930,8 +934,6 @@ const roomId = ref(null)
 const roomDragOver = ref(null)
 const roomImages = ref([])
 const deletedRoomImageIds = ref([])
-const roomUploading = ref(false)
-const roomFileInput = ref(null)
 const roomForm = reactive({
   available_from: '',
   available_to: '',
@@ -963,7 +965,10 @@ async function loadRoom() {
         roomTranslations[locale].description         = t?.description || ''
         roomTranslations[locale].booking_description = t?.booking_description || ''
       }
-      roomImages.value = room.images ? room.images.map(img => ({ ...img })) : []
+      roomImages.value = room.images ? room.images.map(img => ({
+        ...img,
+        name: img.url ? img.url.replace(IMAGE_BASE_URL, '') : '',
+      })) : []
     }
   } catch (e) {
     // API 錯誤或無資料時仍顯示表單
@@ -973,25 +978,7 @@ async function loadRoom() {
 }
 
 function addRoomImage() {
-  roomFileInput.value.click()
-}
-
-async function onRoomFileChange(e) {
-  const files = Array.from(e.target.files)
-  if (!files.length) return
-  roomUploading.value = true
-  try {
-    await Promise.all(files.map(async (file) => {
-      const squared = await padToSquare(file)
-      const { url } = await api.upload(squared)
-      roomImages.value.push({ tempId: Date.now() + Math.random(), url, isNew: true })
-    }))
-  } catch {
-    toast.show('圖片上傳失敗')
-  } finally {
-    roomUploading.value = false
-    e.target.value = ''
-  }
+  roomImages.value.push({ tempId: Date.now() + Math.random(), name: '', isNew: true })
 }
 
 function removeRoomImage(idx) {
@@ -1037,13 +1024,20 @@ async function saveRoom() {
     for (let i = 0; i < roomImages.value.length; i++) {
       const img = roomImages.value[i]
       if (img.isNew) {
-        await api.post(`/api/room/${roomId.value}/images?url=${encodeURIComponent(img.url)}&sort_order=${i}`, {})
+        if (!img.name) continue
+        const url = `${IMAGE_BASE_URL}${img.name}`
+        await api.post(`/api/room/${roomId.value}/images?url=${encodeURIComponent(url)}&sort_order=${i}`, {})
         delete img.isNew
       }
     }
-    const reorderData = roomImages.value
-      .filter(img => img.id)
-      .map((img, i) => ({ id: img.id, sort_order: i }))
+    const existingImages = roomImages.value.filter(img => img.id)
+    for (const img of existingImages) {
+      if (img.name !== undefined) {
+        const url = `${IMAGE_BASE_URL}${img.name}`
+        await api.patch(`/api/room/${roomId.value}/images/${img.id}?url=${encodeURIComponent(url)}`, {})
+      }
+    }
+    const reorderData = existingImages.map((img, i) => ({ id: img.id, sort_order: i }))
     if (reorderData.length > 0) {
       await api.put(`/api/room/${roomId.value}/images/reorder`, reorderData)
     }

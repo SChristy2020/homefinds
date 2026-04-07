@@ -83,6 +83,16 @@ def add_room_image(room_id: int, url: str, sort_order: int = 0, db: Session = De
     db.refresh(image)
     return image
 
+@router.patch("/{room_id}/images/{image_id}", response_model=RoomImageOut)
+def update_room_image(room_id: int, image_id: int, url: str, db: Session = Depends(get_db)):
+    image = db.query(RoomImage).filter(RoomImage.id == image_id, RoomImage.room_id == room_id).first()
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found")
+    image.url = url
+    db.commit()
+    db.refresh(image)
+    return image
+
 @router.delete("/{room_id}/images/{image_id}", status_code=204)
 def delete_room_image(room_id: int, image_id: int, db: Session = Depends(get_db)):
     image = db.query(RoomImage).filter(RoomImage.id == image_id, RoomImage.room_id == room_id).first()
