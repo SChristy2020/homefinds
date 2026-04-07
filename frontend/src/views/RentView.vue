@@ -190,7 +190,11 @@ onMounted(async () => {
     if (rooms.length) {
       const r = rooms[0]
       room.value = r
-      roomImages.value = (r.images || []).sort((a, b) => a.sort_order - b.sort_order)
+      const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || ''
+      roomImages.value = (r.images || []).sort((a, b) => a.sort_order - b.sort_order).map(img => ({
+        ...img,
+        url: img.url && img.url.startsWith('http') ? img.url : `${IMAGE_BASE_URL}${img.url}`,
+      }))
       const map = {}
       for (const t of (r.translations || [])) {
         map[t.locale] = { description: t.description || '', booking_description: t.booking_description || '' }
