@@ -156,6 +156,8 @@ export default {
     noPickup: 'Pickup Unavailable',
     allSoldNote: '*All items sold out. Payment disabled.',
     purchaseSuccess: '🎉 Purchased!',
+    reorderBtn: 'Add to Cart Again',
+    reorderToast: 'Items added back to cart',
   },
   rent: {
     title: '🌟 UNC/Duke Premium Sublease 🌟',

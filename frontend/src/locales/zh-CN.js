@@ -156,6 +156,8 @@ export default {
     noPickup: '无法取货',
     allSoldNote: '*商品皆售出，无法付款',
     purchaseSuccess: '🎉 抢购成功',
+    reorderBtn: '重新加入购物车',
+    reorderToast: '已将商品重新加入购物车',
   },
   rent: {
     title: '🌟 北卡 UNC/Duke 优质短租 🌟',

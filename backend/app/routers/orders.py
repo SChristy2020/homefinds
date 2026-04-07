@@ -86,6 +86,7 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
                 Order.user_id == user.id,
                 OrderItem.product_id == item.product_id,
                 OrderItem.status != "cancelled",
+                Order.order_status != "cancelled",
             )
             .first()
         )
@@ -191,11 +192,48 @@ def get_order(order_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
     return _build_out(order, db)
 
+def _restore_items_from_cancelled(order, db):
+    """當訂單從 cancelled 還原時，把所有 cancelled items 恢復為 reserved，並將 user 加回 waiting list。"""
+    cancelled_items = db.query(OrderItem).filter(
+        OrderItem.order_id == order.id,
+        OrderItem.status == "cancelled",
+    ).all()
+
+    affected_product_ids = set()
+    for item in cancelled_items:
+        item.status = "reserved"
+        item.cancelled_at = None
+
+        # 若已有 waiting list 記錄則復原，否則新增
+        existing_wl = db.query(WaitingList).filter(
+            WaitingList.product_id == item.product_id,
+            WaitingList.user_id == order.user_id,
+        ).first()
+        if existing_wl:
+            existing_wl.is_cancelled = 0
+        else:
+            count = db.query(WaitingList).filter(
+                WaitingList.product_id == item.product_id,
+                WaitingList.is_cancelled == 0,
+            ).count()
+            db.add(WaitingList(product_id=item.product_id, user_id=order.user_id, position=count + 1))
+
+        affected_product_ids.add(item.product_id)
+
+    for product_id in affected_product_ids:
+        _refresh_summary(product_id, db)
+
+
 @router.put("/{order_id}/paid", response_model=OrderOut)
 def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+
+    # 若從 cancelled 還原，先把 items 和 waiting list 恢復
+    if order.order_status == "cancelled":
+        _restore_items_from_cancelled(order, db)
+
     order.order_status = "paid"
     order.paid_at = datetime.now()
 
@@ -400,6 +438,8 @@ def mark_order_picked_up(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+    if order.order_status == "cancelled":
+        _restore_items_from_cancelled(order, db)
     order.order_status = "picked_up"
     db.commit()
     db.refresh(order)
@@ -410,6 +450,8 @@ def mark_order_unpaid(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+    if order.order_status == "cancelled":
+        _restore_items_from_cancelled(order, db)
     order.order_status = "pending_payment"
     order.paid_at = None
     db.commit()
@@ -423,6 +465,28 @@ def mark_order_cancelled(order_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
     order.order_status = "cancelled"
     order.paid_at = None
+
+    # 取消所有尚未取消的 items，並從等待名單中移除
+    active_items = db.query(OrderItem).filter(
+        OrderItem.order_id == order_id,
+        OrderItem.status != "cancelled",
+    ).all()
+    affected_product_ids = set()
+    for item in active_items:
+        item.status = "cancelled"
+        item.cancelled_at = datetime.now()
+        wl_entry = db.query(WaitingList).filter(
+            WaitingList.product_id == item.product_id,
+            WaitingList.user_id == order.user_id,
+            WaitingList.is_cancelled == 0,
+        ).first()
+        if wl_entry:
+            wl_entry.is_cancelled = 1
+            affected_product_ids.add(item.product_id)
+
+    for product_id in affected_product_ids:
+        _refresh_summary(product_id, db)
+
     db.commit()
     db.refresh(order)
     return _build_out(order, db)

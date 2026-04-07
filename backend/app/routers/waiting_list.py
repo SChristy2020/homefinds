@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.waiting_list import WaitingList
+from app.models.order import Order, OrderItem
 from app.models.product import Product
 from app.schemas.waiting_list import WaitingListCreate, WaitingListOut
 
@@ -41,6 +42,24 @@ def _refresh_summary(product_id: int, db: Session):
     summary = []
     for e in entries:
         user = db.query(User).filter(User.id == e.user_id).first()
+
+        # 若 is_cancelled=0，再確認該 user 是否仍有有效（非取消）的訂單，
+        # 若無，自動修正為 is_cancelled=1 以修復舊資料不一致的問題
+        if not e.is_cancelled:
+            has_active_order = (
+                db.query(OrderItem)
+                .join(Order, OrderItem.order_id == Order.id)
+                .filter(
+                    Order.user_id == e.user_id,
+                    OrderItem.product_id == product_id,
+                    OrderItem.status != "cancelled",
+                    Order.order_status != "cancelled",
+                )
+                .first() is not None
+            )
+            if not has_active_order:
+                e.is_cancelled = 1
+
         summary.append({
             "user_id":      e.user_id,
             "last_name":    user.last_name if user else "",

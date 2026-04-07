@@ -202,7 +202,16 @@
             <!-- Expanded items row -->
             <tr v-if="expandedOrderId === order.id" class="expand-row">
               <td :colspan="isAdmin ? 14 : 6">
-                <OrderItemList :items="order.items.filter(i => i.status !== 'cancelled')" :orderStatus="order.order_status" @cancel="handleCancel" />
+                <OrderItemList
+                  :items="order.order_status === 'cancelled' ? order.items : order.items.filter(i => i.status !== 'cancelled')"
+                  :orderStatus="order.order_status"
+                  @cancel="handleCancel"
+                />
+
+                <!-- Reorder button for cancelled orders -->
+                <div v-if="order.order_status === 'cancelled' && order.items.length > 0" class="reorder-wrap">
+                  <button class="btn-reorder" @click.stop="reorderCancelledItems(order)">{{ i18n.t('orders.reorderBtn') }}</button>
+                </div>
 
                 <!-- Total summary -->
                 <div class="order-summary">
@@ -616,10 +625,12 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ArrowLeft, Pencil, ChevronUp, ChevronDown, ChevronsUpDown, Mail } from 'lucide-vue-next'
 import { useOrdersStore } from '@/stores/orders'
 import { useReservationsStore } from '@/stores/reservations'
 import { useUserStore } from '@/stores/user'
+import { useCartStore } from '@/stores/cart'
 import { useToastStore } from '@/stores/toast'
 import { useI18nStore } from '@/stores/i18n'
 import OrderItemList from '@/components/orders/OrderItemList.vue'
@@ -627,9 +638,11 @@ import ShoppingGuideContent from '@/components/shared/ShoppingGuideContent.vue'
 import PickupDatePicker from '@/components/shared/PickupDatePicker.vue'
 import { api } from '@/utils/api'
 
+const router = useRouter()
 const ordersStore = useOrdersStore()
 const reservationsStore = useReservationsStore()
 const userStore = useUserStore()
+const cart = useCartStore()
 const toast = useToastStore()
 const i18n = useI18nStore()
 
@@ -896,6 +909,22 @@ async function handleCancel(itemId) {
   toast.show(i18n.t('orders.cancelToast'))
 }
 
+function reorderCancelledItems(order) {
+  for (const item of order.items) {
+    cart.add({
+      id: item.product_id,
+      name: item.product_name,
+      images: item.image_url ? [{ url: item.image_url }] : [],
+      price: item.price,
+      originalPrice: item.original_price || null,
+      pickupTime: item.available_time || null,
+    })
+  }
+  toast.show(i18n.t('orders.reorderToast'))
+  cart.showModal = true
+  router.push({ name: 'shop' })
+}
+
 async function resendOrderConfirmation(order) {
   try {
     await api.post(`/api/orders/${order.id}/resend-confirmation?admin_id=${userStore.currentUser.id}`)
@@ -1090,23 +1119,22 @@ function statusClass(order) {
 }
 
 function activeItemCount(order) {
+  if (order.order_status === 'cancelled') return order.items.length
   return order.items.filter(i => i.status !== 'cancelled' && i.status !== 'sold').length
 }
 
 function orderTotal(order) {
-  return order.items
-    .filter(i => i.status !== 'cancelled' && i.status !== 'sold')
-    .reduce((s, i) => s + i.price, 0)
-    .toFixed(2)
-    .replace(/\.00$/, '')
+  const items = order.order_status === 'cancelled'
+    ? order.items
+    : order.items.filter(i => i.status !== 'cancelled' && i.status !== 'sold')
+  return items.reduce((s, i) => s + i.price, 0).toFixed(2).replace(/\.00$/, '')
 }
 
 function orderOriginalTotal(order) {
-  return order.items
-    .filter(i => i.status !== 'cancelled' && i.status !== 'sold')
-    .reduce((s, i) => s + (i.original_price || i.price), 0)
-    .toFixed(2)
-    .replace(/\.00$/, '')
+  const items = order.order_status === 'cancelled'
+    ? order.items
+    : order.items.filter(i => i.status !== 'cancelled' && i.status !== 'sold')
+  return items.reduce((s, i) => s + (i.original_price || i.price), 0).toFixed(2).replace(/\.00$/, '')
 }
 
 function hasDiscount(order) {
@@ -1410,6 +1438,16 @@ const calCells = computed(() => {
   border-top: 1.5px solid #858585;
   border-bottom: 1.5px solid #858585;
 }
+
+/* ── Reorder ─────────────────────────────────────────────────────────────── */
+.reorder-wrap { padding: 10px 16px; }
+.btn-reorder {
+  font-size: 0.82rem; font-weight: 600;
+  padding: 6px 14px; border-radius: 6px; cursor: pointer;
+  border: 1.5px solid var(--accent); color: var(--accent); background: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-reorder:hover { background: var(--accent); color: #fff; }
 
 /* ── Order summary ───────────────────────────────────────────────────────── */
 .order-summary {
