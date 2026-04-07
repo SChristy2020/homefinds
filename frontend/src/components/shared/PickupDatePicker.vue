@@ -149,6 +149,7 @@ watch([() => props.bookedSlots, selectedDate, hourValue], () => {
   if (next) {
     hourValue.value = next.hour
     minuteValue.value = next.minute
+    emit('update:modelValue', displayValue.value)
   }
 })
 
