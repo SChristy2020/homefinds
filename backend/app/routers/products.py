@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -23,6 +24,9 @@ class SortItem(PydanticModel):
     sort_order: int
 
 router = APIRouter()
+
+def _utc_now_naive() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 def _build_out(product, db):
     translations = db.query(ProductTranslation).filter(ProductTranslation.product_id == product.id).all()
@@ -170,8 +174,7 @@ def update_product(product_id: int, body: ProductUpdate, db: Session = Depends(g
 def _handle_product_sold(product_id: int, db: Session) -> tuple[set[int], set[int]]:
     """Admin 直接將商品設為 sold 時，連鎖更新所有未付款訂單中的該商品項目。
     回傳 (affected_order_ids, cancelled_order_ids)。"""
-    from datetime import datetime
-    sold_at = datetime.now()
+    sold_at = _utc_now_naive()
 
     # 找出所有「未付款」訂單中狀態為 reserved 的該商品項目
     pending_items = (

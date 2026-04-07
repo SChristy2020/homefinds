@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import date, datetime
 from typing import Optional
-from app.schemas import UTCDatetime
+from app.schemas import UTCNaiveDatetime
 
 class ReservationCreate(BaseModel):
     user_id:                 int
@@ -40,8 +40,8 @@ class ReservationOut(BaseModel):
     guests_pets_description: Optional[str]
     special_requests:        Optional[str]
     admin_note:              Optional[str]
-    created_at:              UTCDatetime
-    updated_at:              UTCDatetime
+    created_at:              UTCNaiveDatetime
+    updated_at:              UTCNaiveDatetime
 
     class Config:
         from_attributes = True

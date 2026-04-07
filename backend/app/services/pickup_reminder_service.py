@@ -8,6 +8,9 @@ from app.services.email_service import send_pickup_reminder_notification
 # pickup_time 在 DB 以 Eastern 時間（naive）儲存；EDT = UTC-4
 _EASTERN = timezone(timedelta(hours=-4))
 
+def _utc_now_naive() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
 
 def send_due_pickup_reminders(db: Session, now: datetime | None = None) -> dict:
     now = now or datetime.now(timezone.utc).astimezone(_EASTERN).replace(tzinfo=None)
@@ -69,7 +72,7 @@ def send_due_pickup_reminders(db: Session, now: datetime | None = None) -> dict:
                 product_ids=product_ids,
                 db=db,
             )
-            order.pickup_reminder_sent_at = datetime.now()
+            order.pickup_reminder_sent_at = _utc_now_naive()
             db.commit()
             sent += 1
         except Exception as e:

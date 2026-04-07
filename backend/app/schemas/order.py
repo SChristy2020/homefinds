@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 from enum import Enum
-from app.schemas import UTCDatetime
+from app.schemas import UTCNaiveDatetime, EasternNaiveDatetime
 
 class ItemStatus(str, Enum):
     reserved  = "reserved"
@@ -19,15 +19,15 @@ class OrderItemOut(BaseModel):
     product_id:       int
     price:            float
     status:           str
-    cancelled_at:     Optional[UTCDatetime]
-    sold_at:          Optional[UTCDatetime]
-    updated_at:       UTCDatetime
+    cancelled_at:     Optional[UTCNaiveDatetime]
+    sold_at:          Optional[UTCNaiveDatetime]
+    updated_at:       UTCNaiveDatetime
     waiting_position: Optional[int] = None
     current_position: Optional[int] = None
     product_name:     Optional[str] = None
     original_price:   Optional[float] = None
     image_url:        Optional[str] = None
-    available_time:   Optional[UTCDatetime] = None
+    available_time:   Optional[EasternNaiveDatetime] = None
 
     class Config:
         from_attributes = True
@@ -52,12 +52,12 @@ class OrderOut(BaseModel):
     order_number: Optional[str]
     user_id:      int
     order_status: str
-    paid_at:     Optional[UTCDatetime]
-    pickup_time: Optional[UTCDatetime]
-    pickup_reminder_sent_at: Optional[UTCDatetime] = None
-    pre_booking_reminder_sent_at: Optional[UTCDatetime] = None
-    created_at:  UTCDatetime
-    updated_at:  UTCDatetime
+    paid_at:     Optional[UTCNaiveDatetime]
+    pickup_time: Optional[EasternNaiveDatetime]
+    pickup_reminder_sent_at: Optional[UTCNaiveDatetime] = None
+    pre_booking_reminder_sent_at: Optional[UTCNaiveDatetime] = None
+    created_at:  UTCNaiveDatetime
+    updated_at:  UTCNaiveDatetime
     items:       list[OrderItemOut] = []
     buyer_first_name:        Optional[str] = None
     buyer_last_name:         Optional[str] = None

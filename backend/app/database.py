@@ -12,7 +12,11 @@ DATABASE_URL = (
     f"?charset=utf8mb4"
 )
 
-engine = create_engine(DATABASE_URL, echo=False)
+engine = create_engine(
+    DATABASE_URL,
+    echo=False,
+    connect_args={"init_command": "SET time_zone = '+00:00'"},
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class Base(DeclarativeBase):

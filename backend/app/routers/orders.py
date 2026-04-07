@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import threading
 from app.database import get_db, SessionLocal
 from app.models.order import Order, OrderItem
@@ -22,6 +22,9 @@ from app.services.email_service import (
 from app.services.pickup_reminder_service import send_due_pickup_reminders
 
 router = APIRouter()
+
+def _utc_now_naive() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 def _build_out(order, db):
     items = db.query(OrderItem).filter(OrderItem.order_id == order.id).all()
@@ -235,9 +238,9 @@ def mark_order_paid(order_id: int, db: Session = Depends(get_db)):
         _restore_items_from_cancelled(order, db)
 
     order.order_status = "paid"
-    order.paid_at = datetime.now()
+    order.paid_at = _utc_now_naive()
 
-    sold_at = datetime.now()
+    sold_at = _utc_now_naive()
 
     # Mark each reserved item in this order as paid and cascade sold status
     paid_items = db.query(OrderItem).filter(
@@ -474,7 +477,7 @@ def mark_order_cancelled(order_id: int, db: Session = Depends(get_db)):
     affected_product_ids = set()
     for item in active_items:
         item.status = "cancelled"
-        item.cancelled_at = datetime.now()
+        item.cancelled_at = _utc_now_naive()
         wl_entry = db.query(WaitingList).filter(
             WaitingList.product_id == item.product_id,
             WaitingList.user_id == order.user_id,
@@ -570,7 +573,7 @@ def send_pickup_reminder(order_id: int, admin_id: int, db: Session = Depends(get
         db=db,
     )
 
-    order.pickup_reminder_sent_at = datetime.now()
+    order.pickup_reminder_sent_at = _utc_now_naive()
     db.commit()
 
     return {"ok": True, "message": "Pickup reminder sent"}
@@ -630,7 +633,7 @@ def send_prebooking_reminder(order_id: int, admin_id: int, db: Session = Depends
         product_positions=product_positions,
     )
 
-    order.pre_booking_reminder_sent_at = datetime.now()
+    order.pre_booking_reminder_sent_at = _utc_now_naive()
     db.commit()
 
     return {"ok": True, "message": "Pre-booking reminder sent"}
@@ -647,7 +650,7 @@ def cancel_order_item(item_id: int, db: Session = Depends(get_db)):
     if not item:
         raise HTTPException(status_code=404, detail="Order item not found")
     item.status = "cancelled"
-    item.cancelled_at = datetime.now()
+    item.cancelled_at = _utc_now_naive()
 
     wl_entry = db.query(WaitingList).filter(
         WaitingList.product_id == item.product_id,

@@ -10,7 +10,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
 from enum import Enum
-from app.schemas import UTCDatetime
+from app.schemas import UTCNaiveDatetime
 
 class ZelleRefund(str, Enum):
     phone = "phone"
@@ -36,7 +36,7 @@ class UserOut(UserCreate):
     has_reservation:         int
     is_admin:                int
     is_subscribed_marketing: int
-    created_at:              UTCDatetime
+    created_at:              UTCNaiveDatetime
 
     class Config:
         from_attributes = True
