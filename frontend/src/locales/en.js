@@ -194,7 +194,7 @@ export default {
     guestsPetsDesc: 'Please provide details on occupants, relationships, and pets.',
     guestsPetsDescPlaceholder: 'Briefly describe your group...',
     specialRequests: 'Special Requests',
-    specialRequestsNote: '*The room will be completely emptied before move-in. Please let us know if you require an air mattress, bedding (pillows/blankets), or a hairdryer.',
+    specialRequestsNote: '*The the furniture in the room will be removed.  However, we’ll provide an air mattress, bedding, and basic essentials (such as a hairdryer, toilet paper, shampoo, and body wash). Feel free to let us know if you have any other needs!',
     specialRequestsPlaceholder: 'Any specific needs or questions?',
     confirmBtn: 'Confirm Booking',
     errorName: 'Only letters and hyphens (-) are allowed',

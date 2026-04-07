@@ -195,7 +195,7 @@ export default {
     guestsPetsDesc: '請簡單描述總入住人數、同住成員身分或寵物',
     guestsPetsDescPlaceholder: '請簡單描述',
     specialRequests: '需求備註',
-    specialRequestsNote: '*​房間​將清空​交付。若有氣墊床、寢具（枕頭、棉被）、吹風機等備品需求，請在此告知',
+    specialRequestsNote: '*房間​將清空家具，但會提供氣墊床、寢具與基本生活備品（如吹風機、衛生紙、洗髮精、沐浴乳等）。如有其他需求也可備註喔！',
     specialRequestsPlaceholder: '請輸入需求',
     confirmBtn: '確認行程',
     errorName: '只允許文字與連字號（-）',

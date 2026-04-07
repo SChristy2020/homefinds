@@ -194,7 +194,7 @@ export default {
     guestsPetsDesc: '请简单描述总入住人数、同住成员身分或宠物',
     guestsPetsDescPlaceholder: '请简单描述',
     specialRequests: '需求备注',
-    specialRequestsNote: '*​房间​将清空​交付。若有气垫床、寝具（枕头、棉被）、电风吹等备品需求，请在此告知',
+    specialRequestsNote: '*房间将清空家具，但会提供气垫床、寝具与基本生活备品（如电吹风、卫生纸、洗发乳、沐浴乳等）。如有其他需求也可备注喔！。',
     specialRequestsPlaceholder: '请输入需求',
     confirmBtn: '确认行程',
     errorName: '只允许文字与连字号（-）',
