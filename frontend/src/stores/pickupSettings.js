@@ -10,6 +10,7 @@ export const PICKUP_DEFAULTS = {
   endHour: 20,
   defaultHour: 15,
   defaultMinute: '00',
+  minuteInterval: 15,
   minutes: ['00', '15', '30', '45'],
   // [{ date: 'YYYY-MM-DD', startHour: 14, endHour: 16 }]
   blockedRanges: [],

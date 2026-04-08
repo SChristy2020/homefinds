@@ -647,12 +647,13 @@
               </div>
 
               <div class="pss-section-label">可選分鐘</div>
-              <div class="pss-minutes-row">
-                <label v-for="m in ['00','15','30','45']" :key="m" class="pss-minute-chip" :class="{ active: psForm.minutes.includes(m) }">
-                  <input type="checkbox" :value="m" v-model="psForm.minutes" class="pss-hidden-check" />
-                  :{{ m }}
+              <div class="pss-interval-row">
+                <label v-for="opt in psIntervalOptions" :key="opt.value" class="pss-interval-chip" :class="{ active: psForm.minuteInterval === opt.value }" @click="setPsInterval(opt.value)">
+                  <input type="radio" :value="opt.value" v-model="psForm.minuteInterval" class="pss-hidden-check" />
+                  {{ opt.label }}
                 </label>
               </div>
+              <div class="pss-interval-preview">{{ psForm.minutes.map(m => ':' + m).join('　') }}</div>
 
               <div class="pss-section-label">特定日期封鎖時段</div>
               <div class="pss-blocked-list">
@@ -1283,6 +1284,19 @@ function fromPickerFormat(str) {
 const pickupSettingsStore = usePickupSettingsStore()
 const showPickupSettings = ref(false)
 const psAllHours = Array.from({ length: 15 }, (_, i) => i + 8) // 08–22
+
+const psIntervalOptions = [
+  { value: 10, label: '每10分鐘', minutes: ['00','10','20','30','40','50'] },
+  { value: 15, label: '每15分鐘', minutes: ['00','15','30','45'] },
+  { value: 20, label: '每20分鐘', minutes: ['00','20','40'] },
+  { value: 30, label: '每30分鐘', minutes: ['00','30'] },
+]
+
+function setPsInterval(value) {
+  const opt = psIntervalOptions.find(o => o.value === value)
+  if (!opt) return
+  psForm.value = { ...psForm.value, minuteInterval: value, minutes: [...opt.minutes] }
+}
 const psForm = ref({ ...pickupSettingsStore.settings })
 const psNewBlock = ref({ date: '', startHour: 12, endHour: 14 })
 
@@ -1290,6 +1304,7 @@ function openPickupSettings() {
   const s = pickupSettingsStore.settings
   psForm.value = {
     ...s,
+    minuteInterval: s.minuteInterval ?? 15,
     minutes: [...s.minutes],
     blockedRanges: s.blockedRanges ? s.blockedRanges.map(r => ({ ...r })) : [],
   }
@@ -1906,6 +1921,20 @@ const calCells = computed(() => {
 }
 .pss-btn-save:hover:not(:disabled) { opacity: 0.82; }
 .pss-btn-save:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Interval selector */
+.pss-interval-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.pss-interval-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 6px 16px; border-radius: 20px; font-size: 0.83rem; font-weight: 500;
+  border: 1.5px solid var(--border); background: #fff; color: var(--mid);
+  cursor: pointer; user-select: none; transition: all 0.15s;
+}
+.pss-interval-chip.active { background: var(--charcoal); border-color: var(--charcoal); color: #fff; }
+.pss-interval-chip:hover:not(.active) { border-color: var(--charcoal); color: var(--charcoal); }
+.pss-interval-preview {
+  margin-top: 6px; font-size: 0.8rem; color: var(--mid); letter-spacing: 0.02em;
+}
 
 /* Blocked ranges */
 .pss-blocked-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
