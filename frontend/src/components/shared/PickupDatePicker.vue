@@ -184,6 +184,12 @@ function findNextAvailableSlot() {
   return null
 }
 
+const displayValue = computed(() => {
+  if (!selectedDate.value) return ''
+  const d = selectedDate.value
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()} ${hourValue.value}:${minuteValue.value}`
+})
+
 watch([() => props.bookedSlots, selectedDate, hourValue], () => {
   if (!currentSlotBooked.value) return
   const next = findNextAvailableSlot()
@@ -201,12 +207,6 @@ function onHourChange(h) {
     if (available) minuteValue.value = available
   }
 }
-
-const displayValue = computed(() => {
-  if (!selectedDate.value) return ''
-  const d = selectedDate.value
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()} ${hourValue.value}:${minuteValue.value}`
-})
 
 function startOffset(firstDayOfMonth) {
   return firstDayOfMonth.getDay() // 0=Sun, always Sun-first
