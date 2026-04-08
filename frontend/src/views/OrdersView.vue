@@ -445,7 +445,7 @@
                 event.type === 'reservation' ? 'cal-event--reservation' : '',
                 event.spanPos ? `cal-event--span-${event.spanPos}` : '',
                 event.type === 'reservation' && calHoverResId === event.data.id ? 'cal-event--res-hovered' : '',
-                event.pickedUp ? 'cal-event--picked-up' : ''
+                event.pickedUp ? 'cal-event--picked-up' : (event.pendingPayment ? 'cal-event--pending-payment' : '')
               ]"
               :title="event.fullLabel"
               @mouseenter="event.type === 'reservation' && (calHoverResId = event.data.id)"
@@ -1366,7 +1366,7 @@ const calCells = computed(() => {
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const prevMonthDays = new Date(year, month, 0).getDate()
   const today = new Date()
-  const paidOrders = ordersStore.orders.filter(o => ['paid', 'picked_up'].includes(o.order_status) && o.pickup_time)
+  const paidOrders = ordersStore.orders.filter(o => ['pending_payment', 'paid', 'picked_up'].includes(o.order_status) && o.pickup_time)
   const activeReservations = reservationsStore.reservations.filter(r =>
     ['待入住', '已入住', '已退房'].includes(r.order_status) && r.check_in && r.check_out
   )
@@ -1390,7 +1390,7 @@ const calCells = computed(() => {
         const timeStr = calFormatTime(o.pickup_time)
         const buyerName = `${o.buyer_last_name || ''} ${o.buyer_first_name || ''}`.trim()
         const fullLabel = `${timeStr}-${o.order_number}-${buyerName}`
-        return { id: `order-${o.id}`, label: fullLabel, fullLabel, type: 'order', pickedUp: o.order_status === 'picked_up', data: o }
+        return { id: `order-${o.id}`, label: fullLabel, fullLabel, type: 'order', pickedUp: o.order_status === 'picked_up', pendingPayment: o.order_status === 'pending_payment', data: o }
       })
 
     const dayOfWeek = (firstDay + d - 1) % 7  // 0=Sun, 6=Sat
@@ -1790,7 +1790,7 @@ const calCells = computed(() => {
 }
 .cal-day--other .cal-day-num { color: var(--mid); }
 .cal-event {
-  background: var(--accent-light); color: var(--charcoal);
+  background: var(--light); color: var(--charcoal);
   border-radius: 3px; padding: 2px 5px; margin-bottom: 2px;
   font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   cursor: pointer; max-width: 100%;
@@ -1807,6 +1807,7 @@ const calCells = computed(() => {
 .cal-event--span-end   { border-radius: 0 10px 10px 0; }
 .cal-event--span-only  { border-radius: 3px; }
 .cal-event--picked-up { background: #b0bec5; color: #37474f; }
+.cal-event--pending-payment { background: var(--accent-light); color: var(--charcoal); }
 
 /* ── Calendar order modal ────────────────────────────────────────────────── */
 .cal-modal-backdrop {
