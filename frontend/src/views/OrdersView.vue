@@ -614,6 +614,22 @@
                 </div>
               </div>
 
+              <div class="pss-section-label">預設時間</div>
+              <div class="pss-grid">
+                <div class="pss-field">
+                  <label class="pss-label">預設小時</label>
+                  <select class="pss-select" v-model="psForm.defaultHour">
+                    <option v-for="h in psAllHours" :key="h" :value="h" :disabled="h < psForm.startHour || h > psForm.endHour">{{ String(h).padStart(2,'0') }}:00</option>
+                  </select>
+                </div>
+                <div class="pss-field">
+                  <label class="pss-label">預設分鐘</label>
+                  <select class="pss-select" v-model="psForm.defaultMinute">
+                    <option v-for="m in psForm.minutes" :key="m" :value="m">:{{ m }}</option>
+                  </select>
+                </div>
+              </div>
+
               <div class="pss-section-label">可取貨時間範圍</div>
               <div class="pss-grid">
                 <div class="pss-field">
@@ -626,22 +642,6 @@
                   <label class="pss-label">最晚</label>
                   <select class="pss-select" v-model="psForm.endHour">
                     <option v-for="h in psAllHours" :key="h" :value="h" :disabled="h <= psForm.startHour">{{ String(h).padStart(2,'0') }}:00</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="pss-section-label">預設時間</div>
-              <div class="pss-grid">
-                <div class="pss-field">
-                  <label class="pss-label">預設小時</label>
-                  <select class="pss-select" v-model="psForm.defaultHour">
-                    <option v-for="h in psAllHours" :key="h" :value="h" :disabled="h < psForm.startHour || h > psForm.endHour">{{ String(h).padStart(2,'0') }}:00</option>
-                  </select>
-                </div>
-                <div class="pss-field">
-                  <label class="pss-label">預設分鐘</label>
-                  <select class="pss-select" v-model="psForm.defaultMinute">
-                    <option v-for="m in ['00','15','30','45']" :key="m" :value="m" :disabled="!psForm.minutes.includes(m)">:{{ m }}</option>
                   </select>
                 </div>
               </div>
@@ -1295,7 +1295,8 @@ const psIntervalOptions = [
 function setPsInterval(value) {
   const opt = psIntervalOptions.find(o => o.value === value)
   if (!opt) return
-  psForm.value = { ...psForm.value, minuteInterval: value, minutes: [...opt.minutes] }
+  const defaultMinute = opt.minutes.includes(psForm.value.defaultMinute) ? psForm.value.defaultMinute : opt.minutes[0]
+  psForm.value = { ...psForm.value, minuteInterval: value, minutes: [...opt.minutes], defaultMinute }
 }
 const psForm = ref({ ...pickupSettingsStore.settings })
 const psNewBlock = ref({ date: '', startHour: 12, endHour: 14 })
