@@ -128,25 +128,44 @@ const timeLabel    = computed(() => isEn.value ? 'Time' : '時間')
 const confirmLabel = computed(() => isEn.value ? 'OK' : '確認')
 const slotBookedLabel = computed(() => isEn.value ? 'This time slot is taken' : i18n.locale === 'zh-CN' ? '此时段已被预订' : '此時段已被預訂')
 
-function isHourBlocked(hour) {
-  if (!selectedDate.value) return false
-  const d = selectedDate.value
-  const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+function getDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
+
+function isHourBlockedForDate(hour, d) {
+  const dateStr = getDateStr(d)
   const h = typeof hour === 'string' ? parseInt(hour) : hour
   return (pickupSettings.settings.blockedRanges || []).some(r =>
     r.date === dateStr && h >= r.startHour && h < r.endHour
   )
 }
 
+function isHourBlocked(hour) {
+  if (!selectedDate.value) return false
+  return isHourBlockedForDate(hour, selectedDate.value)
+}
+
+function isSlotBookedForDate(hour, minute, d) {
+  if (!props.bookedSlots?.length) return false
+  const dateStr = getDateStr(d)
+  return props.bookedSlots.includes(`${dateStr}T${hour}:${minute}`)
+}
+
+function isSlotBooked(hour, minute) {
+  if (!selectedDate.value) return false
+  return isSlotBookedForDate(hour, minute, selectedDate.value)
+}
+
 function isHourFull(hour) {
   return isHourBlocked(hour) || minutes.value.every(m => isSlotBooked(hour, m))
 }
 
-function isSlotBooked(hour, minute) {
-  if (!props.bookedSlots?.length || !selectedDate.value) return false
-  const d = selectedDate.value
-  const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
-  return props.bookedSlots.includes(`${dateStr}T${hour}:${minute}`)
+function isDayFull(day) {
+  if (!day) return false
+  return hours.value.every(h => {
+    if (isHourBlockedForDate(h, day.full)) return true
+    return minutes.value.every(m => isSlotBookedForDate(h, m, day.full))
+  })
 }
 
 const currentSlotBooked = computed(() => isSlotBooked(hourValue.value, minuteValue.value))
@@ -206,6 +225,7 @@ function getDayClass(day) {
   if (!day) return 'empty'
   const d = day.full
   if (d < minDate.value || d > cutoffDate.value) return 'disabled'
+  if (isDayFull(day)) return 'disabled'
   if (selectedDate.value && d.toDateString() === selectedDate.value.toDateString()) return 'selected'
   if (d.toDateString() === minDate.value.toDateString()) return 'today'
   return ''
@@ -222,6 +242,7 @@ function nextMonth() {
 
 function selectDate(day) {
   if (!day || day.full < minDate.value || day.full > cutoffDate.value) return
+  if (isDayFull(day)) return
   selectedDate.value = day.full
   emit('update:modelValue', displayValue.value)
 }
