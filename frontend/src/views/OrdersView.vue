@@ -1317,7 +1317,9 @@ function openPickupSettings() {
 function addBlockedRange() {
   const { date, startHour, endHour } = psNewBlock.value
   if (!date || endHour <= startHour) return
-  psForm.value = { ...psForm.value, blockedRanges: [...psForm.value.blockedRanges, { date, startHour, endHour }] }
+  const updated = [...psForm.value.blockedRanges, { date, startHour, endHour }]
+  updated.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : a.startHour - b.startHour)
+  psForm.value = { ...psForm.value, blockedRanges: updated }
   psNewBlock.value = { date: '', startHour: 12, endHour: 14 }
 }
 
