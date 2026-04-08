@@ -1,0 +1,18 @@
+{
+  "endDate": "2026-04-25",
+  "defaultDate": "2026-04-18",
+  "startHour": 10,
+  "endHour": 20,
+  "defaultHour": 15,
+  "defaultMinute": "00",
+  "minuteInterval": 15,
+  "minutes": ["00", "15", "30", "45"],
+  "blockedRanges": [
+    { "date": "2026-04-09", "startHour": 8, "endHour": 22 },
+    { "date": "2026-04-14", "startHour": 16, "endHour": 22 },
+    { "date": "2026-04-15", "startHour": 8, "endHour": 12 },
+    { "date": "2026-04-16", "startHour": 13, "endHour": 22 },
+    { "date": "2026-04-22", "startHour": 8, "endHour": 12 },
+    { "date": "2026-04-25", "startHour": 12, "endHour": 22 }
+  ]
+}

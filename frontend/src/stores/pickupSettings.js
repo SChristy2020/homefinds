@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-
-const STORAGE_KEY = 'pickup_settings'
+import { api } from '@/utils/api'
 
 export const PICKUP_DEFAULTS = {
   endDate: '2026-04-25',
@@ -17,20 +16,21 @@ export const PICKUP_DEFAULTS = {
 }
 
 export const usePickupSettingsStore = defineStore('pickupSettings', () => {
-  function load() {
+  const settings = ref({ ...PICKUP_DEFAULTS })
+
+  async function fetch() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (raw) return { ...PICKUP_DEFAULTS, ...JSON.parse(raw) }
-    } catch {}
-    return { ...PICKUP_DEFAULTS }
+      const data = await api.get('/api/pickup-settings')
+      settings.value = { ...PICKUP_DEFAULTS, ...data }
+    } catch {
+      // 若 API 失敗，沿用預設值
+    }
   }
 
-  const settings = ref(load())
-
-  function save(newSettings) {
+  async function save(newSettings) {
     settings.value = { ...settings.value, ...newSettings }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings.value))
+    await api.put('/api/pickup-settings', settings.value)
   }
 
-  return { settings, save }
+  return { settings, fetch, save }
 })

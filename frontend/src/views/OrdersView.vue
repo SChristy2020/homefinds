@@ -849,6 +849,7 @@ const SortIcon = {
 }
 
 onMounted(async () => {
+  pickupSettingsStore.fetch()
   try {
     const rooms = await api.get('/api/room')
     if (rooms.length) {
