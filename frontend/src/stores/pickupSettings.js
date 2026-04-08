@@ -11,6 +11,8 @@ export const PICKUP_DEFAULTS = {
   defaultHour: 15,
   defaultMinute: '00',
   minutes: ['00', '15', '30', '45'],
+  // [{ date: 'YYYY-MM-DD', startHour: 14, endHour: 16 }]
+  blockedRanges: [],
 }
 
 export const usePickupSettingsStore = defineStore('pickupSettings', () => {

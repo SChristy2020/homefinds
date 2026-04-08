@@ -654,6 +654,26 @@
                 </label>
               </div>
 
+              <div class="pss-section-label">特定日期封鎖時段</div>
+              <div class="pss-blocked-list">
+                <div v-if="!psForm.blockedRanges.length" class="pss-blocked-empty">尚未設定</div>
+                <div v-for="(r, i) in psForm.blockedRanges" :key="i" class="pss-blocked-item">
+                  <span class="pss-blocked-text">{{ r.date }} &nbsp;{{ String(r.startHour).padStart(2,'0') }}:00 – {{ String(r.endHour).padStart(2,'0') }}:00</span>
+                  <button class="pss-blocked-del" @click="psForm.blockedRanges = psForm.blockedRanges.filter((_,idx) => idx !== i)">✕</button>
+                </div>
+              </div>
+              <div class="pss-blocked-add">
+                <input class="pss-input" type="date" v-model="psNewBlock.date" style="flex:2" />
+                <select class="pss-select" v-model="psNewBlock.startHour" style="flex:1">
+                  <option v-for="h in psAllHours" :key="h" :value="h">{{ String(h).padStart(2,'0') }}:00</option>
+                </select>
+                <span class="pss-blocked-dash">–</span>
+                <select class="pss-select" v-model="psNewBlock.endHour" style="flex:1">
+                  <option v-for="h in psAllHours" :key="h" :value="h" :disabled="h <= psNewBlock.startHour">{{ String(h).padStart(2,'0') }}:00</option>
+                </select>
+                <button class="pss-blocked-add-btn" :disabled="!psNewBlock.date || psNewBlock.endHour <= psNewBlock.startHour" @click="addBlockedRange">+ 新增</button>
+              </div>
+
               <div class="pss-actions">
                 <button class="pss-btn-cancel" @click="showPickupSettings = false">取消</button>
                 <button class="pss-btn-save" :disabled="!psForm.minutes.length" @click="savePickupSettings">儲存</button>
@@ -1264,10 +1284,24 @@ const pickupSettingsStore = usePickupSettingsStore()
 const showPickupSettings = ref(false)
 const psAllHours = Array.from({ length: 15 }, (_, i) => i + 8) // 08–22
 const psForm = ref({ ...pickupSettingsStore.settings })
+const psNewBlock = ref({ date: '', startHour: 12, endHour: 14 })
 
 function openPickupSettings() {
-  psForm.value = { ...pickupSettingsStore.settings, minutes: [...pickupSettingsStore.settings.minutes] }
+  const s = pickupSettingsStore.settings
+  psForm.value = {
+    ...s,
+    minutes: [...s.minutes],
+    blockedRanges: s.blockedRanges ? s.blockedRanges.map(r => ({ ...r })) : [],
+  }
+  psNewBlock.value = { date: '', startHour: 12, endHour: 14 }
   showPickupSettings.value = true
+}
+
+function addBlockedRange() {
+  const { date, startHour, endHour } = psNewBlock.value
+  if (!date || endHour <= startHour) return
+  psForm.value = { ...psForm.value, blockedRanges: [...psForm.value.blockedRanges, { date, startHour, endHour }] }
+  psNewBlock.value = { date: '', startHour: 12, endHour: 14 }
 }
 
 function savePickupSettings() {
@@ -1872,5 +1906,32 @@ const calCells = computed(() => {
 }
 .pss-btn-save:hover:not(:disabled) { opacity: 0.82; }
 .pss-btn-save:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Blocked ranges */
+.pss-blocked-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.pss-blocked-empty { font-size: 0.8rem; color: var(--mid); }
+.pss-blocked-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #faf9f7; border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 10px; font-size: 0.83rem; color: var(--charcoal);
+}
+.pss-blocked-text { flex: 1; }
+.pss-blocked-del {
+  background: none; border: none; cursor: pointer; color: var(--mid);
+  font-size: 0.8rem; padding: 0 2px; line-height: 1;
+  transition: color 0.15s;
+}
+.pss-blocked-del:hover { color: #e74c3c; }
+.pss-blocked-add {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.pss-blocked-dash { color: var(--mid); font-size: 0.85rem; flex-shrink: 0; }
+.pss-blocked-add-btn {
+  padding: 7px 14px; border-radius: 6px; font-size: 0.82rem; white-space: nowrap;
+  background: #f0ece6; border: 1.5px solid var(--border); color: var(--charcoal);
+  cursor: pointer; font-family: var(--font-body); transition: all 0.15s; flex-shrink: 0;
+}
+.pss-blocked-add-btn:hover:not(:disabled) { border-color: var(--charcoal); }
+.pss-blocked-add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
 

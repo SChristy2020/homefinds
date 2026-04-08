@@ -128,8 +128,18 @@ const timeLabel    = computed(() => isEn.value ? 'Time' : '時間')
 const confirmLabel = computed(() => isEn.value ? 'OK' : '確認')
 const slotBookedLabel = computed(() => isEn.value ? 'This time slot is taken' : i18n.locale === 'zh-CN' ? '此时段已被预订' : '此時段已被預訂')
 
+function isHourBlocked(hour) {
+  if (!selectedDate.value) return false
+  const d = selectedDate.value
+  const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  const h = typeof hour === 'string' ? parseInt(hour) : hour
+  return (pickupSettings.settings.blockedRanges || []).some(r =>
+    r.date === dateStr && h >= r.startHour && h < r.endHour
+  )
+}
+
 function isHourFull(hour) {
-  return minutes.value.every(m => isSlotBooked(hour, m))
+  return isHourBlocked(hour) || minutes.value.every(m => isSlotBooked(hour, m))
 }
 
 function isSlotBooked(hour, minute) {
