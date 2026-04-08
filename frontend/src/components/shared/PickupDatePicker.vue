@@ -168,12 +168,13 @@ function isDayFull(day) {
   })
 }
 
-const currentSlotBooked = computed(() => isSlotBooked(hourValue.value, minuteValue.value))
+const currentSlotBooked = computed(() => isHourBlocked(hourValue.value) || isSlotBooked(hourValue.value, minuteValue.value))
 
 function findNextAvailableSlot() {
   const hourList = hours.value
   const startIdx = hourList.indexOf(hourValue.value)
   for (let i = startIdx; i < hourList.length; i++) {
+    if (isHourBlocked(hourList[i])) continue
     for (const m of minutes.value) {
       if (!isSlotBooked(hourList[i], m)) {
         return { hour: hourList[i], minute: m }
@@ -191,7 +192,7 @@ watch([() => props.bookedSlots, selectedDate, hourValue], () => {
     minuteValue.value = next.minute
     emit('update:modelValue', displayValue.value)
   }
-})
+}, { immediate: true })
 
 function onHourChange(h) {
   hourValue.value = h
