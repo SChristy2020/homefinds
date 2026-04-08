@@ -419,7 +419,10 @@
 
       <!-- 取貨與租屋行事曆 (admin only) -->
       <div v-if="isAdmin" class="pickup-calendar-section">
-        <h2 class="orders-section-title">取貨與租屋行事曆</h2>
+        <div class="cal-section-header">
+          <h2 class="orders-section-title" style="margin-bottom:0">取貨與租屋行事曆</h2>
+          <button class="cal-settings-btn" title="設定可取貨時段" @click="openPickupSettings"><Settings :size="15" /></button>
+        </div>
         <div class="cal-nav">
           <button class="cal-nav-btn" @click="calPrevMonth">‹</button>
           <span class="cal-month-label">{{ calMonthLabel }}</span>
@@ -590,6 +593,76 @@
         </div>
       </Teleport>
 
+      <!-- 可取貨時段設定 modal -->
+      <Teleport to="body">
+        <div v-if="showPickupSettings" class="cal-modal-backdrop" @click.self="showPickupSettings = false">
+          <div class="cal-modal pss-modal">
+            <div class="cal-modal-header">
+              <span class="cal-modal-title">可取貨時段設定</span>
+              <button class="cal-modal-close" @click="showPickupSettings = false">✕</button>
+            </div>
+            <div class="cal-modal-body pss-body">
+              <div class="pss-section-label">取貨日期</div>
+              <div class="pss-grid">
+                <div class="pss-field">
+                  <label class="pss-label">預設日期</label>
+                  <input class="pss-input" type="date" v-model="psForm.defaultDate" />
+                </div>
+                <div class="pss-field">
+                  <label class="pss-label">最晚可選日期</label>
+                  <input class="pss-input" type="date" v-model="psForm.endDate" />
+                </div>
+              </div>
+
+              <div class="pss-section-label">可取貨時間範圍</div>
+              <div class="pss-grid">
+                <div class="pss-field">
+                  <label class="pss-label">最早</label>
+                  <select class="pss-select" v-model="psForm.startHour">
+                    <option v-for="h in psAllHours" :key="h" :value="h">{{ String(h).padStart(2,'0') }}:00</option>
+                  </select>
+                </div>
+                <div class="pss-field">
+                  <label class="pss-label">最晚</label>
+                  <select class="pss-select" v-model="psForm.endHour">
+                    <option v-for="h in psAllHours" :key="h" :value="h" :disabled="h <= psForm.startHour">{{ String(h).padStart(2,'0') }}:00</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="pss-section-label">預設時間</div>
+              <div class="pss-grid">
+                <div class="pss-field">
+                  <label class="pss-label">預設小時</label>
+                  <select class="pss-select" v-model="psForm.defaultHour">
+                    <option v-for="h in psAllHours" :key="h" :value="h" :disabled="h < psForm.startHour || h > psForm.endHour">{{ String(h).padStart(2,'0') }}:00</option>
+                  </select>
+                </div>
+                <div class="pss-field">
+                  <label class="pss-label">預設分鐘</label>
+                  <select class="pss-select" v-model="psForm.defaultMinute">
+                    <option v-for="m in ['00','15','30','45']" :key="m" :value="m" :disabled="!psForm.minutes.includes(m)">:{{ m }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="pss-section-label">可選分鐘</div>
+              <div class="pss-minutes-row">
+                <label v-for="m in ['00','15','30','45']" :key="m" class="pss-minute-chip" :class="{ active: psForm.minutes.includes(m) }">
+                  <input type="checkbox" :value="m" v-model="psForm.minutes" class="pss-hidden-check" />
+                  :{{ m }}
+                </label>
+              </div>
+
+              <div class="pss-actions">
+                <button class="pss-btn-cancel" @click="showPickupSettings = false">取消</button>
+                <button class="pss-btn-save" :disabled="!psForm.minutes.length" @click="savePickupSettings">儲存</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Teleport>
+
       <!-- 購物須知 -->
       <div class="shopping-guide-wrap">
         <button class="guide-toggle-btn" @click="shoppingGuideOpen = !shoppingGuideOpen">
@@ -627,7 +700,8 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeft, Pencil, ChevronUp, ChevronDown, ChevronsUpDown, Mail } from 'lucide-vue-next'
+import { ArrowLeft, Pencil, ChevronUp, ChevronDown, ChevronsUpDown, Mail, Settings } from 'lucide-vue-next'
+import { usePickupSettingsStore } from '@/stores/pickupSettings'
 import { useOrdersStore } from '@/stores/orders'
 import { useReservationsStore } from '@/stores/reservations'
 import { useUserStore } from '@/stores/user'
@@ -1185,6 +1259,23 @@ function fromPickerFormat(str) {
   return `${parts[3]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}T${parts[4].padStart(2,'0')}:${parts[5].padStart(2,'0')}:00`
 }
 
+// ── Pickup Settings Modal ─────────────────────────────────────────────────────
+const pickupSettingsStore = usePickupSettingsStore()
+const showPickupSettings = ref(false)
+const psAllHours = Array.from({ length: 15 }, (_, i) => i + 8) // 08–22
+const psForm = ref({ ...pickupSettingsStore.settings })
+
+function openPickupSettings() {
+  psForm.value = { ...pickupSettingsStore.settings, minutes: [...pickupSettingsStore.settings.minutes] }
+  showPickupSettings.value = true
+}
+
+function savePickupSettings() {
+  if (!psForm.value.minutes.length) return
+  pickupSettingsStore.save({ ...psForm.value })
+  showPickupSettings.value = false
+}
+
 // ── Pickup/Rental Calendar ────────────────────────────────────────────────────
 const calSelectedItem = ref(null)
 const calHoverResId = ref(null)
@@ -1713,5 +1804,73 @@ const calCells = computed(() => {
   font-size: 0.82rem; font-weight: 600; color: var(--mid);
   margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
 }
+
+/* ── Cal section header (title + settings btn) ───────────────────────────── */
+.cal-section-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.cal-settings-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 6px;
+  border: 1px solid var(--border); background: #fff;
+  color: var(--mid); cursor: pointer; transition: all 0.15s;
+  flex-shrink: 0;
+}
+.cal-settings-btn:hover { border-color: var(--charcoal); color: var(--charcoal); background: #f5f3f0; }
+
+/* ── Pickup Settings Modal ───────────────────────────────────────────────── */
+.pss-modal { max-width: 420px; }
+.pss-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 0; }
+.pss-section-label {
+  font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 8px; margin-top: 18px;
+}
+.pss-section-label:first-child { margin-top: 0; }
+.pss-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.pss-grid--1 { grid-template-columns: 1fr; }
+.pss-field { display: flex; flex-direction: column; gap: 4px; }
+.pss-label { font-size: 0.78rem; color: var(--charcoal); font-weight: 500; }
+.pss-input, .pss-select {
+  border: 1.5px solid var(--border); border-radius: 6px;
+  padding: 7px 10px; font-size: 0.85rem; background: #fff;
+  color: var(--charcoal); width: 100%; box-sizing: border-box;
+  font-family: var(--font-body); transition: border-color 0.15s;
+}
+.pss-input:focus, .pss-select:focus { outline: none; border-color: var(--charcoal); }
+
+/* Minute chips */
+.pss-minutes-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.pss-minute-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 5px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;
+  border: 1.5px solid var(--border); background: #fff; color: var(--mid);
+  cursor: pointer; user-select: none; transition: all 0.15s;
+}
+.pss-minute-chip.active { background: var(--button); border-color: var(--button); color: #fff; }
+.pss-minute-chip:hover:not(.active) { border-color: var(--button); color: var(--button); }
+.pss-hidden-check { display: none; }
+
+/* Actions */
+.pss-actions {
+  display: flex; gap: 10px; justify-content: flex-end;
+  margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);
+}
+.pss-btn-cancel {
+  padding: 8px 20px; border-radius: 6px; font-size: 0.85rem;
+  border: 1.5px solid var(--border); background: #fff; color: var(--charcoal);
+  cursor: pointer; font-family: var(--font-body); transition: all 0.15s;
+}
+.pss-btn-cancel:hover { border-color: var(--charcoal); }
+.pss-btn-save {
+  padding: 8px 24px; border-radius: 6px; font-size: 0.85rem;
+  background: var(--charcoal); color: #fff; border: none;
+  cursor: pointer; font-family: var(--font-body); font-weight: 600;
+  transition: opacity 0.15s;
+}
+.pss-btn-save:hover:not(:disabled) { opacity: 0.82; }
+.pss-btn-save:disabled { opacity: 0.35; cursor: not-allowed; }
 </style>
 

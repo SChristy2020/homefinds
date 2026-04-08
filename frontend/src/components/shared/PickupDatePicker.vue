@@ -56,6 +56,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { useI18nStore } from '@/stores/i18n'
+import { usePickupSettingsStore } from '@/stores/pickupSettings'
 
 const props = defineProps({
   modelValue: String,
@@ -65,22 +66,35 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const i18n = useI18nStore()
+const pickupSettings = usePickupSettingsStore()
 const root = ref(null)
 const open = ref(false)
 
-const today = new Date(); today.setHours(0,0,0,0)
+// 最早可選日期 = 美東今天 + 1 天
+const minDate = computed(() => {
+  const etNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }))
+  etNow.setHours(0, 0, 0, 0)
+  etNow.setDate(etNow.getDate() + 1)
+  return etNow
+})
+const cutoffDate = computed(() => {
+  const [y, m, d] = pickupSettings.settings.endDate.split('-').map(Number)
+  return new Date(y, m - 1, d)
+})
 
-const DEFAULT_DATE = new Date(2026, 3, 18) // April 18, 2026
-const DEFAULT_HOUR = '15'
-const DEFAULT_MIN  = '00'
-const CUTOFF_DATE  = new Date(2026, 3, 25) // April 25, 2026 — no dates after this
+const defaultDate = computed(() => {
+  const [y, m, d] = pickupSettings.settings.defaultDate.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  // 若設定的預設日期早於最早可選日期，改用最早可選日期
+  return date >= minDate.value ? date : minDate.value
+})
 
-const viewYear  = ref(DEFAULT_DATE.getFullYear())
-const viewMonth = ref(DEFAULT_DATE.getMonth())
+const viewYear  = ref(defaultDate.value.getFullYear())
+const viewMonth = ref(defaultDate.value.getMonth())
 
-const selectedDate = ref(DEFAULT_DATE)
-const hourValue    = ref(DEFAULT_HOUR)
-const minuteValue  = ref(DEFAULT_MIN)
+const selectedDate = ref(defaultDate.value)
+const hourValue    = ref(String(pickupSettings.settings.defaultHour).padStart(2, '0'))
+const minuteValue  = ref(pickupSettings.settings.defaultMinute ?? '00')
 
 // Parse existing modelValue if provided
 if (props.modelValue) {
@@ -94,15 +108,12 @@ if (props.modelValue) {
   }
 }
 
-// Hour & minute options — on CUTOFF_DATE (Apr 25), cap at 12:00
 const hours = computed(() => {
-  const isCutoff = selectedDate.value &&
-    selectedDate.value.toDateString() === CUTOFF_DATE.toDateString()
-  const maxHour = isCutoff ? 12 : 20
-  const count = maxHour - 10 + 1
-  return Array.from({ length: count }, (_, i) => String(i + 10).padStart(2, '0'))
+  const start = pickupSettings.settings.startHour
+  const end   = pickupSettings.settings.endHour
+  return Array.from({ length: end - start + 1 }, (_, i) => String(i + start).padStart(2, '0'))
 })
-const minutes = ['00', '15', '30', '45']
+const minutes = computed(() => pickupSettings.settings.minutes)
 
 const isEn = computed(() => i18n.locale === 'en')
 
@@ -118,7 +129,7 @@ const confirmLabel = computed(() => isEn.value ? 'OK' : '確認')
 const slotBookedLabel = computed(() => isEn.value ? 'This time slot is taken' : i18n.locale === 'zh-CN' ? '此时段已被预订' : '此時段已被預訂')
 
 function isHourFull(hour) {
-  return minutes.every(m => isSlotBooked(hour, m))
+  return minutes.value.every(m => isSlotBooked(hour, m))
 }
 
 function isSlotBooked(hour, minute) {
@@ -134,7 +145,7 @@ function findNextAvailableSlot() {
   const hourList = hours.value
   const startIdx = hourList.indexOf(hourValue.value)
   for (let i = startIdx; i < hourList.length; i++) {
-    for (const m of minutes) {
+    for (const m of minutes.value) {
       if (!isSlotBooked(hourList[i], m)) {
         return { hour: hourList[i], minute: m }
       }
@@ -156,7 +167,7 @@ watch([() => props.bookedSlots, selectedDate, hourValue], () => {
 function onHourChange(h) {
   hourValue.value = h
   if (isSlotBooked(h, minuteValue.value)) {
-    const available = minutes.find(m => !isSlotBooked(h, m))
+    const available = minutes.value.find(m => !isSlotBooked(h, m))
     if (available) minuteValue.value = available
   }
 }
@@ -184,9 +195,9 @@ const days = computed(() => {
 function getDayClass(day) {
   if (!day) return 'empty'
   const d = day.full
-  if (d < today || d > CUTOFF_DATE) return 'disabled'
+  if (d < minDate.value || d > cutoffDate.value) return 'disabled'
   if (selectedDate.value && d.toDateString() === selectedDate.value.toDateString()) return 'selected'
-  if (d.toDateString() === today.toDateString()) return 'today'
+  if (d.toDateString() === minDate.value.toDateString()) return 'today'
   return ''
 }
 
@@ -200,13 +211,8 @@ function nextMonth() {
 }
 
 function selectDate(day) {
-  if (!day || day.full < today || day.full > CUTOFF_DATE) return
+  if (!day || day.full < minDate.value || day.full > cutoffDate.value) return
   selectedDate.value = day.full
-  // If switching to cutoff date and current hour exceeds noon, cap it
-  if (day.full.toDateString() === CUTOFF_DATE.toDateString() && +hourValue.value > 12) {
-    hourValue.value = '12'
-    minuteValue.value = '00'
-  }
   emit('update:modelValue', displayValue.value)
 }
 
