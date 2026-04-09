@@ -1,9 +1,13 @@
 from datetime import datetime, timedelta, time, timezone
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.models.order import Order, OrderItem
 from app.models.user import User
-from app.services.email_service import send_pickup_reminder_notification
+from app.services.email_service import (
+    send_pickup_reminder_notification,
+    send_prebooking_reminder_notification,
+)
 
 # pickup_time 在 DB 以 Eastern 時間（naive）儲存；EDT = UTC-4
 _EASTERN = timezone(timedelta(hours=-4))
@@ -27,11 +31,19 @@ def send_due_pickup_reminders(db: Session, now: datetime | None = None) -> dict:
     due_orders = (
         db.query(Order)
         .filter(
-            Order.order_status.in_(("pending_payment", "paid")),
             Order.pickup_time.isnot(None),
             Order.pickup_time >= window_start,
             Order.pickup_time <= window_end,
-            Order.pickup_reminder_sent_at.is_(None),
+            or_(
+                and_(
+                    Order.order_status == "pending_payment",
+                    Order.pre_booking_reminder_sent_at.is_(None),
+                ),
+                and_(
+                    Order.order_status == "paid",
+                    Order.pickup_reminder_sent_at.is_(None),
+                ),
+            ),
         )
         .all()
     )
@@ -46,11 +58,12 @@ def send_due_pickup_reminders(db: Session, now: datetime | None = None) -> dict:
             skipped += 1
             continue
 
+        item_statuses = ("paid", "reserved") if order.order_status == "paid" else ("paid", "reserved", "pending_payment")
         product_rows = (
             db.query(OrderItem.product_id)
             .filter(
                 OrderItem.order_id == order.id,
-                OrderItem.status.in_(("paid", "reserved")),
+                OrderItem.status.in_(item_statuses),
             )
             .all()
         )
@@ -65,14 +78,38 @@ def send_due_pickup_reminders(db: Session, now: datetime | None = None) -> dict:
             continue
 
         try:
-            send_pickup_reminder_notification(
-                user=user,
-                order_number=order.order_number,
-                pickup_time=order.pickup_time,
-                product_ids=product_ids,
-                db=db,
-            )
-            order.pickup_reminder_sent_at = _utc_now_naive()
+            if order.order_status == "pending_payment":
+                product_positions = {}
+                for pid in product_ids:
+                    pos = (
+                        db.query(OrderItem)
+                        .join(Order, OrderItem.order_id == Order.id)
+                        .filter(
+                            OrderItem.product_id == pid,
+                            OrderItem.status != "cancelled",
+                            Order.created_at <= order.created_at,
+                        )
+                        .count()
+                    )
+                    product_positions[pid] = pos
+                send_prebooking_reminder_notification(
+                    user=user,
+                    order_number=order.order_number,
+                    pickup_time=order.pickup_time,
+                    product_ids=product_ids,
+                    db=db,
+                    product_positions=product_positions,
+                )
+                order.pre_booking_reminder_sent_at = _utc_now_naive()
+            else:
+                send_pickup_reminder_notification(
+                    user=user,
+                    order_number=order.order_number,
+                    pickup_time=order.pickup_time,
+                    product_ids=product_ids,
+                    db=db,
+                )
+                order.pickup_reminder_sent_at = _utc_now_naive()
             db.commit()
             sent += 1
         except Exception as e:
