@@ -68,7 +68,7 @@
               <th class="sortable" @click="toggleSort('pickup')">
                 {{ i18n.t('orders.pickupTimeLabel') }}<SortIcon col="pickup" :active="sortColumn" :dir="sortDirection" />
               </th>
-              <th v-if="isAdmin">(預訂)取貨通知</th>
+              <th v-if="isAdmin">{{ i18n.t('orders.prebookingReminderCol') }}</th>
               <template v-if="isAdmin">
                 <th class="sortable" @click="toggleSort('buyer')">
                   {{ i18n.t('orders.buyer') }}<SortIcon col="buyer" :active="sortColumn" :dir="sortDirection" />
@@ -83,7 +83,7 @@
               <th v-if="isAdmin" class="sortable" @click="toggleSort('updated')">
                 {{ i18n.t('orders.updatedAt') }}<SortIcon col="updated" :active="sortColumn" :dir="sortDirection" />
               </th>
-              <th v-if="isAdmin">補發訂單確認</th>
+              <th v-if="isAdmin">{{ i18n.t('orders.resendConfirmationCol') }}</th>
             </tr>
           </thead>
           <tbody v-if="filteredOrders.length === 0">
