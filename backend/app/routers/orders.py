@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
+import os
 import threading
 from app.database import get_db, SessionLocal
 from app.models.order import Order, OrderItem
 from app.models.product import Product, ProductTranslation, ProductImage
 from app.models.user import User
 from app.models.waiting_list import WaitingList
+
+IMAGE_BASE_URL = os.environ.get("IMAGE_BASE_URL", "https://amadegx.synology.me/img/")
 from app.schemas.order import OrderCreate, OrderOut, OrderItemOut, OrderPickupTimeUpdate, RevertPaidBody, AdminNotesUpdate
 from app.routers.waiting_list import _refresh_summary
 from app.services.email_service import (
@@ -67,7 +70,7 @@ def _build_out(order, db):
                 ProductImage.product_id == item.product_id,
             ).order_by(ProductImage.sort_order).first()
             if image:
-                item_out.image_url = image.url
+                item_out.image_url = f"{IMAGE_BASE_URL}{image.name}" if image.name else image.url
 
         enriched.append(item_out)
     out.items = enriched
