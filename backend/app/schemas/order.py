@@ -28,6 +28,7 @@ class OrderItemOut(BaseModel):
     original_price:   Optional[float] = None
     image_url:        Optional[str] = None
     available_time:   Optional[EasternNaiveDatetime] = None
+    translations:     list[dict] = []
 
     class Config:
         from_attributes = True

@@ -60,12 +60,16 @@ def _build_out(order, db):
         if product:
             item_out.original_price = float(product.original_price) if product.original_price else None
             item_out.available_time = product.pickup_available_time
-            translation = db.query(ProductTranslation).filter(
+            all_translations = db.query(ProductTranslation).filter(
                 ProductTranslation.product_id == item.product_id,
-                ProductTranslation.locale == "zh-TW",
-            ).first()
-            if translation:
-                item_out.product_name = translation.name
+            ).all()
+            item_out.translations = [{"locale": t.locale, "name": t.name} for t in all_translations]
+            for t in all_translations:
+                if t.locale == "zh-TW":
+                    item_out.product_name = t.name
+                    break
+            if not item_out.product_name and all_translations:
+                item_out.product_name = all_translations[0].name
             image = db.query(ProductImage).filter(
                 ProductImage.product_id == item.product_id,
             ).order_by(ProductImage.sort_order).first()

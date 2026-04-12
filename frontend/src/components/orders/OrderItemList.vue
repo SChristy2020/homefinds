@@ -22,7 +22,7 @@
           </td>
 
           <!-- 物品名稱 -->
-          <td class="td-name">{{ item.product_name || '—' }}</td>
+          <td class="td-name">{{ getProductName(item) }}</td>
 
           <!-- 最快取貨日 -->
           <td class="td-avail">{{ formatAvailableTime(item.available_time) }}</td>
@@ -58,6 +58,15 @@ import { useI18nStore } from '@/stores/i18n'
 const props = defineProps({ items: Array, orderStatus: String })
 defineEmits(['cancel'])
 const i18n = useI18nStore()
+
+function getProductName(item) {
+  const trans = item.translations
+  if (trans && trans.length) {
+    const t = trans.find(t => t.locale === i18n.locale) || trans.find(t => t.locale === 'en')
+    if (t?.name) return t.name
+  }
+  return item.product_name || '—'
+}
 
 function fmtPrice(val) {
   return Number(val).toFixed(2).replace(/\.00$/, '')
