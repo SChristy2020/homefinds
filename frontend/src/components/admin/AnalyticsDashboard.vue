@@ -126,7 +126,7 @@ const data    = ref(null)
 const charts = []
 
 // ── ★ 統一色盤：只需修改這裡 ★ ─────────────────────────────
-const PALETTE = ['#5a92a7', '#89D5C9', '#FAC172', '#E25B45']
+const PALETTE = ['#89D5C9', '#FAC172', '#59a3bf', '#E25B45', '#6f9f90']
 // ────────────────────────────────────────────────────────────
 
 const PROD_COLORS    = [PALETTE[0], PALETTE[1]]
@@ -190,7 +190,16 @@ function mkLine(canvas, labels, datasets) {
       responsive: true,
       maintainAspectRatio: true,
       interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { display: true, labels: {
+      plugins: { tooltip: { usePointStyle: true, boxWidth: 30, callbacks: { labelPointStyle: (ctx) => {
+              const c = document.createElement('canvas')
+              c.width = 20; c.height = 10
+              const g = c.getContext('2d')
+              g.strokeStyle = ctx.dataset.borderColor
+              g.lineWidth = 2.5
+              if (ctx.datasetIndex >= 2) g.setLineDash([4, 3])
+              g.beginPath(); g.moveTo(0, 5); g.lineTo(30, 5); g.stroke()
+              return { pointStyle: c, rotation: 0 }
+            } } }, legend: { display: true, labels: {
         font: { size: 11 },
         usePointStyle: true,
         pointStyle: 'line',
