@@ -17,8 +17,8 @@
               </div>
             </div>
             <ul class="donut-legend">
-              <li><span class="dot" style="background:#507f70"></span>已售出 {{ data.products.sold }}</li>
-              <li><span class="dot" style="background:#89D5C9"></span>未售出 {{ data.products.unsold }}</li>
+              <li><span class="dot" :style="{ background: PALETTE[0] }"></span>已售出 {{ data.products.sold }}</li>
+              <li><span class="dot" :style="{ background: PALETTE[1] }"></span>未售出 {{ data.products.unsold }}</li>
             </ul>
           </div>
         </div>
@@ -125,25 +125,21 @@ const data    = ref(null)
 // chart instances for cleanup
 const charts = []
 
-// ── Colour palettes ──────────────────────────────────────────
-const BG = ['#507f70', '#89D5C9', '#FAC172', '#E25B45']
+// ── ★ 統一色盤：只需修改這裡 ★ ─────────────────────────────
+const PALETTE = ['#5a92a7', '#89D5C9', '#FAC172', '#E25B45']
+// ────────────────────────────────────────────────────────────
 
-// 1. 商品（2 段）
-const PROD_COLORS = [BG[0], BG[1]]
+const PROD_COLORS    = [PALETTE[0], PALETTE[1]]
+const LOCALE_ORDER   = ['zh-TW', 'zh-CN', 'en']
+const LOCALE_COLORS  = { 'zh-TW': PALETTE[0], 'zh-CN': PALETTE[1], 'en': PALETTE[2] }
+function localeColor(l) { return LOCALE_COLORS[l] || PALETTE[3] }
 
-// 2. 使用者（3 段）
-const LOCALE_ORDER  = ['zh-TW', 'zh-CN', 'en']
-const LOCALE_COLORS = { 'zh-TW': BG[0], 'zh-CN': BG[1], 'en': BG[2] }
-function localeColor(l) { return LOCALE_COLORS[l] || BG[3] }
-
-// 3. 購物訂單（4 段）
 const SHOP_STATUS_ORDER  = ['pending_payment', 'paid', 'picked_up', 'cancelled']
 const SHOP_STATUS_LABELS = { pending_payment: '待付款', paid: '已付款', picked_up: '已取貨', cancelled: '已取消' }
-const SHOP_STATUS_COLORS = [BG[0], BG[1], BG[2], BG[3]]
+const SHOP_STATUS_COLORS = [...PALETTE]
 
-// 4. 租屋訂單（5 段，循環取色）
 const RENT_STATUS_ORDER  = ['待付訂金', '待入住', '已入住', '已退房', '已取消']
-const RENT_STATUS_COLORS = [BG[0], BG[1], BG[2], BG[3], BG[0]]
+const RENT_STATUS_COLORS = [...PALETTE, PALETTE[0]]
 
 // ── Computed helpers ─────────────────────────────────────────
 const totalUsers = computed(() =>
@@ -247,24 +243,22 @@ function buildCharts() {
     RENT_STATUS_COLORS,
   )
 
-  const LC = ['#507f70', '#89D5C9', '#FAC172', '#E25B45']
-
   // Shop line chart
   const sl = d.shop_daily.labels
   mkLine(shopLineCanvas.value, sl, [
-    { label: '每日訂單數',   data: d.shop_daily.daily_count,  borderColor: LC[0], backgroundColor: 'transparent', yAxisID: 'y',  tension: 0.3, pointRadius: 2 },
-    { label: '每日訂單金額', data: d.shop_daily.daily_amount, borderColor: LC[1], backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 2 },
-    { label: '累積訂單數',   data: d.shop_daily.cum_count,   borderColor: LC[2], backgroundColor: 'transparent', yAxisID: 'y',  tension: 0.3, pointRadius: 2, borderDash: [4,3] },
-    { label: '累積訂單金額', data: d.shop_daily.cum_amount,  borderColor: LC[3], backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 2, borderDash: [4,3] },
+    { label: '每日訂單數',   data: d.shop_daily.daily_count,  borderColor: PALETTE[0], backgroundColor: 'transparent', yAxisID: 'y',  tension: 0.3, pointRadius: 2 },
+    { label: '每日訂單金額', data: d.shop_daily.daily_amount, borderColor: PALETTE[1], backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 2 },
+    { label: '累積訂單數',   data: d.shop_daily.cum_count,   borderColor: PALETTE[2], backgroundColor: 'transparent', yAxisID: 'y',  tension: 0.3, pointRadius: 2, borderDash: [4,3] },
+    { label: '累積訂單金額', data: d.shop_daily.cum_amount,  borderColor: PALETTE[3], backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 2, borderDash: [4,3] },
   ])
 
   // Rent line chart
   const rl = d.rent_daily.labels
   mkLine(rentLineCanvas.value, rl, [
-    { label: '每日訂單數',   data: d.rent_daily.daily_count,  borderColor: LC[0], backgroundColor: 'transparent', yAxisID: 'y',  tension: 0.3, pointRadius: 2 },
-    { label: '每日訂單金額', data: d.rent_daily.daily_amount, borderColor: LC[1], backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 2 },
-    { label: '累積訂單數',   data: d.rent_daily.cum_count,   borderColor: LC[2], backgroundColor: 'transparent', yAxisID: 'y',  tension: 0.3, pointRadius: 2, borderDash: [4,3] },
-    { label: '累積訂單金額', data: d.rent_daily.cum_amount,  borderColor: LC[3], backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 2, borderDash: [4,3] },
+    { label: '每日訂單數',   data: d.rent_daily.daily_count,  borderColor: PALETTE[0], backgroundColor: 'transparent', yAxisID: 'y',  tension: 0.3, pointRadius: 2 },
+    { label: '每日訂單金額', data: d.rent_daily.daily_amount, borderColor: PALETTE[1], backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 2 },
+    { label: '累積訂單數',   data: d.rent_daily.cum_count,   borderColor: PALETTE[2], backgroundColor: 'transparent', yAxisID: 'y',  tension: 0.3, pointRadius: 2, borderDash: [4,3] },
+    { label: '累積訂單金額', data: d.rent_daily.cum_amount,  borderColor: PALETTE[3], backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 2, borderDash: [4,3] },
   ])
 }
 
