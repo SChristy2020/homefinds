@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import users, products, orders, waiting_list, reservations, room, categories, marketing, pickup_settings
+from app.routers import users, products, orders, waiting_list, reservations, room, categories, marketing, pickup_settings, analytics
 from app.database import SessionLocal
 from app.services.pickup_reminder_service import send_due_pickup_reminders
 import os
@@ -30,6 +30,7 @@ app.include_router(room.router,        prefix="/api/room",         tags=["Room"]
 app.include_router(categories.router,  prefix="/api/categories",   tags=["Categories"])
 app.include_router(marketing.router,        prefix="/api/marketing",         tags=["Marketing"])
 app.include_router(pickup_settings.router,  prefix="/api/pickup-settings",   tags=["Pickup Settings"])
+app.include_router(analytics.router,        prefix="/api/analytics",          tags=["Analytics"])
 
 def _run_pickup_reminder_scheduler():
     interval = int(os.getenv("PICKUP_REMINDER_INTERVAL_SECONDS", "600"))

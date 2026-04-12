@@ -1,6 +1,9 @@
 <template>
   <div class="admin-view">
 
+    <!-- ===== 數據分析 ===== -->
+    <AnalyticsDashboard />
+
     <!-- ===== 商品管理 ===== -->
     <section class="admin-section">
       <div class="section-header">
@@ -452,6 +455,7 @@
 import { ref, computed, onMounted, reactive, watch } from 'vue'
 import { Search, ArrowUpDown, ChevronUp, ChevronDown, Pencil, Trash2, PlusCircle, Mail } from 'lucide-vue-next'
 import { api } from '@/utils/api'
+import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard.vue'
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL
 import { useToastStore } from '@/stores/toast'
 import BaseModal from '@/components/shared/BaseModal.vue'
