@@ -81,11 +81,11 @@
       <!-- ── Line charts ─────────────────────────────────────── -->
       <div class="line-charts-row">
         <div class="line-card">
-          <div class="line-label">購物訂單金額與訂單數</div>
+          <div class="line-label">購物訂單金額與訂單數 (累積項目不含已取消)</div>
           <canvas ref="shopLineCanvas"></canvas>
         </div>
         <div class="line-card">
-          <div class="line-label">租屋訂單金額與訂單數</div>
+          <div class="line-label">租屋訂單金額與訂單數 (累積項目不含已取消)</div>
           <canvas ref="rentLineCanvas"></canvas>
         </div>
       </div>

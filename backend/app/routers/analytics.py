@@ -88,6 +88,32 @@ def _build_shop_daily(db: Session):
     )
     amount_map = {str(r.day): float(r.amount) for r in amount_rows}
 
+    # 累積用：排除已取消的訂單數
+    nc_count_rows = (
+        db.query(
+            func.date(Order.created_at).label("day"),
+            func.count(Order.id).label("count"),
+        )
+        .filter(Order.order_status != "cancelled")
+        .group_by(func.date(Order.created_at))
+        .all()
+    )
+    nc_count_map = {str(r.day): r.count for r in nc_count_rows}
+
+    # 累積用：排除已取消訂單的金額
+    nc_amount_rows = (
+        db.query(
+            func.date(Order.created_at).label("day"),
+            func.sum(OrderItem.price).label("amount"),
+        )
+        .join(OrderItem, OrderItem.order_id == Order.id)
+        .filter(Order.order_status != "cancelled")
+        .filter(OrderItem.status != "cancelled")
+        .group_by(func.date(Order.created_at))
+        .all()
+    )
+    nc_amount_map = {str(r.day): float(r.amount) for r in nc_amount_rows}
+
     labels, daily_count, daily_amount, cum_count, cum_amount = [], [], [], [], []
     c_sum, a_sum = 0, 0
     for r in rows:
@@ -96,8 +122,8 @@ def _build_shop_daily(db: Session):
         daily_count.append(r.count)
         amt = amount_map.get(day_str, 0.0)
         daily_amount.append(amt)
-        c_sum += r.count
-        a_sum += amt
+        c_sum += nc_count_map.get(day_str, 0)
+        a_sum += nc_amount_map.get(day_str, 0.0)
         cum_count.append(c_sum)
         cum_amount.append(round(a_sum, 2))
 
@@ -118,15 +144,30 @@ def _build_rent_daily(db: Session):
         .all()
     )
 
+    # 累積用：排除已取消的租屋訂單
+    nc_rows = (
+        db.query(
+            func.date(Reservation.created_at).label("day"),
+            func.count(Reservation.id).label("count"),
+            func.sum(Reservation.total_price).label("amount"),
+        )
+        .filter(Reservation.order_status != "已取消")
+        .group_by(func.date(Reservation.created_at))
+        .all()
+    )
+    nc_map = {str(r.day): (r.count, float(r.amount) if r.amount else 0.0) for r in nc_rows}
+
     labels, daily_count, daily_amount, cum_count, cum_amount = [], [], [], [], []
     c_sum, a_sum = 0, 0.0
     for r in rows:
-        labels.append(str(r.day))
+        day_str = str(r.day)
+        labels.append(day_str)
         daily_count.append(r.count)
         amt = float(r.amount) if r.amount else 0.0
         daily_amount.append(amt)
-        c_sum += r.count
-        a_sum += amt
+        nc = nc_map.get(day_str, (0, 0.0))
+        c_sum += nc[0]
+        a_sum += nc[1]
         cum_count.append(c_sum)
         cum_amount.append(round(a_sum, 2))
 
