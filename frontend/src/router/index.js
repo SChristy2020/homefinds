@@ -11,6 +11,9 @@ import ShopView from '@/views/ShopView.vue'
 import RentView from '@/views/RentView.vue'
 import OrdersView from '@/views/OrdersView.vue'
 import AdminView from '@/views/AdminView.vue'
+import { useI18nStore } from '@/stores/i18n'
+
+const SUPPORTED_LOCALES = ['en', 'zh-TW', 'zh-CN']
 
 const routes = [
   { path: '/',       name: 'shop',   component: ShopView },
@@ -29,6 +32,18 @@ router.beforeEach((to) => {
     const USER_KEY = 'homefinds_user'
     const user = JSON.parse(sessionStorage.getItem(USER_KEY))
     if (!user) return { name: 'orders' }
+  }
+
+  const i18n = useI18nStore()
+
+  // 若網址有 lang 參數且合法，套用語系
+  if (to.query.lang && SUPPORTED_LOCALES.includes(to.query.lang)) {
+    i18n.setLocale(to.query.lang)
+  }
+
+  // 若網址沒有 lang 參數，補上當前語系（保持網址可複製分享）
+  if (!to.query.lang) {
+    return { path: to.path, query: { ...to.query, lang: i18n.locale }, hash: to.hash }
   }
 })
 

@@ -22,10 +22,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Languages } from 'lucide-vue-next'
 import { useI18nStore } from '@/stores/i18n'
 
 const i18n = useI18nStore()
+const router = useRouter()
+const route = useRoute()
 const open = ref(false)
 
 const langs = [
@@ -35,7 +38,11 @@ const langs = [
 ]
 
 function toggle() { open.value = !open.value }
-function select(code) { i18n.setLocale(code); open.value = false }
+function select(code) {
+  i18n.setLocale(code)
+  router.replace({ query: { ...route.query, lang: code } })
+  open.value = false
+}
 function close() { open.value = false }
 
 onMounted(() => document.addEventListener('click', close))

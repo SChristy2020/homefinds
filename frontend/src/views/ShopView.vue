@@ -214,11 +214,14 @@ const filteredProducts = computed(() => {
 function openProduct(product) {
   selectedProduct.value = product
   showDetailModal.value = true
-  router.replace({ query: { product: product.id } })
+  router.replace({ query: { ...route.query, product: product.id } })
 }
 
 watch(showDetailModal, (val) => {
-  if (!val) router.replace({ query: {} })
+  if (!val) {
+    const { product: _, ...rest } = route.query
+    router.replace({ query: rest })
+  }
 })
 
 // 從 URL query ?product=ID 自動開啟商品跳窗
