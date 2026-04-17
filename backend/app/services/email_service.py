@@ -6,6 +6,17 @@ from app.models.product import Product, ProductTranslation, ProductImage
 from app.models.room import RoomTranslation
 
 OWNER_EMAIL = "qsa8647332@gmail.com"
+IMAGE_BASE_URL = os.environ.get("IMAGE_BASE_URL", "https://amadegx.synology.me/img/")
+
+
+def _resolve_img_url(url: str) -> str:
+    """將 Cloudinary URL 轉換為本地伺服器路徑，其他 URL 維持不變。"""
+    if not url:
+        return ""
+    if "cloudinary.com" in url:
+        filename = url.rstrip("/").split("/")[-1]
+        return f"{IMAGE_BASE_URL}{filename}"
+    return url
 
 # ── Email translations ────────────────────────────────────────────────────────
 EMAIL_TRANSLATIONS = {
@@ -737,7 +748,7 @@ def send_marketing_email(user, product_ids, db):
             .first()
         )
         name = translation.name if translation else (product.code if product else str(pid))
-        img_url = image.url if image else ""
+        img_url = _resolve_img_url(image.url if image else "")
         price = float(product.price)
         original_price = float(product.original_price) if product.original_price else None
         products_data.append({
@@ -940,7 +951,7 @@ def send_product_restored_notification(user, restored_product_ids, db, order=Non
             .first()
         )
         name = translation.name if translation else (product.code if product else str(pid))
-        img_url = image.url if image else ""
+        img_url = _resolve_img_url(image.url if image else "")
         price = float(product.price)
         original_price = float(product.original_price) if product.original_price else None
         products_data.append({
@@ -1108,7 +1119,7 @@ def _build_order_summary_section(order, db, db_locale, tr):
             .first()
         )
         name = translation.name if translation else (product.code if product else str(oi.product_id))
-        img_url = image.url if image else ""
+        img_url = _resolve_img_url(image.url if image else "")
         price = float(oi.price)
         original_price = float(product.original_price) if product and product.original_price else None
         pickup_time = product.pickup_available_time if product else None
@@ -1227,7 +1238,7 @@ def _build_simple_product_rows(product_ids, db, db_locale):
             .first()
         )
         name = translation.name if translation else (product.code if product else str(pid))
-        img_url = image.url if image else ""
+        img_url = _resolve_img_url(image.url if image else "")
         price = float(product.price)
         original_price = float(product.original_price) if product.original_price else None
         products_data.append({"name": name, "img_url": img_url, "price": price, "original_price": original_price})
@@ -1672,7 +1683,7 @@ def send_prebooking_reminder_notification(user, order_number, pickup_time, produ
             .first()
         )
         name = translation.name if translation else (product.code if product else str(pid))
-        img_url = image.url if image else ""
+        img_url = _resolve_img_url(image.url if image else "")
         price = float(product.price)
         original_price = float(product.original_price) if product.original_price else None
         position = product_positions.get(pid)
@@ -1865,7 +1876,7 @@ def send_order_confirmation(user, order_out, db):
             if translation
             else (product.code if product else str(item.product_id))
         )
-        img_url = image.url if image else ""
+        img_url = _resolve_img_url(image.url if image else "")
         price = float(item.price)
         original_price = (
             float(product.original_price)
