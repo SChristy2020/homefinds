@@ -554,7 +554,7 @@ PICKUP_REMINDER_TRANSLATIONS = {
         "header": "取貨通知提醒",
         "emoji": "🎁",
         "greeting": "Hi {first_name}，",
-        "body": "提醒您，明天 <strong>{pickup_time}</strong> 就是我們的取貨約定時間！<br>我們已經把您的寶貝物品準備妥當，就等您來帶它回家。<br>如果行程有變動，記得先至「{link}」改一下時間，才不會接空喔！<br>明天見！",
+        "body": "提醒您，明天 <strong>{pickup_time}</strong> 就是我們的取貨約定時間！<br>我們已經把您的寶貝物品準備妥當，就等您來帶它回家。<br>如果行程有變動，記得先至「{link}」改一下時間，才不會白跑一趟喔！<br>明天見！",
         "my_orders_link_text": "我的訂單",
         "order_number_label": "訂單編號：",
         "col_name": "物品名稱",
