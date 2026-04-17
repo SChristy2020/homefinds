@@ -1154,14 +1154,14 @@ def _build_order_summary_section(order, db, db_locale, tr):
         )
         item_rows += f"""
         <tr>
-          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;color:#999;font-size:13px;text-align:center;">{i}</td>
-          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;">{thumb_cell}</td>
-          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;">{name}</td>
-          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;color:#666;">{pickup_str}</td>
-          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:600;text-align:right;white-space:nowrap;">
+          <td style="padding:8px 4px;border-bottom:1px solid #e8e8e8;color:#999;font-size:12px;text-align:center;vertical-align:top;">{i}</td>
+          <td style="padding:8px 4px;border-bottom:1px solid #e8e8e8;vertical-align:top;">{thumb_cell}</td>
+          <td style="padding:8px 4px;border-bottom:1px solid #e8e8e8;font-size:13px;vertical-align:top;">{name}</td>
+          <td style="padding:8px 4px;border-bottom:1px solid #e8e8e8;font-size:13px;color:#666;white-space:nowrap;vertical-align:top;">{pickup_str}</td>
+          <td style="padding:8px 4px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:600;text-align:right;white-space:nowrap;vertical-align:top;">
             {original_td}${_format_price(price)}
           </td>
-          <td style="padding:8px 6px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:700;color:{pos_color};text-align:center;white-space:nowrap;">
+          <td style="padding:8px 4px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:700;color:{pos_color};text-align:center;white-space:nowrap;vertical-align:top;">
             {pos_label}
           </td>
         </tr>"""
@@ -1200,12 +1200,12 @@ def _build_order_summary_section(order, db, db_locale, tr):
                        style="border-collapse:collapse;margin-bottom:16px;font-size:13px;">
                   <thead>
                     <tr style="border-bottom:1.5px solid #e0e0e0;">
-                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:center;width:24px;"></th>
-                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;width:50px;"></th>
-                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">{tr["col_name"]}</th>
-                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:left;">{tr["col_pickup"]}</th>
-                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:right;">{tr["col_price"]}</th>
-                      <th style="padding:6px;color:#888;font-weight:500;font-size:12px;text-align:center;">{tr["col_position"]}</th>
+                      <th style="padding:6px 4px;color:#888;font-weight:500;font-size:12px;text-align:center;width:20px;white-space:nowrap;"></th>
+                      <th style="padding:6px 4px;color:#888;font-weight:500;font-size:12px;text-align:left;width:48px;white-space:nowrap;"></th>
+                      <th style="padding:6px 4px;color:#888;font-weight:500;font-size:12px;text-align:left;white-space:nowrap;">{tr["col_name"]}</th>
+                      <th style="padding:6px 4px;color:#888;font-weight:500;font-size:12px;text-align:left;white-space:nowrap;">{tr["col_pickup"]}</th>
+                      <th style="padding:6px 4px;color:#888;font-weight:500;font-size:12px;text-align:right;white-space:nowrap;">{tr["col_price"]}</th>
+                      <th style="padding:6px 4px;color:#888;font-weight:500;font-size:12px;text-align:center;white-space:nowrap;">{tr["col_position"]}</th>
                     </tr>
                   </thead>
                   <tbody>{item_rows}
