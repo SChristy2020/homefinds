@@ -80,6 +80,7 @@ import { Search, ArrowUpDown } from 'lucide-vue-next'
 import { useProductsStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
 import { useI18nStore } from '@/stores/i18n'
+import { usePickupSettingsStore } from '@/stores/pickupSettings'
 import ProductGrid from '@/components/shop/ProductGrid.vue'
 import ProductDetailModal from '@/components/shop/ProductDetailModal.vue'
 import CartModal from '@/components/shop/CartModal.vue'
@@ -88,6 +89,7 @@ import OrderSuccessModal from '@/components/shop/OrderSuccessModal.vue'
 const productsStore = useProductsStore()
 const cart = useCartStore()
 const i18n = useI18nStore()
+const pickupSettingsStore = usePickupSettingsStore()
 const router = useRouter()
 
 const selectedCategories = ref([])
@@ -101,6 +103,7 @@ onMounted(async () => {
   await Promise.all([
     productsStore.fetchCategories(),
     productsStore.fetchProducts(),
+    pickupSettingsStore.fetch(),
   ])
   document.addEventListener('click', onClickOutside)
   window.addEventListener('scroll', onScrollSticky, { passive: true })

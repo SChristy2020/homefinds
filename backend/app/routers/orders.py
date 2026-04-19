@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
 import os
+import json
 import threading
 from app.database import get_db, SessionLocal
 from app.models.order import Order, OrderItem
@@ -108,6 +109,21 @@ def create_order(body: OrderCreate, db: Session = Depends(get_db)):
             status_code=409,
             detail={"duplicate_product_ids": duplicate_product_ids},
         )
+
+    # 檢查取貨時段是否在封鎖時段內
+    if body.pickup_time:
+        _settings_path = os.path.join(os.path.dirname(__file__), '..', '..', 'pickup_settings.json')
+        try:
+            with open(_settings_path, 'r', encoding='utf-8') as f:
+                _ps = json.load(f)
+        except FileNotFoundError:
+            _ps = {}
+        blocked_ranges = _ps.get('blockedRanges', [])
+        pt_date = body.pickup_time.strftime('%Y-%m-%d')
+        pt_hour = body.pickup_time.hour
+        for r in blocked_ranges:
+            if r.get('date') == pt_date and r.get('startHour', 0) <= pt_hour < r.get('endHour', 0):
+                raise HTTPException(status_code=409, detail={"slot_taken": True})
 
     # 檢查取貨時段是否已有人預定（每15分鐘只能1人）
     if body.pickup_time:
