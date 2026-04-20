@@ -61,6 +61,7 @@ class ProductOut(BaseModel):
     pickup_available_time: Optional[EasternNaiveDatetime]
     listed_date:           date
     waiting_list_summary:  Optional[Any]
+    sale_order_number:     Optional[str] = None
     created_at:            UTCNaiveDatetime
     updated_at:            UTCNaiveDatetime
     translations:          list[TranslationOut] = []

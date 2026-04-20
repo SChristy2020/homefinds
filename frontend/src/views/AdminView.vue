@@ -51,12 +51,13 @@
               <th class="sortable-th" @click="setProdSort('is_visible')">顯示<component :is="prodSortKey==='is_visible' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='is_visible' ? 'sort-active' : 'sort-inactive'" /></th>
               <th class="sortable-th" @click="setProdSort('sort')">排序<component :is="prodSortKey==='sort' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='sort' ? 'sort-active' : 'sort-inactive'" /></th>
               <th class="sortable-th" @click="setProdSort('pickup_available_time')">最快取貨日<component :is="prodSortKey==='pickup_available_time' ? (prodSortAsc ? ChevronUp : ChevronDown) : ArrowUpDown" :size="10" :class="prodSortKey==='pickup_available_time' ? 'sort-active' : 'sort-inactive'" /></th>
+              <th>出售訂單</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="filteredProducts.length === 0">
-              <td colspan="11" class="empty-row">無資料</td>
+              <td colspan="12" class="empty-row">無資料</td>
             </tr>
             <tr v-for="prod in pagedProducts" :key="prod.id">
               <td>{{ prod.id }}</td>
@@ -73,6 +74,7 @@
               <td><span class="status-badge" :class="prod.is_visible ? 'available' : 'sold'" style="cursor:pointer" @click="toggleVisible(prod)">{{ prod.is_visible ? '顯示' : '隱藏' }}</span></td>
               <td><input type="number" class="sort-inline-input" :value="prod.sort ?? 0" @change="updateProdSort(prod, $event.target.value)" @keydown.enter="$event.target.blur()" /></td>
               <td>{{ prod.pickup_available_time ? fmtDate(prod.pickup_available_time) : '隨時' }}</td>
+              <td>{{ prod.sale_order_number || '' }}</td>
               <td><div class="row-actions">
                 <button class="action-btn edit" @click="openEditProd(prod)" title="編輯"><Pencil :size="14"/></button>
                 <button class="action-btn delete" @click="deleteProduct(prod.id)" title="刪除"><Trash2 :size="14"/></button>

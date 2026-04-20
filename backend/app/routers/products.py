@@ -34,6 +34,20 @@ def _build_out(product, db):
     out = ProductOut.model_validate(product)
     out.translations = translations
     out.images = images
+    if product.status == "sold":
+        sale_item = (
+            db.query(OrderItem)
+            .join(Order, OrderItem.order_id == Order.id)
+            .filter(
+                OrderItem.product_id == product.id,
+                OrderItem.status == "paid",
+                Order.order_status.in_(["paid", "picked_up"]),
+            )
+            .first()
+        )
+        if sale_item:
+            order = db.query(Order).filter(Order.id == sale_item.order_id).first()
+            out.sale_order_number = order.order_number if order else None
     return out
 
 @router.get("", response_model=list[ProductOut])
