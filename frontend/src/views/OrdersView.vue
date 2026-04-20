@@ -458,11 +458,11 @@
 
       <!-- Calendar item detail modal -->
       <Teleport to="body">
-        <div v-if="calSelectedItem" class="cal-modal-backdrop" @click.self="calSelectedItem = null">
+        <div v-if="calSelectedItem" class="cal-modal-backdrop" @click.self="calSelectedItem = null; calStatusEditing = false">
           <div class="cal-modal">
             <div class="cal-modal-header">
               <span class="cal-modal-title">{{ calSelectedItem.data.order_number || calSelectedItem.data.id }}</span>
-              <button class="cal-modal-close" @click="calSelectedItem = null">✕</button>
+              <button class="cal-modal-close" @click="calSelectedItem = null; calStatusEditing = false">✕</button>
             </div>
             <div class="cal-modal-body">
 
@@ -470,8 +470,29 @@
               <template v-if="calSelectedItem.type === 'order'">
                 <div class="cal-modal-grid">
                   <div class="cal-modal-field">
-                    <span class="cal-modal-label">{{ i18n.t('orders.payStatus') }}</span>
-                    <span :class="statusClass(calSelectedItem.data)">{{ statusLabel(calSelectedItem.data) }}</span>
+                    <span class="cal-modal-label">
+                      {{ i18n.t('orders.payStatus') }}
+                      <button v-if="isAdmin && !calStatusEditing" class="btn-edit-icon cal-status-edit-btn" @click="calStatusEditing = true; editingStatusValue = calSelectedItem.data.order_status" title="編輯">
+                        <Pencil :size="11" />
+                      </button>
+                    </span>
+                    <template v-if="!calStatusEditing">
+                      <span :class="statusClass(calSelectedItem.data)">{{ statusLabel(calSelectedItem.data) }}</span>
+                    </template>
+                    <template v-else>
+                      <div class="status-edit-wrap" @click.stop>
+                        <select v-model="editingStatusValue" class="status-select">
+                          <option value="pending_payment">{{ i18n.t('orders.pending_payment') }}</option>
+                          <option value="paid">{{ i18n.t('orders.paid') }}</option>
+                          <option value="picked_up">{{ i18n.t('orders.picked_up') }}</option>
+                          <option value="cancelled">{{ i18n.t('orders.cancelled') }}</option>
+                        </select>
+                        <div class="pickup-edit-actions">
+                          <button class="btn-save-pickup" @click.stop="saveCalStatus">{{ i18n.t('orders.savePickup') }}</button>
+                          <button class="btn-cancel-pickup" @click.stop="calStatusEditing = false">{{ i18n.t('orders.cancelPickupEdit') }}</button>
+                        </div>
+                      </div>
+                    </template>
                   </div>
                   <div class="cal-modal-field">
                     <span class="cal-modal-label">{{ i18n.t('orders.pickupTimeLabel') }}</span>
@@ -985,6 +1006,19 @@ async function saveStatus(order) {
   editingStatusOrderId.value = null
 }
 
+async function saveCalStatus() {
+  const order = calSelectedItem.value.data
+  if (order.order_status === 'paid' && editingStatusValue.value !== 'paid' && editingStatusValue.value !== 'picked_up') {
+    await ordersStore.revertPaidOrder(order.id, editingStatusValue.value)
+  } else {
+    await ordersStore.updateOrderStatus(order.id, editingStatusValue.value)
+    await ordersStore.fetchAllOrders()
+  }
+  order.order_status = editingStatusValue.value
+  toast.show(i18n.t('orders.payStatusToast'))
+  calStatusEditing.value = false
+}
+
 function startEditNotes(order) {
   editingNotesOrderId.value = order.id
   editingNotesValue.value = order.admin_notes || ''
@@ -1332,6 +1366,7 @@ function savePickupSettings() {
 // ── Pickup/Rental Calendar ────────────────────────────────────────────────────
 const calSelectedItem = ref(null)
 const calHoverResId = ref(null)
+const calStatusEditing = ref(false)
 const calYear = ref(new Date().getFullYear())
 const calMonth = ref(new Date().getMonth())
 
@@ -1849,8 +1884,12 @@ const calCells = computed(() => {
 }
 .cal-modal-label {
   font-size: 0.72rem; color: var(--mid); font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.03em; display: flex; align-items: center; gap: 4px;
 }
+.cal-status-edit-btn {
+  opacity: 0.5; transition: opacity 0.15s;
+}
+.cal-status-edit-btn:hover { opacity: 1; }
 .cal-modal-notes {
   white-space: pre-wrap; word-break: break-word; font-size: 0.88rem;
 }
