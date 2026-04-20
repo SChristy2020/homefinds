@@ -70,11 +70,10 @@ const pickupSettings = usePickupSettingsStore()
 const root = ref(null)
 const open = ref(false)
 
-// 最早可選日期 = 美東今天 + 1 天
+// 最早可選日期 = 美東今天
 const minDate = computed(() => {
   const etNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }))
   etNow.setHours(0, 0, 0, 0)
-  etNow.setDate(etNow.getDate() + 1)
   return etNow
 })
 const cutoffDate = computed(() => {
@@ -132,9 +131,27 @@ function getDateStr(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 }
 
+function getETNow() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }))
+}
+
+function isDateToday(d) {
+  const now = getETNow()
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+}
+
+function isPastSlotOnDate(hour, minute, d) {
+  if (!isDateToday(d)) return false
+  const now = getETNow()
+  const h = parseInt(hour)
+  const m = parseInt(minute)
+  return h < now.getHours() || (h === now.getHours() && m <= now.getMinutes())
+}
+
 function isHourBlockedForDate(hour, d) {
   const dateStr = getDateStr(d)
   const h = typeof hour === 'string' ? parseInt(hour) : hour
+  if (isDateToday(d) && h < getETNow().getHours()) return true
   return (pickupSettings.settings.blockedRanges || []).some(r =>
     r.date === dateStr && h >= r.startHour && h < r.endHour
   )
@@ -146,6 +163,7 @@ function isHourBlocked(hour) {
 }
 
 function isSlotBookedForDate(hour, minute, d) {
+  if (isPastSlotOnDate(hour, minute, d)) return true
   if (!props.bookedSlots?.length) return false
   const dateStr = getDateStr(d)
   return props.bookedSlots.includes(`${dateStr}T${hour}:${minute}`)
